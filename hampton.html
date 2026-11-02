@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>希尔顿欢朋 · 主页</title>
+
+<!--
+  希尔顿欢朋主页：底部导航 5 项（看电视 / 影视 / 投屏 / 酒店 / 服务指南），
+  每一项是一整页截图（导航高亮、内容区都在图里），左右键切换、循环。
+  返回键回开机页；各栏目的二级页素材到了再接。
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#1b3fa0; overflow:hidden; }
+  body{ font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif; user-select:none; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .shot{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+    opacity:0;
+    transition:opacity .2s ease;
+    pointer-events:none;
+  }
+  .shot.is-on{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img class="shot is-on" src="assets/screens/hampton/home/1-tv.jpg" alt="看电视" />
+  <img class="shot" src="assets/screens/hampton/home/2-video.jpg" alt="影视" />
+  <img class="shot" src="assets/screens/hampton/home/3-cast.jpg" alt="投屏" />
+  <img class="shot" src="assets/screens/hampton/home/4-hotel.jpg" alt="酒店" />
+  <img class="shot" src="assets/screens/hampton/home/5-guide.jpg" alt="服务指南" />
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var shots = Array.prototype.slice.call(document.querySelectorAll('.shot'));
+  var idx = 0;
+
+  function show(i) {
+    idx = (i + shots.length) % shots.length;
+    shots.forEach(function (s, k) { s.classList.toggle('is-on', k === idx); });
+  }
+
+  function back() { location.href = 'hampton-boot.html'; }
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowLeft')  { e.preventDefault(); show(idx - 1); return; }
+    if (k === 'ArrowRight') { e.preventDefault(); show(idx + 1); return; }
+    if (/^[1-5]$/.test(k))  { e.preventDefault(); show(parseInt(k, 10) - 1); return; }
+    if (k === 'Enter' || k === ' ' || k === 'OK' || k === 'Select') {
+      e.preventDefault();
+      if (idx === 3) location.href = 'hampton-hotel.html';   // 「酒店」栏目有二级页
+      return;
+    }
+    if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') { e.preventDefault(); back(); }
+  });
+
+  /* 鼠标点击左右半屏翻页，方便桌面演示 */
+  stage.addEventListener('click', function (e) {
+    show(idx + (e.clientX < innerWidth / 2 ? -1 : 1));
+  });
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

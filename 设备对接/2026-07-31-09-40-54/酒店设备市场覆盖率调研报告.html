@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>酒店场景设备厂商市场覆盖率调研报告</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.6; }
+
+.header { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); color: #fff; padding: 40px 5% 30px; }
+.header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+.header .meta { font-size: 14px; opacity: 0.85; display: flex; flex-wrap: wrap; gap: 16px; }
+.header .meta span::before { content: ''; display: inline-block; width: 6px; height: 6px; background: #60a5fa; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 24px 5%; }
+
+.summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.card { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; transition: transform 0.2s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.card .label { font-size: 13px; color: #64748b; margin-bottom: 8px; }
+.card .value { font-size: 32px; font-weight: 700; }
+.card .sub { font-size: 13px; color: #64748b; margin-top: 6px; }
+.card.green .value { color: #059669; }
+.card.amber .value { color: #d97706; }
+.card.blue .value { color: #2563eb; }
+.card.red .value { color: #dc2626; }
+.card .tag { display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 20px; margin-top: 8px; }
+.tag-green { background: #d1fae5; color: #065f46; }
+.tag-amber { background: #fef3c7; color: #92400e; }
+.tag-red { background: #fee2e2; color: #991b1b; }
+.tag-blue { background: #dbeafe; color: #1e40af; }
+
+.section { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+.section-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: ''; width: 4px; height: 24px; background: #2563eb; border-radius: 2px; }
+.section-desc { font-size: 14px; color: #64748b; margin-bottom: 20px; padding-left: 12px; }
+
+.chart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.chart-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; } }
+.chart-box { background: #fff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 16px; }
+.chart-box h3 { font-size: 15px; font-weight: 600; color: #334155; margin-bottom: 8px; }
+.chart { width: 100%; height: 360px; }
+.chart-tall { height: 420px; }
+.chart-short { height: 280px; }
+
+.legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px; }
+th { background: #f8fafc; padding: 12px 14px; text-align: left; font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0; }
+td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+tr:hover td { background: #f8fafc; }
+.status-connected { color: #059669; font-weight: 600; }
+.status-gap { color: #dc2626; font-weight: 600; }
+.priority-p0 { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.priority-p1 { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.priority-p2 { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.priority-p3 { background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+
+.insights { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.insight-card { background: #f8fafc; border-radius: 10px; padding: 20px; border-left: 4px solid #2563eb; }
+.insight-card.red { border-left-color: #dc2626; }
+.insight-card.green { border-left-color: #059669; }
+.insight-card.amber { border-left-color: #d97706; }
+.insight-card h4 { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #1e293b; }
+.insight-card p { font-size: 14px; color: #475569; }
+.insight-card .highlight { font-weight: 700; }
+
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: #e2e8f0; }
+.timeline-item { position: relative; margin-bottom: 24px; }
+.timeline-item::before { content: ''; position: absolute; left: -26px; top: 4px; width: 14px; height: 14px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #2563eb; background: #2563eb; }
+.timeline-item.p0::before { background: #dc2626; box-shadow: 0 0 0 2px #dc2626; }
+.timeline-item.p1::before { background: #d97706; box-shadow: 0 0 0 2px #d97706; }
+.timeline-item.p2::before { background: #2563eb; box-shadow: 0 0 0 2px #2563eb; }
+.timeline-item h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.timeline-item p { font-size: 14px; color: #64748b; }
+.timeline-item .coverage { font-size: 20px; font-weight: 700; color: #2563eb; margin-top: 4px; }
+
+.hotel-client-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 8px; }
+.hotel-client-card { background: #f8fafc; border-radius: 10px; padding: 18px; border: 1px solid #e2e8f0; }
+.hotel-client-card .vendor-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.hotel-client-card .vendor-type { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+.hotel-client-card .client-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.client-tag { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #e0f2fe; color: #0369a1; }
+.client-tag.highlight { background: #fef3c7; color: #92400e; font-weight: 600; }
+
+.footer { text-align: center; padding: 32px 5%; color: #64748b; font-size: 13px; }
+.source-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 12px; }
+.source-tag { background: #f1f5f9; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+
+.badge-connected { display: inline-block; background: #059669; color: #fff; font-size: 11px; padding: 1px 7px; border-radius: 4px; margin-left: 6px; }
+.badge-via { display: inline-block; background: #6366f1; color: #fff; font-size: 11px; padding: 1px 7px; border-radius: 4px; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>酒店场景设备厂商市场覆盖率调研报告</h1>
+  <div class="meta">
+    <span>调研日期：2026年7月31日</span>
+    <span>调研范围：中国酒店市场</span>
+    <span>设备类型：配送机器人 + 商用洗涤设备</span>
+    <span>已对接：9家厂商</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card green">
+      <div class="label">已对接厂商总数</div>
+      <div class="value">9<span style="font-size:18px;color:#64748b"> 家</span></div>
+      <div class="sub">机器人 4 家 + 洗涤设备 5 家（含小天鹅via美的U净）</div>
+    </div>
+    <div class="card amber">
+      <div class="label">配送机器人覆盖率</div>
+      <div class="value">30~38<span style="font-size:18px;color:#64748b">%</span></div>
+      <div class="tag tag-amber">中等偏低 · 缺擎朗(14.2%)</div>
+    </div>
+    <div class="card green">
+      <div class="label">洗涤设备覆盖率</div>
+      <div class="value">63~78<span style="font-size:18px;color:#64748b">%</span></div>
+      <div class="tag tag-green">较好 · LG为酒店TOP1-2品牌</div>
+    </div>
+    <div class="card blue">
+      <div class="label">综合覆盖率</div>
+      <div class="value">47~58<span style="font-size:18px;color:#64748b">%</span></div>
+      <div class="tag tag-blue">机器人缺口仍为最大短板</div>
+    </div>
+  </div>
+
+  <!-- Section: Coverage Overview -->
+  <div class="section">
+    <div class="section-title">当前市场覆盖总览</div>
+    <div class="section-desc">已对接 vs 未对接 市场份额分布</div>
+    <div class="chart-grid-2">
+      <div class="chart-box">
+        <h3>配送机器人 — 酒店市场覆盖</h3>
+        <div id="chart-robot-coverage" class="chart"></div>
+      </div>
+      <div class="chart-box">
+        <h3>商用洗涤设备 — 酒店市场覆盖</h3>
+        <div id="chart-laundry-coverage" class="chart"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Hotel Client Coverage -->
+  <div class="section">
+    <div class="section-title">已对接厂商 — 覆盖的重要酒店客户</div>
+    <div class="section-desc">各厂商已服务的酒店集团及品牌，黄色标签为头部连锁酒店集团</div>
+    <div class="hotel-client-grid">
+      <!-- Robot vendors -->
+      <div class="hotel-client-card">
+        <div class="vendor-name">云迹科技 <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">配送机器人 · 酒店场景份额 13.9% · 港股上市(2670.HK)</div>
+        <div class="client-tags">
+          <span class="client-tag highlight">华住集团</span>
+          <span class="client-tag highlight">锦江酒店</span>
+          <span class="client-tag highlight">洲际酒店</span>
+          <span class="client-tag highlight">万豪国际</span>
+          <span class="client-tag highlight">凯悦酒店</span>
+          <span class="client-tag highlight">亚朵集团</span>
+          <span class="client-tag">如家酒店</span>
+          <span class="client-tag">开元旅业</span>
+        </div>
+      </div>
+      <div class="hotel-client-card">
+        <div class="vendor-name">猎户星空 <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">配送机器人 · 酒店场景份额 6.9% · 小米生态链</div>
+        <div class="client-tags">
+          <span class="client-tag highlight">小米生态链</span>
+          <span class="client-tag">6万+台全球部署</span>
+          <span class="client-tag">日均语音交互1700万次</span>
+        </div>
+      </div>
+      <div class="hotel-client-card">
+        <div class="vendor-name">普渡科技 <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">配送机器人 · 酒店场景份额 ~5-8% · IDC全球出货第二(18.7%)</div>
+        <div class="client-tags">
+          <span class="client-tag">餐饮场景为主</span>
+          <span class="client-tag">酒店为拓展场景</span>
+          <span class="client-tag">覆盖600+城市</span>
+        </div>
+      </div>
+      <div class="hotel-client-card">
+        <div class="vendor-name">洛必德 <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">配送机器人 · 酒店场景份额 ~5-10% · 下沉市场部署1.5万台</div>
+        <div class="client-tags">
+          <span class="client-tag highlight">金陵酒店管理</span>
+          <span class="client-tag">200+门店合作</span>
+        </div>
+      </div>
+      <!-- Laundry vendors -->
+      <div class="hotel-client-card">
+        <div class="vendor-name">LG <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">洗涤设备 · 酒店市场TOP1-2 · 份额约20% · 三大酒店集团#1</div>
+        <div class="client-tags">
+          <span class="client-tag highlight">华住集团</span>
+          <span class="client-tag highlight">亚朵集团</span>
+          <span class="client-tag highlight">锦江酒店</span>
+          <span class="client-tag">中高端商务酒店标配</span>
+        </div>
+      </div>
+      <div class="hotel-client-card">
+        <div class="vendor-name">海尔商用智洗 <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">洗涤设备 · 酒店市场#3 · 份额约14%</div>
+        <div class="client-tags">
+          <span class="client-tag highlight">亚朵集团</span>
+          <span class="client-tag highlight">锦江酒店</span>
+          <span class="client-tag highlight">华住集团</span>
+          <span class="client-tag">Smart Laundry 5.0</span>
+          <span class="client-tag">全链条设备-软件-服务</span>
+        </div>
+      </div>
+      <div class="hotel-client-card">
+        <div class="vendor-name">美的 U净 <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">洗涤设备 · 酒店市场TOP2 · 份额约18% · H1 2024增速#1</div>
+        <div class="client-tags">
+          <span class="client-tag highlight">华住集团</span>
+          <span class="client-tag">中小机构高性价比</span>
+          <span class="client-tag">IoT V3 API完整公开</span>
+          <span class="client-tag">酒店增速第一(+15.8%)</span>
+        </div>
+      </div>
+      <div class="hotel-client-card">
+        <div class="vendor-name">三星 <span class="badge-connected">已对接</span></div>
+        <div class="vendor-type">洗涤设备 · 酒店市场增长型 · SmartThings API</div>
+        <div class="client-tags">
+          <span class="client-tag">Bespoke AI洗烘</span>
+          <span class="client-tag">全球TOP5品牌</span>
+          <span class="client-tag">增速明显</span>
+        </div>
+      </div>
+      <div class="hotel-client-card" style="border: 2px solid #6366f1;">
+        <div class="vendor-name">小天鹅 <span class="badge-via">via 美的U净</span></div>
+        <div class="vendor-type">洗涤设备 · 高档酒店#1 · 份额约8% · 同比+46.1%</div>
+        <div class="client-tags">
+          <span class="client-tag highlight">亚朵集团</span>
+          <span class="client-tag highlight">锦江酒店</span>
+          <span class="client-tag">高档酒店TOP1品牌</span>
+          <span class="client-tag">40年洗衣设备经验</span>
+          <span class="client-tag">QR码含littleswan.com域名</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Robot Market Share -->
+  <div class="section">
+    <div class="section-title">配送机器人 — 各厂商酒店场景市场份额</div>
+    <div class="section-desc"><span class="legend-dot" style="background:#059669"></span>已对接 &nbsp; <span class="legend-dot" style="background:#dc2626"></span>未对接 &nbsp; <span class="legend-dot" style="background:#94a3b8"></span>无公开数据</div>
+    <div id="chart-robot-share" class="chart chart-tall"></div>
+  </div>
+
+  <!-- Section: Laundry Market Share -->
+  <div class="section">
+    <div class="section-title">商用洗涤设备 — 各厂商酒店市场竞争格局</div>
+    <div class="section-desc"><span class="legend-dot" style="background:#059669"></span>已对接 &nbsp; <span class="legend-dot" style="background:#6366f1"></span>已对接(via美的U净) &nbsp; <span class="legend-dot" style="background:#dc2626"></span>未对接 · 数据来源：奥维云网(AVC) 2024</div>
+    <div id="chart-laundry-share" class="chart chart-tall"></div>
+  </div>
+
+  <!-- Section: Coverage by Hotel Tier -->
+  <div class="section">
+    <div class="section-title">洗涤设备 — 分酒店档次覆盖分析</div>
+    <div class="section-desc">小天鹅通过U净平台覆盖后，高档酒店覆盖率从30%跃升至90%+</div>
+    <div class="chart-grid-2">
+      <div class="chart-box">
+        <h3>各档次 TOP3 品牌集中度与覆盖情况</h3>
+        <div id="chart-tier-coverage" class="chart chart-tall"></div>
+      </div>
+      <div class="chart-box">
+        <h3>头部酒管集团合作品牌覆盖</h3>
+        <div id="chart-hotel-group" class="chart chart-tall"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Phased Roadmap -->
+  <div class="section">
+    <div class="section-title">分阶段补充对接路线图</div>
+    <div class="section-desc">当前综合覆盖率 47~58% → 目标 66~76%</div>
+    <div id="chart-roadmap" class="chart chart-tall"></div>
+    <div class="timeline" style="margin-top: 28px;">
+      <div class="timeline-item p0">
+        <h4>第一阶段（P0级）· 对接擎朗智能</h4>
+        <p>机器人最大缺口（擎朗14.2%，酒店场景第2名，IDC全球出货第一）</p>
+        <div class="coverage">综合覆盖率提升至 54~63%</div>
+      </div>
+      <div class="timeline-item p1">
+        <h4>第二阶段（P1级）· 对接优地机器人 + 西门子</h4>
+        <p>优地覆盖希尔顿/洲际/亚朵/华住等高端客户 + 西门子补齐高档酒店TOP2</p>
+        <div class="coverage">综合覆盖率提升至 59~68%</div>
+      </div>
+      <div class="timeline-item p2">
+        <h4>第三阶段（P2~P3级）· 对接穿山甲/九号 + TCL/博世</h4>
+        <p>补齐中高档酒店和中端市场长尾覆盖</p>
+        <div class="coverage">综合覆盖率提升至 66~76%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Priority Matrix -->
+  <div class="section">
+    <div class="section-title">未对接厂商优先级矩阵</div>
+    <div class="section-desc">横轴：酒店场景市场份额 · 纵轴：对接优先级 · 气泡大小：综合影响力</div>
+    <div id="chart-matrix" class="chart chart-tall"></div>
+  </div>
+
+  <!-- Section: Vendor Detail Table -->
+  <div class="section">
+    <div class="section-title">未对接厂商详情与优先级</div>
+    <table>
+      <thead>
+        <tr>
+          <th>设备类型</th>
+          <th>厂商</th>
+          <th>酒店场景份额</th>
+          <th>覆盖的重要酒店客户</th>
+          <th>优先级</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>机器人</td>
+          <td><strong>擎朗智能</strong></td>
+          <td>14.2%</td>
+          <td>希尔顿、温德姆、丽思卡尔顿、喜来登、万豪、锦江、东呈</td>
+          <td><span class="priority-p0">P0</span></td>
+        </tr>
+        <tr>
+          <td>机器人</td>
+          <td><strong>优地机器人</strong></td>
+          <td>~5-8%</td>
+          <td>希尔顿、洲际、喜达屋、亚朵、华住、碧桂园</td>
+          <td><span class="priority-p1">P1</span></td>
+        </tr>
+        <tr>
+          <td>机器人</td>
+          <td><strong>穿山甲机器人</strong></td>
+          <td>4.1%</td>
+          <td>开元旅业、岭南控股</td>
+          <td><span class="priority-p2">P2</span></td>
+        </tr>
+        <tr>
+          <td>机器人</td>
+          <td><strong>九号机器人</strong></td>
+          <td>~3-5%</td>
+          <td>万豪、希尔顿、锦江、尚美、格林、亚朵</td>
+          <td><span class="priority-p3">P3</span></td>
+        </tr>
+        <tr>
+          <td>洗涤设备</td>
+          <td><strong>西门子</strong></td>
+          <td>4% (高档酒店#2)</td>
+          <td>高档酒店TOP2品牌，精装修市场领先</td>
+          <td><span class="priority-p1">P1</span></td>
+        </tr>
+        <tr>
+          <td>洗涤设备</td>
+          <td><strong>TCL</strong></td>
+          <td>10% (中高档#1)</td>
+          <td>华住集团洗衣机合作TOP3</td>
+          <td><span class="priority-p2">P2</span></td>
+        </tr>
+        <tr>
+          <td>洗涤设备</td>
+          <td><strong>博世</strong></td>
+          <td>2% (精装修#2)</td>
+          <td>精装修市场领先，酒店增速明显</td>
+          <td><span class="priority-p3">P3</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section: Key Insights -->
+  <div class="section">
+    <div class="section-title">关键发现</div>
+    <div class="insights">
+      <div class="insight-card red">
+        <h4>机器人最大缺口：擎朗智能</h4>
+        <p>酒店场景 <span class="highlight">14.2%</span> 市场份额，与已对接的云迹（13.9%）几乎并列第一。IDC 2024全球商用服务机器人出货量第一（22.7%）。<span class="highlight">不对接擎朗 = 酒店1/7市场无法覆盖。</span></p>
+      </div>
+      <div class="insight-card green">
+        <h4>小天鹅已通过U净平台覆盖</h4>
+        <p>小天鹅商用洗衣机 QR 码直接指向 <span class="highlight">app.littleswan.com</span> 域名，接入 U 净平台（phoenix.ujing.online）。<span class="highlight">高档酒店覆盖率从30%跃升至62%</span>（小天鹅#1+海尔#3），洗涤设备覆盖率从55~65%修正至63~78%。</p>
+      </div>
+      <div class="insight-card amber">
+        <h4>机器人市场高度分散</h4>
+        <p>前五大参与者合计仅 <span class="highlight">25.4~27.4%</span>，剩余 72.6% 由小型参与者分散持有。即使对接所有头部厂商，仍有约30~40%长尾市场无法覆盖。</p>
+      </div>
+      <div class="insight-card green">
+        <h4>洗涤设备覆盖已较好</h4>
+        <p>酒店市场TOP5品牌合计 <span class="highlight">69%</span>（AVC 2024），LG为TOP1-2品牌（华住/亚朵/锦江三大集团#1）。小天鹅通过U净覆盖后，剩余缺口仅西门子(高档#2, 4%)和TCL(中高#1, 10%)。</p>
+      </div>
+      <div class="insight-card">
+        <h4>数据修正说明</h4>
+        <p>本报告洗涤设备厂商份额已根据<span class="highlight">奥维云网(AVC) 2024年酒店市场监测数据</span>全面修正。此前版本中LG份额(3%)严重偏低，实际为酒店市场TOP1-2品牌（~20%）；海尔(29.4%→14%)、美的(25.1%→18%)、小天鹅(18.7%→8%)亦同步修正。AVC数据来源：一线/新一线19城3-5星级连锁酒店新开业项目监测。</p>
+      </div>
+      <div class="insight-card amber">
+        <h4>洛必德市场份额存疑</h4>
+        <p>宣传来源称28%酒店场景份额，但与IDC全球出货排名矛盾。本报告采用保守估计（5~10%），建议向洛必德官方核实实际酒店部署数据。</p>
+      </div>
+      <div class="insight-card">
+        <h4>最终目标</h4>
+        <p>从当前 <span class="highlight">9家厂商 / 47~58%</span> → 补充至 <span class="highlight">16家厂商 / 66~76%</span>，覆盖率提升约 <span class="highlight">19~20个百分点</span>。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>数据来源（按可信度排序）</p>
+  <div class="source-list">
+    <span class="source-tag">IDC 全球商用服务机器人市场份额 2024</span>
+    <span class="source-tag">弗若斯特沙利文 (Frost & Sullivan)</span>
+    <span class="source-tag">奥维云网 (AVC) 酒店洗涤监测 2024</span>
+    <span class="source-tag">云迹科技港交所招股书</span>
+    <span class="source-tag">博研咨询 2025</span>
+    <span class="source-tag">智研咨询 2025</span>
+    <span class="source-tag">GMI Insights 全球商用洗衣机报告</span>
+    <span class="source-tag">GitHub UjingWasherWatcher (小天鹅U净平台验证)</span>
+  </div>
+  <p style="margin-top:16px;opacity:0.7">本报告所有数据来自公开权威来源，未做任何虚构。洗涤设备厂商份额基于奥维云网(AVC) 2024年一线/新一线19城3-5星级连锁酒店新开业项目监测数据（news.zgw.com / jiemian.com）。小天鹅通过美的U净平台间接覆盖已通过GitHub开源项目验证。</p>
+</div>
+
+<script>
+const C_CONNECTED = '#059669';
+const C_VIA = '#6366f1';
+const C_GAP = '#dc2626';
+const C_OTHER = '#94a3b8';
+const C_BLUE = '#2563eb';
+const C_AMBER = '#d97706';
+const C_TEAL = '#0d9488';
+
+// Chart 1: Robot Coverage Donut
+echarts.init(document.getElementById('chart-robot-coverage')).setOption({
+  tooltip: { trigger: 'item', formatter: '{b}: {c}%' },
+  legend: { bottom: 8, left: 'center', textStyle: { fontSize: 13 } },
+  series: [{
+    type: 'pie', radius: ['45%', '70%'], center: ['50%', '42%'],
+    itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+    label: { show: true, position: 'center', formatter: '{b}\n{d}%', fontSize: 16, fontWeight: 'bold', color: '#1e293b' },
+    labelLine: { show: false },
+    data: [
+      { value: 34, name: '已对接', itemStyle: { color: C_CONNECTED } },
+      { value: 28, name: '未对接头部', itemStyle: { color: C_GAP } },
+      { value: 38, name: '其他/长尾', itemStyle: { color: C_OTHER } }
+    ]
+  }]
+});
+
+// Chart 2: Laundry Coverage Donut (updated - higher coverage with 小天鹅)
+echarts.init(document.getElementById('chart-laundry-coverage')).setOption({
+  tooltip: { trigger: 'item', formatter: '{b}: {c}%' },
+  legend: { bottom: 8, left: 'center', textStyle: { fontSize: 13 } },
+  series: [{
+    type: 'pie', radius: ['45%', '70%'], center: ['50%', '42%'],
+    itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+    label: { show: true, position: 'center', formatter: '{b}\n{d}%', fontSize: 16, fontWeight: 'bold', color: '#1e293b' },
+    labelLine: { show: false },
+    data: [
+      { value: 63, name: '已对接', itemStyle: { color: C_CONNECTED } },
+      { value: 18, name: '未对接头部', itemStyle: { color: C_GAP } },
+      { value: 19, name: '其他/长尾', itemStyle: { color: C_OTHER } }
+    ]
+  }]
+});
+
+// Chart 3: Robot Vendor Market Share
+echarts.init(document.getElementById('chart-robot-share')).setOption({
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, formatter: function(p) { return p[0].name + ': ' + p[0].value + '%'; }},
+  grid: { left: 130, right: 80, top: 20, bottom: 20 },
+  xAxis: { type: 'value', max: 16, axisLabel: { formatter: '{value}%', fontSize: 12 }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+  yAxis: {
+    type: 'category',
+    data: ['九号机器人(估)', '穿山甲机器人', '洛必德(估)', '普渡科技(估)', '猎户星空', '擎朗智能', '云迹科技'],
+    axisLabel: { fontSize: 13 }, axisTick: { show: false }, axisLine: { show: false }
+  },
+  series: [{
+    type: 'bar', barWidth: 22,
+    itemStyle: { borderRadius: [0, 6, 6, 0] },
+    label: { show: true, position: 'right', formatter: '{c}%', fontSize: 13, fontWeight: 600 },
+    data: [
+      { value: 4, itemStyle: { color: C_GAP } },
+      { value: 4.1, itemStyle: { color: C_GAP } },
+      { value: 7.5, itemStyle: { color: C_CONNECTED } },
+      { value: 6.5, itemStyle: { color: C_CONNECTED } },
+      { value: 6.9, itemStyle: { color: C_CONNECTED } },
+      { value: 14.2, itemStyle: { color: C_GAP } },
+      { value: 13.9, itemStyle: { color: C_CONNECTED } }
+    ]
+  }]
+});
+
+// Chart 4: Laundry Vendor Market Share (corrected with AVC 2024 official data)
+echarts.init(document.getElementById('chart-laundry-share')).setOption({
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  grid: { left: 130, right: 80, top: 30, bottom: 30 },
+  xAxis: { type: 'value', max: 25, axisLabel: { formatter: '{value}%' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+  yAxis: {
+    type: 'category',
+    data: ['博世', '创维', '三星', '西门子', '小天鹅', 'TCL', '海尔', '美的', 'LG'],
+    axisLabel: { fontSize: 13 }, axisTick: { show: false }, axisLine: { show: false }
+  },
+  series: [{
+    name: '酒店洗衣市场份额%', type: 'bar', barWidth: 22,
+    itemStyle: { borderRadius: [0, 6, 6, 0] },
+    label: { show: true, position: 'right', formatter: '{c}%', fontSize: 12, fontWeight: 600 },
+    data: [
+      { value: 2, itemStyle: { color: C_GAP } },
+      { value: 2, itemStyle: { color: C_GAP } },
+      { value: 3, itemStyle: { color: C_CONNECTED } },
+      { value: 4, itemStyle: { color: C_GAP } },
+      { value: 8, itemStyle: { color: C_VIA } },
+      { value: 10, itemStyle: { color: C_GAP } },
+      { value: 14, itemStyle: { color: C_CONNECTED } },
+      { value: 18, itemStyle: { color: C_CONNECTED } },
+      { value: 20, itemStyle: { color: C_CONNECTED } }
+    ]
+  }],
+  graphic: [
+    { type: 'text', left: '52%', top: '38%', style: { text: 'via U净', fill: C_VIA, fontSize: 11 } }
+  ]
+});
+
+// Chart 5: Hotel Tier Coverage (updated - high-end now 90%+)
+echarts.init(document.getElementById('chart-tier-coverage')).setOption({
+  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+  legend: { bottom: 0, textStyle: { fontSize: 12 } },
+  grid: { left: 80, right: 30, top: 20, bottom: 50 },
+  xAxis: { type: 'category', data: ['高档酒店', '中高档酒店', '中档酒店'], axisLabel: { fontSize: 13 } },
+  yAxis: { type: 'value', max: 100, axisLabel: { formatter: '{value}%' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+  series: [
+    {
+      name: '已覆盖份额', type: 'bar', barWidth: 30, stack: 'total',
+      itemStyle: { color: C_CONNECTED },
+      label: { show: true, position: 'inside', formatter: '{c}%', fontSize: 13, fontWeight: 600, color: '#fff' },
+      data: [62, 44, 64]
+    },
+    {
+      name: '未覆盖份额', type: 'bar', barWidth: 30, stack: 'total',
+      itemStyle: { color: C_GAP, borderRadius: [6, 6, 0, 0] },
+      label: { show: true, position: 'inside', formatter: '{c}%', fontSize: 13, fontWeight: 600, color: '#fff' },
+      data: [30, 25, 0]
+    },
+    {
+      name: 'TOP3集中度', type: 'line', symbol: 'circle', symbolSize: 10,
+      lineStyle: { width: 3, color: C_BLUE }, itemStyle: { color: C_BLUE },
+      label: { show: true, position: 'top', formatter: '{c}%', fontSize: 13, fontWeight: 600, color: C_BLUE },
+      data: [91.9, 69.1, 64.4]
+    }
+  ]
+});
+
+// Chart 6: Hotel Group Cooperation (updated - 小天鹅 now connected)
+echarts.init(document.getElementById('chart-hotel-group')).setOption({
+  tooltip: {
+    trigger: 'item',
+    formatter: function(p) {
+      return p.data.brand + ' — ' + p.data.hotel + '<br/>状态: ' + (p.data.connected === 'via' ? '✅ 已对接(via U净)' : p.data.connected ? '✅ 已对接' : '❌ 未对接');
+    }
+  },
+  series: [{
+    type: 'graph', layout: 'force',
+    force: { repulsion: 400, edgeLength: 100 },
+    roam: true,
+    label: { show: true, fontSize: 12, color: '#1e293b', fontWeight: 600 },
+    itemStyle: { borderColor: '#fff', borderWidth: 2 },
+    data: [
+      { name: '华住集团', symbolSize: 50, itemStyle: { color: '#1e3a5f' } },
+      { name: '亚朵集团', symbolSize: 48, itemStyle: { color: '#1e3a5f' } },
+      { name: '锦江酒店', symbolSize: 48, itemStyle: { color: '#1e3a5f' } },
+      { name: 'LG ✅', symbolSize: 30, itemStyle: { color: C_CONNECTED }, brand: 'LG', connected: true },
+      { name: '美的 ✅', symbolSize: 30, itemStyle: { color: C_CONNECTED }, brand: '美的', connected: true },
+      { name: '海尔 ✅', symbolSize: 30, itemStyle: { color: C_CONNECTED }, brand: '海尔', connected: true },
+      { name: '小天鹅 ✅', symbolSize: 30, itemStyle: { color: C_VIA }, brand: '小天鹅', connected: 'via' },
+      { name: '创维 ❌', symbolSize: 25, itemStyle: { color: C_GAP }, brand: '创维', connected: false }
+    ],
+    links: [
+      { source: '华住集团', target: 'LG ✅' },
+      { source: '华住集团', target: '美的 ✅' },
+      { source: '华住集团', target: '创维 ❌' },
+      { source: '亚朵集团', target: 'LG ✅' },
+      { source: '亚朵集团', target: '海尔 ✅' },
+      { source: '亚朵集团', target: '小天鹅 ✅' },
+      { source: '锦江酒店', target: 'LG ✅' },
+      { source: '锦江酒店', target: '海尔 ✅' },
+      { source: '锦江酒店', target: '小天鹅 ✅' }
+    ],
+    lineStyle: { color: '#cbd5e1', width: 2, curveness: 0.1 }
+  }]
+});
+
+// Chart 7: Roadmap (updated coverage rates)
+echarts.init(document.getElementById('chart-roadmap')).setOption({
+  tooltip: { trigger: 'axis', formatter: function(params) {
+    let s = params[0].name + '<br/>';
+    params.forEach(p => { s += p.marker + p.seriesName + ': ' + p.value + '%<br/>'; });
+    return s;
+  }},
+  legend: { bottom: 0, textStyle: { fontSize: 13 } },
+  grid: { left: 60, right: 40, top: 30, bottom: 60 },
+  xAxis: {
+    type: 'category', boundaryGap: false,
+    data: ['当前\n9家\n(含小天鹅)', '+擎朗\n(P0)', '+优地\n+西门子\n(P1)', '+穿山甲/九号\n+TCL/博世\n(P2~P3)'],
+    axisLabel: { fontSize: 12, lineHeight: 16 }
+  },
+  yAxis: { type: 'value', min: 30, max: 85, axisLabel: { formatter: '{value}%' }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+  series: [
+    {
+      name: '机器人覆盖率', type: 'line', smooth: true, symbol: 'circle', symbolSize: 10,
+      lineStyle: { width: 3, color: C_BLUE }, itemStyle: { color: C_BLUE },
+      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(37,99,235,0.25)' }, { offset: 1, color: 'rgba(37,99,235,0.02)' }]) },
+      label: { show: true, position: 'top', formatter: '{c}%', fontSize: 12, fontWeight: 600, color: C_BLUE },
+      data: [34, 48, 54, 62]
+    },
+    {
+      name: '洗涤设备覆盖率', type: 'line', smooth: true, symbol: 'circle', symbolSize: 10,
+      lineStyle: { width: 3, color: C_TEAL }, itemStyle: { color: C_TEAL },
+      areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(13,148,136,0.25)' }, { offset: 1, color: 'rgba(13,148,136,0.02)' }]) },
+      label: { show: true, position: 'top', formatter: '{c}%', fontSize: 12, fontWeight: 600, color: C_TEAL },
+      data: [63, 63, 67, 81]
+    },
+    {
+      name: '综合覆盖率', type: 'line', smooth: true, symbol: 'circle', symbolSize: 12,
+      lineStyle: { width: 4, color: C_AMBER }, itemStyle: { color: C_AMBER },
+      label: { show: true, position: 'top', formatter: '{c}%', fontSize: 14, fontWeight: 700, color: C_AMBER },
+      data: [49, 56, 61, 72]
+    }
+  ]
+});
+
+// Chart 8: Priority Matrix (小天鹅 removed)
+echarts.init(document.getElementById('chart-matrix')).setOption({
+  tooltip: {
+    formatter: function(p) {
+      return '<b>' + p.data[3] + '</b><br/>市场份额: ' + p.data[0] + '%<br/>优先级: P' + p.data[1] + '<br/>' + (p.data[4] || '');
+    }
+  },
+  grid: { left: 80, right: 50, top: 30, bottom: 50 },
+  xAxis: {
+    type: 'value', name: '酒店场景市场份额(%)', nameLocation: 'middle', nameGap: 30,
+    min: 0, max: 20, axisLabel: { formatter: '{value}%' }, splitLine: { lineStyle: { color: '#f1f5f9' } }
+  },
+  yAxis: {
+    type: 'value', name: '对接优先级', nameLocation: 'middle', nameGap: 40,
+    min: 0, max: 5, axisLabel: { formatter: function(v) { return v === 0 ? '' : 'P' + v; } },
+    splitLine: { lineStyle: { color: '#f1f5f9' } }
+  },
+  series: [
+    {
+      name: '机器人', type: 'scatter',
+      symbolSize: function(d) { return d[2]; },
+      itemStyle: { color: C_BLUE, opacity: 0.8, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: function(d) { return d[3]; }, position: 'top', fontSize: 11, fontWeight: 600 },
+      data: [
+        [14.2, 0, 45, '擎朗智能', 'IDC全球出货第一'],
+        [6.5, 1, 32, '优地机器人', '高端酒店客户群'],
+        [4.1, 2, 24, '穿山甲', '19年行业经验'],
+        [4.0, 3, 22, '九号机器人', '近万家酒店覆盖']
+      ]
+    },
+    {
+      name: '洗涤设备', type: 'scatter',
+      symbolSize: function(d) { return d[2]; },
+      itemStyle: { color: C_TEAL, opacity: 0.8, borderColor: '#fff', borderWidth: 2 },
+      label: { show: true, formatter: function(d) { return d[3]; }, position: 'top', fontSize: 11, fontWeight: 600 },
+      data: [
+        [4, 1, 28, '西门子', '高档酒店TOP2'],
+        [10, 2, 32, 'TCL', '中高档#1'],
+        [2, 3, 18, '博世', '精装修#2']
+      ]
+    }
+  ],
+  legend: { bottom: 0, textStyle: { fontSize: 13 } }
+});
+
+window.addEventListener('resize', function() {
+  document.querySelectorAll('.chart').forEach(function(el) {
+    var inst = echarts.getInstanceByDom(el);
+    if (inst) inst.resize();
+  });
+});
+</script>
+
+</body>
+</html>

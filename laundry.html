@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>博雅酒店 · 自助洗衣</title>
+
+<!--
+  自助洗衣详情页：两张整页截图（洗衣机 / 烘干机），上下键切换，返回回首页。
+  页面里的分组、卡片、二维码都是截图自带的，没有额外绘制。
+-->
+
+<style>
+  html,body{ margin:0; height:100%; background:#dff0f6; overflow:hidden; cursor:default; }
+  body{ font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif; user-select:none; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .shot{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+    opacity:0;
+    transition:opacity .22s ease;
+    pointer-events:none;
+  }
+  .shot.is-on{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img class="shot is-on" id="washer" src="assets/screens/parkyard/laundry-washer.jpg" alt="洗衣机" />
+  <img class="shot" id="dryer" src="assets/screens/parkyard/laundry-dryer.jpg" alt="烘干机" />
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var shots = [document.getElementById('washer'), document.getElementById('dryer')];
+  var idx = 0;   // 0 = 洗衣机，1 = 烘干机
+
+  function show(i) {
+    idx = Math.max(0, Math.min(shots.length - 1, i));
+    shots.forEach(function (s, k) { s.classList.toggle('is-on', k === idx); });
+  }
+
+  function back() { location.href = 'parkyard.html'; }
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowUp')   { e.preventDefault(); show(0); return; }
+    if (k === 'ArrowDown') { e.preventDefault(); show(1); return; }
+    if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') { e.preventDefault(); back(); }
+  });
+
+  /* 点一下切到另一半（方便鼠标演示） */
+  stage.addEventListener('click', function () { show(idx === 0 ? 1 : 0); });
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

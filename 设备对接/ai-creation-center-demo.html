@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI 创作中心 · 酒店智能语音助手</title>
+<style>
+  :root{
+    --bg:#F4F7FB; --panel:#fff; --ink:#0E1620; --ink2:#303D4B; --muted:#5B6A79; --faint:#8A96A3;
+    --line:#E3E9F1; --line2:#D5DEE9; --accent:#1568F9; --teal:#0B86DA;
+    --grad:linear-gradient(135deg,#01C4CD 0%,#1568F9 100%);
+    --r-lg:18px; --r-md:13px; --r-sm:9px;
+    --sh:0 1px 2px rgba(14,30,47,.04),0 8px 24px rgba(14,30,47,.06);
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro SC","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--font);color:var(--ink);font-size:14px;
+    background:
+      radial-gradient(1000px 560px at 0% -14%,rgba(1,196,205,.12),transparent 62%),
+      radial-gradient(900px 540px at 104% -10%,rgba(21,104,249,.09),transparent 60%),
+      var(--bg);
+  }
+  button,input,textarea{font:inherit;color:inherit}
+  button{cursor:pointer}
+  .app{display:flex;height:100%}
+
+  .sidebar{
+    width:262px;flex:0 0 auto;display:flex;flex-direction:column;gap:14px;
+    padding:18px 14px;background:rgba(255,255,255,.74);border-right:1px solid var(--line);
+    backdrop-filter:blur(10px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:2px 6px 4px}
+  .brand svg{width:30px;height:30px;flex:none}
+  .brand b{font-size:15.5px;letter-spacing:.2px}
+  .new-chat{
+    display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:var(--r-md);
+    padding:11px 14px;font-weight:600;color:#fff;background:var(--grad);
+    box-shadow:0 6px 18px rgba(21,104,249,.22);
+  }
+  .new-chat span{font-size:17px;line-height:1}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .mode{
+    display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);
+    color:var(--ink2);border-radius:var(--r-md);padding:9px 10px;font-size:13px;text-align:left;
+  }
+  .mode svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .mode:hover{border-color:var(--line2)}
+  .mode.active{border-color:rgba(21,104,249,.45);background:#EEF4FF;color:var(--accent);font-weight:600}
+  .nav-label{font-size:12px;color:var(--faint);padding:8px 6px 2px;letter-spacing:.03em}
+  .tour{display:flex;flex-direction:column;gap:3px}
+  .tour button{
+    display:flex;align-items:center;gap:9px;border:0;background:transparent;color:var(--muted);
+    border-radius:var(--r-sm);padding:8px 10px;font-size:13px;text-align:left;
+  }
+  .tour button:hover{background:#F1F5FA;color:var(--ink)}
+  .tour i{width:6px;height:6px;border-radius:50%;background:var(--line2);flex:none}
+  .tour button:hover i{background:var(--accent)}
+  .side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:12px}
+  .account{display:flex;align-items:center;gap:10px;padding:6px;border-radius:var(--r-md);background:transparent;border:0;text-align:left;width:100%}
+  .account:hover{background:#F1F5FA}
+  .avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;background:var(--grad);flex:none}
+  .account-meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .account-name{font-size:13px;font-weight:600}
+  .account-sub{font-size:11.5px;color:var(--faint)}
+
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{
+    height:60px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:0 28px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.72);backdrop-filter:blur(10px);
+  }
+  .crumbs{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--faint)}
+  .crumbs b{color:var(--ink);font-size:14px;font-weight:600}
+  .badge{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted)}
+  .badge i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#2BC48A;margin-right:6px;vertical-align:1px}
+
+  .view{display:none;flex:1;min-height:0;flex-direction:column}
+  .view.active{display:flex}
+
+  /* chat */
+  .thread{flex:1;overflow-y:auto;padding:30px 28px 10px;display:flex;flex-direction:column;gap:18px}
+  .welcome{max-width:860px;width:100%;margin:0 auto;padding:28px 0 0}
+  .welcome .kicker{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--teal);background:#EDF9FB;border:1px solid #D6F0F3;border-radius:999px;padding:5px 12px}
+  .kicker i{width:6px;height:6px;border-radius:50%;background:#12B7C4}
+  .welcome h1{font-size:30px;line-height:1.3;letter-spacing:-.01em;margin-top:16px}
+  .welcome h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .welcome p{color:var(--muted);margin-top:10px;max-width:640px;line-height:1.8}
+  .welcome .hero-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .btn{border-radius:10px;padding:10px 18px;font-weight:600;font-size:13px;border:1px solid transparent}
+  .btn-primary{background:var(--grad);color:#fff;box-shadow:0 6px 18px rgba(21,104,249,.2)}
+  .btn-ghost{background:var(--panel);border-color:var(--line);color:var(--ink2)}
+  .entries{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+  .entry{border:1px solid var(--line);background:var(--panel);border-radius:var(--r-lg);padding:15px 16px;display:flex;gap:12px;box-shadow:var(--sh)}
+  .entry-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#EEF4FF;color:var(--accent);flex:none}
+  .entry-ico svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .entry h3{font-size:13.5px}
+  .entry p{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.6}
+  .suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+  .sug{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 13px;font-size:12.5px;color:var(--muted)}
+  .sug:hover{border-color:rgba(21,104,249,.4);color:var(--accent)}
+
+  .msg{max-width:760px;display:flex;flex-direction:column;width:fit-content}
+  .msg.user{align-self:flex-end;background:#EAF1FF;border:1px solid #DCE7FB;border-radius:16px;padding:11px 15px;color:var(--ink)}
+  .msg.bot{align-self:flex-start}
+  .msg .who{font-size:12px;color:var(--faint);margin-bottom:5px}
+  .msg.bot .body{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:13px 16px;line-height:1.8;box-shadow:var(--sh)}
+  .msg.bot .body b{color:var(--ink)}
+
+  .composer{padding:8px 28px 22px}
+  .composer-box{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);padding:8px 10px 8px 16px;display:flex;align-items:flex-end;gap:10px}
+  .composer textarea{flex:1;border:0;outline:none;resize:none;padding:9px 0;max-height:120px;line-height:1.6;background:transparent}
+  .send{width:38px;height:38px;border-radius:50%;border:0;background:var(--grad);color:#fff;display:grid;place-items:center;flex:none}
+  .send svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .composer .hint{font-size:11.5px;color:var(--faint);margin-top:8px;text-align:center}
+
+  /* cards views */
+  .panel{flex:1;overflow-y:auto;padding:28px 32px}
+  .panel-head h2{font-size:22px}
+  .panel-head p{color:var(--muted);margin-top:6px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:20px}
+  .card{border:1px solid var(--line);background:var(--panel);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh)}
+  .card h3{font-size:15px}
+  .card .sub{font-size:11px;color:var(--faint);letter-spacing:.08em;margin-top:3px}
+  .card p{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7}
+  .card ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .card li{font-size:12.5px;color:var(--ink2);background:#F6F9FD;border:1px solid #EAF0F7;border-radius:8px;padding:6px 9px}
+  .card .foot{font-size:11.5px;color:var(--faint);margin-top:12px}
+
+  .flow{display:flex;flex-direction:column;gap:10px;margin-top:20px}
+  .layer{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--panel);padding:14px 16px;box-shadow:var(--sh)}
+  .layer .label{font-size:11px;color:var(--faint);letter-spacing:.08em;margin-bottom:8px}
+  .flow-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+  .flow-box{border:1px solid var(--line);border-radius:var(--r-md);padding:11px 12px;background:#F8FAFD}
+  .flow-box h4{font-size:13px}
+  .flow-box p{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.6}
+  .core{border:1px solid rgba(21,104,249,.3);background:linear-gradient(135deg,#F2F8FF,#EDFBFD);border-radius:var(--r-lg);padding:16px;text-align:center;box-shadow:var(--sh)}
+  .core h3{font-size:15px;color:var(--accent)}
+  .core p{font-size:12px;color:var(--muted);margin-top:6px}
+  .core .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+  .tag{font-size:11px;color:var(--accent);background:#fff;border:1px solid #D9E6FB;border-radius:999px;padding:3px 9px}
+  .arrow{text-align:center;color:var(--faint);font-size:12px}
+
+  .hl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:20px}
+  .hl{border:1px solid var(--line);background:var(--panel);border-radius:var(--r-md);padding:14px 15px;box-shadow:var(--sh)}
+  .hl .n{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.08em}
+  .hl h4{font-size:13.5px;margin-top:4px}
+  .hl p{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.7}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}
+  .stat{border:1px solid var(--line);background:linear-gradient(180deg,#fff,#F8FBFF);border-radius:var(--r-lg);padding:16px;text-align:center;box-shadow:var(--sh)}
+  .stat b{display:block;font-size:24px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .stat span{font-size:12px;color:var(--muted)}
+
+  @media (max-width:900px){
+    .sidebar{width:210px}
+    .entries{grid-template-columns:1fr}
+    .topbar{padding:0 16px}
+    .thread{padding:20px 16px 8px}
+    .composer{padding:6px 16px 16px}
+    .panel{padding:20px 16px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <svg viewBox="0 0 28 28" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg" x1="0" y1="0" x2="1" y2=".5">
+            <stop offset="0" stop-color="#D9831B"/><stop offset=".17" stop-color="#51CCE6"/><stop offset=".81" stop-color="#1568F9"/>
+          </linearGradient>
+        </defs>
+        <path d="M3 22V8l8 6 8-6v14" fill="none" stroke="url(#lg)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="3" cy="6.6" r="1.9" fill="url(#lg)"/><circle cx="19" cy="6.6" r="1.9" fill="url(#lg)"/>
+      </svg>
+      <b>MindRouter</b>
+    </div>
+
+    <button class="new-chat" id="newChat"><span>+</span> 新建对话</button>
+
+    <div class="modes">
+      <button class="mode active" data-view="chat">
+        <svg viewBox="0 0 24 24"><path d="M20 12.5a7.5 7.5 0 0 1-10.9 6.7L4 20l1.2-4A7.5 7.5 0 1 1 20 12.5z"/></svg>对话
+      </button>
+      <button class="mode" data-view="capability">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="9.5" r="1.6"/><path d="m4.8 17.2 4.7-4.7 3.4 3.4 2.5-2.5 3.8 3.8"/></svg>能力
+      </button>
+      <button class="mode" data-view="access">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="12.5" height="12" rx="3"/><path d="m16 10.2 4.5-2.6v8.8L16 13.8z"/></svg>入口
+      </button>
+      <button class="mode" data-view="highlights">
+        <svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="7.5" height="15" rx="2"/><rect x="13" y="4.5" width="7.5" height="7" rx="2"/><rect x="13" y="13" width="7.5" height="6.5" rx="2"/></svg>亮点
+      </button>
+    </div>
+
+    <div class="nav-label">项目导览</div>
+    <div class="tour">
+      <button data-go="access"><i></i>两种接入方式</button>
+      <button data-go="capability"><i></i>三大核心能力</button>
+      <button data-go="arch"><i></i>系统架构</button>
+      <button data-go="highlights"><i></i>项目亮点</button>
+    </div>
+
+    <div class="side-foot">
+      <button class="account" id="account">
+        <span class="avatar">AI</span>
+        <span class="account-meta">
+          <span class="account-name">酒店语音助手</span>
+          <span class="account-sub">静态演示 · 无需登录</span>
+        </span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="crumbs">AI 创作 <span>/</span> <b id="title">酒店智能语音助手</b></div>
+      <div class="badge"><i></i>IPTV 酒店场景 · 已落地</div>
+    </header>
+
+    <section class="view active" id="view-chat">
+      <div class="thread" id="thread">
+        <div class="welcome" id="welcome">
+          <span class="kicker"><i></i>项目介绍 · 不用遥控器，也不用找菜单</span>
+          <h1>把大模型语音助手<br><span>装进客房电视</span></h1>
+          <p>客人对着电视说一句，或用手机扫电视上的二维码、按住说话，就能完成「问服务、控电视、管设备」。两种入口，三类能力，一套语音中枢统一接住。</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-ask="这个项目解决什么问题？">体验对话</button>
+            <button class="btn btn-ghost" data-go="capability">查看三类能力</button>
+          </div>
+
+          <div class="entries">
+            <div class="entry">
+              <span class="entry-ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="12" rx="2.5"/><path d="M8 20h8"/><path d="M12 16.5V20"/></svg></span>
+              <div><h3>电视语音唤醒</h3><p>电视麦克风拾音，关键词唤醒后直接对话，全程免遥控、免手机。</p></div>
+            </div>
+            <div class="entry">
+              <span class="entry-ico"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 5.5h3"/><circle cx="12" cy="18" r="1"/></svg></span>
+              <div><h3>小程序扫码互联</h3><p>扫码绑定房间，按住手机说话，识别更准，也更有私密性。</p></div>
+            </div>
+          </div>
+
+          <div class="suggestions">
+            <button class="sug" data-ask="客人怎么使用？">客人怎么使用？</button>
+            <button class="sug" data-ask="三类能力分别是什么？">三类能力分别是什么？</button>
+            <button class="sug" data-ask="客房之间会互相干扰吗？">客房之间会互相干扰吗？</button>
+            <button class="sug" data-ask="能控制哪些设备？">能控制哪些设备？</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <form class="composer-box" id="composer">
+          <textarea id="input" rows="1" placeholder="问点什么，比如：这个项目能做什么？"></textarea>
+          <button class="send" type="submit" aria-label="发送">
+            <svg viewBox="0 0 24 24"><path d="M12 19V5m0 0-6 6m6-6 6 6"/></svg>
+          </button>
+        </form>
+        <div class="hint">静态演示页，回答为预置内容，不会调用真实模型</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-capability">
+      <div class="panel">
+        <div class="panel-head"><h2>三大核心能力</h2><p>从问服务，到控电视，再到管设备，一句话解决客房里的日常需求。</p></div>
+        <div class="cards">
+          <div class="card">
+            <h3>酒店智能客服</h3><div class="sub">HOTEL CONCIERGE</div>
+            <p>基于酒店知识库作答，覆盖住宿过程中最高频的咨询，减少前台电话。</p>
+            <ul><li>WiFi 密码是多少？</li><li>前台电话是多少？</li><li>早餐几点开始？</li><li>推荐一下附近景点</li></ul>
+            <div class="foot">知识库可配置，答案随酒店信息更新</div>
+          </div>
+          <div class="card">
+            <h3>电视控制</h3><div class="sub">TV CONTROL</div>
+            <p>用说话代替遥控器，直接切频道、进栏目、开投屏，把层层菜单变成一句话。</p>
+            <ul><li>我想看 CCTV6</li><li>我想看动画片</li><li>打开投屏</li><li>打开酒店栏目</li></ul>
+            <div class="foot">支持频道切换、页面直达、投屏等能力</div>
+          </div>
+          <div class="card">
+            <h3>设备控制</h3><div class="sub">DEVICE · 对接酒店设施</div>
+            <p>通过统一的工具调用协议对接客房设施，让一句话直接变成一次真实的服务动作。</p>
+            <ul><li>把空调温度调低一点</li><li>送一条浴巾到房间</li><li>预约明早 8 点叫醒</li><li>预约房间打扫</li></ul>
+            <div class="foot">空调、送物、叫醒、清洁等可持续扩展</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-access">
+      <div class="panel" id="arch">
+        <div class="panel-head"><h2>两种接入方式，一套语音中枢</h2><p>入口不同，体验一致；所有请求汇聚到同一个助手，再分发到三类能力。</p></div>
+        <div class="flow">
+          <div class="layer">
+            <div class="label">接入层 · 两种入口</div>
+            <div class="flow-row">
+              <div class="flow-box"><h4>电视语音唤醒</h4><p>远场拾音，关键词唤醒，免遥控、免手机，适合躺在沙发上随口一问。</p></div>
+              <div class="flow-box"><h4>小程序扫码互联</h4><p>扫码绑定房间，按住手机说话，识别更准、更抗噪，消息实时送到电视。</p></div>
+            </div>
+          </div>
+          <div class="arrow">▼</div>
+          <div class="core">
+            <h3>智能语音中枢 · AI Agent</h3>
+            <p>统一接收语音，理解意图，再决定是直接回答，还是调用能力去执行。</p>
+            <div class="tags"><span class="tag">语音识别</span><span class="tag">意图理解</span><span class="tag">知识库问答</span><span class="tag">工具调用</span><span class="tag">多轮对话</span></div>
+          </div>
+          <div class="arrow">▼</div>
+          <div class="layer">
+            <div class="label">能力层 · 三类能力</div>
+            <div class="flow-row">
+              <div class="flow-box"><h4>酒店智能客服</h4><p>WiFi、前台电话、周边景点、早餐时间等高频问答。</p></div>
+              <div class="flow-box"><h4>电视控制</h4><p>频道切换、栏目直达、投屏等电视端操作。</p></div>
+              <div class="flow-box"><h4>设备控制</h4><p>调空调、送浴巾、叫醒、清洁预约等真实服务动作。</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-highlights">
+      <div class="panel">
+        <div class="panel-head" id="highlights"><h2>项目亮点</h2><p>已经落地在真实客房环境里，重点解决可用性与多房间并发。</p></div>
+        <div class="stats">
+          <div class="stat"><b>2</b><span>种接入方式</span></div>
+          <div class="stat"><b>3</b><span>类核心能力</span></div>
+          <div class="stat"><b>房间级</b><span>消息隔离</span></div>
+          <div class="stat"><b>已落地</b><span>IPTV 酒店场景</span></div>
+        </div>
+        <div class="hl-grid">
+          <div class="hl"><div class="n">01</div><h4>房间级隔离</h4><p>以房间号为边界通信，多间客房共用同一套界面，消息互不干扰，一台电视只收本房间的内容。</p></div>
+          <div class="hl"><div class="n">02</div><h4>实时直达电视</h4><p>手机说完，电视端几乎同步响应，动画与答复一起出现，不用等待、不用刷新。</p></div>
+          <div class="hl"><div class="n">03</div><h4>语音代替遥控</h4><p>识别到看电视类指令可直接跳到对应页面，省去层层菜单，老人小孩也能直接用。</p></div>
+          <div class="hl"><div class="n">04</div><h4>能力可持续扩展</h4><p>通过统一的工具接入方式增加新设备与新服务，扩展能力不需要改动对话入口。</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+  const titles = { chat: "酒店智能语音助手", capability: "三大核心能力", access: "两种接入方式", highlights: "项目亮点" };
+  const thread = document.getElementById("thread");
+  const welcome = document.getElementById("welcome");
+  const input = document.getElementById("input");
+  const threadStarted = { value: false };
+
+  function switchView(name) {
+    document.querySelectorAll(".mode").forEach((button) => button.classList.toggle("active", button.dataset.view === name));
+    document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === "view-" + name));
+    document.getElementById("title").textContent = titles[name] || titles.chat;
+    if (name !== "chat") {
+      const panel = document.querySelector("#view-" + name + " .panel");
+      if (panel) panel.scrollTop = 0;
+    }
+  }
+
+  document.querySelectorAll(".mode").forEach((button) => {
+    button.addEventListener("click", () => switchView(button.dataset.view));
+  });
+
+  document.querySelectorAll("[data-go]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.go;
+      if (target === "capability" || target === "access" || target === "highlights" || target === "arch") {
+        const view = target === "arch" ? "access" : target;
+        switchView(view);
+        const anchor = document.getElementById(target);
+        if (anchor) anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  });
+
+  const replies = [
+    { keys: ["解决", "什么问题", "为什么"], text: "它把客房电视变成语音服务入口：客人不用找遥控器、不用记前台电话，开口就能问服务、切频道、调设备。对酒店来说，能减少前台重复咨询，也让电视从看节目变成服务终端。" },
+    { keys: ["怎么用", "使用", "入口", "方式"], text: "两种入口。一是直接对着电视说，关键词唤醒后开始对话，全程免遥控。二是扫电视上的房间二维码，用微信小程序绑定房间，按住手机说话，识别更准，也更有私密性。" },
+    { keys: ["能力", "能做", "功能"], text: "三类能力。酒店智能客服负责 WiFi、前台电话、早餐、周边景点这类高频问答；电视控制负责切频道、进栏目、开投屏；设备控制负责调空调、送物、叫醒、预约清洁。" },
+    { keys: ["客房", "干扰", "串", "隔离"], text: "不会。系统以房间号为通信边界，一台电视只接收本房间的消息。多间客房共用同一套前端界面，但彼此的消息互不可见，也不会串台。" },
+    { keys: ["电视", "频道", "投屏"], text: "电视控制支持频道切换、栏目直达和投屏。比如客人说“我想看 CCTV6”或“打开投屏”，电视会直接跳到对应页面，不用在菜单里一层层找。" },
+    { keys: ["设备", "空调", "叫醒", "送", "清洁"], text: "设备控制通过统一的工具调用方式接入客房设施，目前覆盖空调调温、送物、叫醒、清洁预约这类服务动作，后续新增设备也可以沿用同一个入口。" },
+    { keys: ["落地", "场景", "酒店"], text: "这是面向 IPTV 酒店场景的产品，已经在真实客房环境里落地。两种入口、三类能力共用一套语音中枢，适合连锁酒店和单体酒店按需配置。" },
+  ];
+
+  function replyTo(text) {
+    const normalized = text.replace(/\s+/g, "");
+    const hit = replies.find((item) => item.keys.some((key) => normalized.includes(key)));
+    return hit ? hit.text : "可以问我：这个项目解决什么问题、客人怎么使用、三类能力分别是什么，或者客房之间如何隔离。";
+  }
+
+  function appendMessage(role, text) {
+    welcome.style.display = "none";
+    const node = document.createElement("div");
+    node.className = "msg " + (role === "user" ? "user" : "bot");
+    if (role === "user") {
+      node.textContent = text;
+    } else {
+      node.innerHTML = '<div class="who">MindRouter · 酒店语音助手</div><div class="body"></div>';
+      node.querySelector(".body").textContent = text;
+    }
+    thread.appendChild(node);
+    thread.scrollTop = thread.scrollHeight;
+    threadStarted.value = true;
+  }
+
+  function send(text) {
+    const value = String(text || "").trim();
+    if (!value) return;
+    appendMessage("user", value);
+    input.value = "";
+    input.style.height = "auto";
+    window.setTimeout(() => {
+      appendMessage("bot", replyTo(value));
+    }, 320);
+  }
+
+  document.getElementById("composer").addEventListener("submit", (event) => {
+    event.preventDefault();
+    send(input.value);
+  });
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      send(input.value);
+    }
+  });
+
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height = Math.min(input.scrollHeight, 120) + "px";
+  });
+
+  document.querySelectorAll("[data-ask]").forEach((button) => {
+    button.addEventListener("click", () => {
+      switchView("chat");
+      send(button.dataset.ask);
+    });
+  });
+
+  document.getElementById("newChat").addEventListener("click", () => {
+    thread.querySelectorAll(".msg").forEach((node) => node.remove());
+    welcome.style.display = "";
+    switchView("chat");
+    input.value = "";
+    input.style.height = "auto";
+    input.focus();
+  });
+</script>
+</body>
+</html>

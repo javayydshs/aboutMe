@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>希尔顿欢朋 · 酒店详情</title>
+
+<!--
+  欢朋「酒店」三张卡的详情页（左图 + 右下角标题 + 底部图注式排版，整页截图切换）：
+    hampton-detail.html?set=room   客房介绍
+    hampton-detail.html?set=dine   餐厅介绍
+    hampton-detail.html?set=fun    休闲娱乐
+  左右键翻页（循环），返回回「酒店」页。
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#12308f; overflow:hidden; }
+  body{ font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif; user-select:none; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .shot{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+    opacity:0;
+    transition:opacity .2s ease;
+    pointer-events:none;
+  }
+  .shot.is-on{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SETS = {
+    room: [
+      'assets/screens/hampton/detail/room-1.jpg',
+      'assets/screens/hampton/detail/room-2.jpg'
+    ],
+    dine: [
+      'assets/screens/hampton/detail/dine-1.jpg',
+      'assets/screens/hampton/detail/dine-2.jpg'
+    ],
+    fun: [
+      'assets/screens/hampton/detail/fun-1.jpg',
+      'assets/screens/hampton/detail/fun-2.jpg'
+    ]
+  };
+
+  var q = new URLSearchParams(location.search);
+  var key = q.get('set') || 'room';
+  var list = SETS[key] || SETS.room;
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var shots = list.map(function (src, i) {
+    var img = document.createElement('img');
+    img.className = 'shot' + (i === 0 ? ' is-on' : '');
+    img.src = src;
+    img.alt = '';
+    stage.appendChild(img);
+    return img;
+  });
+
+  var idx = 0;
+  function show(i) {
+    idx = (i + shots.length) % shots.length;
+    shots.forEach(function (s, k) { s.classList.toggle('is-on', k === idx); });
+  }
+
+  /* 联调：?set=dine&i=2 直接停在第二页 */
+  var start = parseInt(q.get('i') || '1', 10);
+  if (start > 1) show(start - 1);
+
+  function back() { location.href = 'hampton-hotel.html'; }
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'ArrowLeft' || k === 'ArrowUp')   { e.preventDefault(); show(idx - 1); return; }
+    if (k === 'ArrowRight' || k === 'ArrowDown') { e.preventDefault(); show(idx + 1); return; }
+    if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') { e.preventDefault(); back(); }
+  });
+
+  stage.addEventListener('click', function (e) {
+    show(idx + (e.clientX < innerWidth / 2 ? -1 : 1));
+  });
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

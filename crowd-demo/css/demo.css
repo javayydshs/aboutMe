@@ -1,0 +1,263 @@
+/* 人体传感器-公共区域人流密度 演示页样式
+   精简自 crowdDensity/css/crowdDensity-konka.css，仅保留演示所需样式 */
+
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: "serviceFont", "Droid Sans Fallback", "Microsoft YaHei", sans-serif;
+}
+
+body {
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    background-image: url("../images/bgRestaurant.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+    /* 演示页自适应缩放（见 demo.js 动态计算） */
+    transform-origin: left top;
+}
+
+.nav-box {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+}
+
+nav {
+    width: 1920px;
+    height: 1080px;
+    position: absolute;
+    color: #ffffff;
+    font-size: 24px;
+    text-align: center;
+    z-index: 200;
+}
+
+.rectDiv {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 281px;
+    height: 1080px;
+    opacity: 1;
+    background: #000000;
+}
+
+.logoDiv {
+    position: absolute;
+    top: 61px;
+    left: 34px;
+    width: 213px;
+    height: 56px;
+    background-image: url("../images/logo.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.menuContainer {
+    position: absolute;
+    left: 76px;
+    top: 177px;
+    width: 130px;
+    height: 590px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.menuItem {
+    width: 130px;
+    height: 130px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100% 100%;
+    transition: transform 0.2s ease;
+}
+
+.menuItem.active {
+    transform: scale(1.23);
+    /* 130 → 160，仅视觉放大，不改变布局，避免切换抖动 */
+    z-index: 1;
+}
+
+.mainContaint {
+    position: absolute;
+    left: 308px;
+    top: 130px;
+    width: 1580px;
+    height: 899px;
+}
+
+.title {
+    position: absolute;
+    left: 35px;
+    top: -7px;
+    font-size: 52px;
+    font-weight: bold;
+    line-height: normal;
+    letter-spacing: 0.14em;
+    color: #DDC1A1;
+}
+
+.subTitle {
+    position: absolute;
+    left: 518px;
+    top: 16px;
+    opacity: 0.7;
+    font-size: 28px;
+    font-weight: normal;
+    line-height: normal;
+    letter-spacing: 0em;
+    color: #DDC1A1;
+}
+
+.PersonnelDistribution {
+    position: absolute;
+    left: 35px;
+    top: 71px;
+    width: 1165px;
+    height: 744px;
+    border-radius: 10px;
+    opacity: 1;
+    background: rgba(54, 54, 52, 0.9);
+    box-sizing: border-box;
+    border: 1px solid rgba(221, 193, 161, 0.94);
+}
+
+.PersonnelDistribution canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.rightBanner {
+    position: absolute;
+    top: 71px;
+    right: 43px;
+    width: 327px;
+    height: 744px;
+    border-radius: 10px;
+    opacity: 1;
+    background: rgba(54, 54, 52, 0.8);
+    box-sizing: border-box;
+    border: 1px solid rgba(221, 193, 161, 0.98);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: center;
+    align-items: center;
+}
+
+.introduceImg {
+    width: 294px;
+    height: 469px;
+    margin-top: 15px;
+    margin-bottom: 31px;
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 100% 100%;
+}
+
+.deliveryLine {
+    width: 292px;
+    height: 0px;
+    opacity: 1;
+    border-top: 1px solid rgba(216, 216, 216, 0.4);
+    margin-bottom: 16px;
+}
+
+.densityLevel {
+    position: relative;
+    width: 292px;
+    height: 167px;
+}
+
+.guideTitle {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    opacity: 0.8;
+    font-size: 28px;
+    font-weight: normal;
+    line-height: normal;
+    letter-spacing: 0em;
+    color: #DDC1A1;
+}
+
+.levelImage {
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    width: 95px;
+    height: 95px;
+    background-image: url("../images/more.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.levelText {
+    position: absolute;
+    left: 114px;
+    bottom: 38px;
+    opacity: 1;
+    font-size: 48px;
+    font-weight: normal;
+    letter-spacing: 0em;
+    line-height: 70px;
+    color: #FF7B15;
+    height: 70px;
+}
+
+.Peoplecount {
+    position: absolute;
+    left: 114px;
+    bottom: 0px;
+    opacity: 0.6;
+    font-size: 28px;
+    font-weight: normal;
+    line-height: normal;
+    letter-spacing: 0em;
+    color: #DDC1A1;
+}
+
+.backTip {
+    position: absolute;
+    left: 77px;
+    bottom: 55px;
+    width: 127px;
+    height: 30px;
+    opacity: 1;
+    background-image: url("../images/backTip.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.littleTip {
+    position: absolute;
+    left: 45px;
+    top: 848px;
+    width: 793px;
+    height: 64px;
+    background-image: url("../images/littleTip.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+}
+
+.colorTip {
+    position: absolute;
+    left: 957px;
+    bottom: 0px;
+    width: 243px;
+    height: 38px;
+    background-image: url("../images/colorTip.png");
+    background-repeat: no-repeat;
+    background-position: center center;
+}

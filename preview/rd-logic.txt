@@ -1,0 +1,201 @@
+  /* ---------------- 配送：真下单 + 轮询订单状态 ---------------- */
+  var pathDone = document.getElementById('pathDone');
+  var robotEl = document.getElementById('dvRobot');
+  var shadowEl = document.getElementById('dvShadow');
+  var statusEl = document.getElementById('dvStatus');
+  var barEl = document.getElementById('dvBar');
+  var orderEl = document.getElementById('dvOrder');
+  var stateEl = document.getElementById('dvState');
+  var tlEl = document.getElementById('dvTimeline');
+  var len = pathDone.getTotalLength();
+  pathDone.style.strokeDasharray = len;
+  pathDone.style.strokeDashoffset = len;
+
+  var wps = Array.prototype.slice.call(document.querySelectorAll('.wp'));
+  wps.forEach(function (g) { g.dataset.len = parseFloat(g.dataset.len) || 0; });
+
+  /* mock 服务：D:\delivery-server（已开 CORS） */
+  var API_CREATE = 'http://127.0.0.1:3001/API_URL/createOrder/v2.0';
+  var API_INFO = 'http://127.0.0.1:3001/API_URL/getOrderInfo';
+  var API_HEAD = { 'Content-Type': 'application/json', appId: 'test-app', secret: 'test-secret' };
+
+  var raf = null;
+  var progress = 0, targetP = 0;
+  var order = null, pollTimer = null, offline = false;
+
+  var STATE_TXT = { PENDING_DELIVERY: '待配送', DELIVERING: '配送中', DELIVERED: '已送达' };
+
+  function nowStr() {
+    var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
+           p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+
+  function elapsedSec(o) {
+    var t = new Date(String(o.createTime).replace(' ', 'T')).getTime();
+    return isNaN(t) ? 0 : (Date.now() - t) / 1000;
+  }
+
+  /* 状态 → 路线进度：待配送走 0–35%，配送中 40–90%，已送达 100% */
+  function targetFromOrder(o) {
+    if (!o) return 0;
+    var e = elapsedSec(o);
+    if (o.state === 'DELIVERED') return 1;
+    if (o.state === 'DELIVERING') return 0.40 + 0.50 * Math.min(1, (e - 30) / 30);
+    return 0.05 + 0.30 * Math.min(1, e / 30);
+  }
+
+  function paintTimeline(list) {
+    if (!tlEl) return;
+    tlEl.innerHTML = '';
+    (list || []).forEach(function (a, i) {
+      var row = document.createElement('div');
+      row.className = 'tl' + (i === list.length - 1 ? ' now' : '');
+      row.innerHTML = '<i></i><b>' + a.action + '</b><em>' + String(a.createTime).slice(11) + '</em>';
+      tlEl.appendChild(row);
+    });
+  }
+
+  function applyOrder(o) {
+    order = o;
+    if (orderEl) orderEl.textContent = '订单 ' + o.orderNum;
+    if (stateEl) {
+      stateEl.textContent = STATE_TXT[o.state] || o.state;
+      stateEl.className = 'dv-state ' + String(o.state || '').toLowerCase();
+    }
+    if (o.orderActionList) paintTimeline(o.orderActionList);
+    var acts = o.orderActionList || [];
+    var last = acts.length ? acts[acts.length - 1].action : '订单已创建';
+    statusEl.textContent = offline ? last + '（离线演示）' : last;
+    targetP = targetFromOrder(o);
+    if (o.state === 'DELIVERED' && mode === 'delivering') finish();
+  }
+
+  function frame() {
+    progress += (targetP - progress) * 0.08;
+    if (Math.abs(targetP - progress) < 0.0005) progress = targetP;
+
+    pathDone.style.strokeDashoffset = len * (1 - progress);
+    var pt = pathDone.getPointAtLength(len * progress);
+    var bob = Math.sin(progress * 34) * 3;
+    robotEl.style.transform = 'translate(' + (pt.x - 46) + 'px,' + (pt.y - 190 + bob) + 'px) scale(1)';
+    shadowEl.style.transform = 'translate(' + (pt.x - 48) + 'px,' + (pt.y - 10) + 'px)';
+    wps.forEach(function (g) { g.classList.toggle('on', progress >= parseFloat(g.dataset.len) - 0.001); });
+    barEl.style.width = (progress * 100).toFixed(1) + '%';
+
+    /* 每帧按当前时间重算目标，两次轮询之间也在缓慢前进 */
+    if (order) targetP = Math.max(targetP, targetFromOrder(order));
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  function stopPoll() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  function pollOnce() {
+    if (!order || offline) return;
+    fetch(API_INFO, {
+      method: 'POST',
+      headers: API_HEAD,
+      body: JSON.stringify({ orderNum: order.orderNum })
+    }).then(function (r) { return r.json(); }).then(function (o) {
+      if (o && o.orderNum) applyOrder(o);
+    }).catch(function () {});
+  }
+
+  /* 没有服务器时的兜底：同样的状态机，节奏压缩到 8s / 18s */
+  function startOffline() {
+    offline = true;
+    var t0 = Date.now();
+    order = { orderNum: 'OFFLINE-' + String(Date.now()).slice(-8), state: 'PENDING_DELIVERY',
+              createTime: nowStr(), orderActionList: [{ action: '订单已创建', createTime: nowStr() }] };
+    applyOrder(order);
+    pollTimer = setInterval(function () {
+      var s = (Date.now() - t0) / 1000;
+      if (s >= 18 && order.state !== 'DELIVERED') {
+        order.state = 'DELIVERED';
+        order.orderActionList = order.orderActionList.concat([
+          { action: '到达取件点', createTime: nowStr() },
+          { action: '已取件，配送中', createTime: nowStr() },
+          { action: '已送达', createTime: nowStr() }
+        ]);
+        applyOrder(order);
+        stopPoll();
+      } else if (s >= 8 && order.state === 'PENDING_DELIVERY') {
+        order.state = 'DELIVERING';
+        order.orderActionList = order.orderActionList.concat([
+          { action: '到达取件点', createTime: nowStr() },
+          { action: '已取件，配送中', createTime: nowStr() }
+        ]);
+        applyOrder(order);
+      }
+    }, 700);
+  }
+
+  function startDelivery() {
+    if (mode !== 'select') return;
+    var total = qty.reduce(function (a, b) { return a + b; }, 0);
+    if (!total) return;
+
+    mode = 'delivering';
+    paint();
+    offline = false;
+    order = null;
+    progress = 0; targetP = 0;
+    pathDone.style.strokeDashoffset = len;
+    wps.forEach(function (g) { g.classList.remove('on'); });
+    barEl.style.width = '0%';
+    statusEl.textContent = '正在下单…';
+    if (orderEl) orderEl.textContent = '订单 —';
+    if (stateEl) { stateEl.textContent = '提交中'; stateEl.className = 'dv-state'; }
+    if (tlEl) tlEl.innerHTML = '';
+    dvDone.classList.remove('on');
+    deliver.classList.add('on');
+
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(frame);
+
+    var details = [];
+    ITEMS.forEach(function (it, i) {
+      if (qty[i]) details.push({ productName: it.name, productCount: qty[i] });
+    });
+    var payload = {
+      source: 'TV-PORTAL',
+      thridOrderNum: 'TV' + Date.now(),
+      roomNum: '8888',
+      phone: '15800000000',
+      callBackUrl: 'http://localhost/cb',
+      description: details.map(function (d) { return d.productName + '×' + d.productCount; }).join('、'),
+      orderDetails: details
+    };
+
+    fetch(API_CREATE, { method: 'POST', headers: API_HEAD, body: JSON.stringify(payload) })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (o) {
+        if (!o || !o.orderNum) throw new Error('bad response');
+        applyOrder(o);
+        pollTimer = setInterval(pollOnce, 1500);
+      })
+      .catch(function () { startOffline(); });
+  }
+
+  function finish() {
+    mode = 'done';
+    stopPoll();
+    dvDone.classList.add('on');
+  }
+
+  function closeAll() {
+    stopPoll();
+    deliver.classList.remove('on');
+    dvDone.classList.remove('on');
+    mode = 'select';
+    offline = false;
+    order = null;
+    progress = 0; targetP = 0;
+    qty = ITEMS.map(function () { return 0; });
+    renderList();
+    paint();
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+  }

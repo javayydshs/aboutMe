@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8"/>
+    <title>index</title>
+    <script type="text/javascript" charset="utf-8">
+        //判断并锁定到直播页面。
+        //注意此处不用判定网络状态，判定网络状态统一由apkGlobalKeyDown
+        //模块处理。且开机后第一次进入首页时也没有必要判定网络状态。
+        if (apk.getOnlineState() !== 2 ||
+            apk.getOfflineMode() === true) {
+            window.location.href = "../tv/tv-list.html?dispPosi=0";
+        }
+
+        //根据终端型号确定终端所使用的效果。
+        //终端型号第1~2位为厂家码、第3~4位为硬件型号码、第5~6位为批次码、剩余为批次内序号。
+        //因为不同厂家、或同一厂家但不同硬件型号时，硬件能力不尽相同，故应自适应效果。
+        var model = apk.getTermModel();
+        if (model && /^02/.test(model)) { //康佳机顶盒
+            storage.setVolatileVariable('termModel', 'konka');
+            document.write('<link rel="stylesheet" type="text/css" href="css/robotDelivery-konka.css">');
+        } else if (model && /^03/.test(model)) { //同洲机顶盒
+            storage.setVolatileVariable('termModel', 'coship');
+            document.write('<link rel="stylesheet" type="text/css" href="css/robotDelivery.css">');
+        } else if (model && /^04/.test(model)) { //同洲飞利浦一体机
+            storage.setVolatileVariable('termModel', 'konka');
+            document.write('<link rel="stylesheet" type="text/css" href="css/robotDelivery-konka.css">');
+        } else if (model && model.indexOf("HUAWEI") != -1) {
+            storage.setVolatileVariable('termModel', 'konka');
+            document.write('<link rel="stylesheet" type="text/css" href="css/robotDelivery-huawei.css">');
+        } else { //默认使用康佳效果
+            storage.setVolatileVariable('termModel', 'konka');
+            document.write('<link rel="stylesheet" type="text/css" href="css/robotDelivery-konka.css">');
+        }
+
+        //显示加载图标。
+        //注意，开机后第一次进入首页且是从欢迎页过来的，才需要显示加载图标。
+
+        window.onload = function () {
+
+            if ('0' === storage.getVolatileVariable('wpkg.index.ProcShowBulletinAtBootup', '0')) {
+                storage.setVolatileVariable('wpkg.index.ProcShowBulletinAtBootup', '1')
+
+                //获取后台上传的加载图标
+                var loadingIcon = storage.getVolatileVariable('loadingIcon');
+
+                if (loadingIcon && loadingIcon.length > 0) {
+                    var pixels = loadingIcon.split(',');
+                    if (pixels && pixels.length > 0) {
+                        var canvas = document.getElementById('canvasOne');
+                        var context = canvas ? canvas.getContext('2d') : null;
+                        if (context) {
+                            context.fillRect(0, 0, canvas.width, canvas.height);
+                            var imageData = context.createImageData(
+                                canvas.width, canvas.height);
+                            for (var i = 0; i < pixels.length; ++i)
+                                imageData.data[i] = pixels[i];
+                            context.putImageData(imageData, 0, 0);
+                        }
+                    }
+                }
+                var loadId = document.getElementById('loading_bg');
+                loadId.style.cssText = "display:block;";
+                // var welcomeExitTime = storage.getVolatileVariable(
+                //     "sys.wpkg.welcome.pageExitTime");
+                // if (welcomeExitTime && !isNaN(welcomeExitTime) &&
+                //     new Date().getTime() - parseInt(welcomeExitTime) <= 1000) {
+                //     //旋转显示默认的加载图标（不使用界面素材）
+                // }
+            }
+        }
+    </script>
+    <script data-main="" src="../lib/js/config.js"></script>
+</head>
+
+<body>
+<div id="banner"></div>
+<!-- =============公告板开始============= -->
+<div id="bulletin" class="bulletin-content"></div>
+<!-- =============公告板结束============= -->
+<div class="nav-box">
+    <nav>
+        <div id='nav'></div>
+        <script id="topMenuTemplate" type="text/template">
+            <div class="header-bar">
+                <div class="pageTitle">机器人送物</div>
+                <div class="roomNum">房间号:8888</div>
+            </div>
+
+            <div class="main-content">
+                <div class="left-panel">
+                    <div class="robot-image-wrapper"></div>
+                    <div class="order-info">
+                        <div class="select-instructions">
+                            <p>请选择要送的物品</p>
+                            <p>按确认键增删/按上下左右键切换</p>
+                            <div class="selected-items-title">已选物品</div>
+                        </div>
+
+                        <div class="selected-items-list"></div>
+                    </div>
+                    <div class="btn-container">
+                        <div class="btn submit-btn">提交</div>
+                        <div class="btn reset-btn">重选</div>
+                    </div>
+                </div>
+                <div class="right-panel">
+                    <div class="item-grid">
+                        <div class="item-card active">
+                            <div class="item-icon"></div>
+                            <div class="item-icon-focus"></div>
+                            <div class="item-name">纸巾</div>
+                            <span class="qty-value">0</span>
+
+                        </div>
+                        <div class="item-card">
+                            <div class="item-icon"></div>
+                            <div class="item-icon-focus"></div>
+                            <div class="item-name">矿泉水</div>
+                            <span class="qty-value">0</span>
+
+                        </div>
+                        <div class="item-card">
+                            <div class="item-icon"></div>
+                            <div class="item-icon-focus"></div>
+                            <div class="item-name">毛巾</div>
+                            <span class="qty-value">0</span>
+
+                        </div>
+                        <div class="item-card">
+                            <div class="item-icon"></div>
+                            <div class="item-icon-focus"></div>
+                            <div class="item-name">浴巾</div>
+                            <span class="qty-value">0</span>
+
+                        </div>
+                        <div class="item-card">
+                            <div class="item-icon"></div>
+                            <div class="item-icon-focus"></div>
+                            <div class="item-name">牙刷</div>
+                            <span class="qty-value">0</span>
+
+                        </div>
+                        <div class="item-card">
+                            <div class="item-icon"></div>
+                            <div class="item-icon-focus"></div>
+                            <div class="item-name">拖鞋</div>
+                            <span class="qty-value">0</span>
+
+                        </div>
+                        <!-- 毛巾、浴巾、牙刷、拖鞋 同理 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="turnback-box">
+                <div class="turnback-icon"></div>
+                <div class="turnback-text">返回</div>
+            </div>
+
+            <div class="tip-message">提示：预计送达时间“5-10分钟“，以上物品均为免费用品，请合理使用</div>
+
+        </script>
+    </nav>
+</div>
+<!-- 旋转显示默认的加载图标 -->
+<div class="loading-bg" id="loading_bg">
+    <canvas id="canvasOne" width="100" height="100" class="loading-img"></canvas>
+</div>
+<!-- 公告板与进入直播询问框提示模板 -->
+<script id="bulletinTemplate" type="text/template">
+    {@if showBox == 0 }
+    <div id="index_bg " class="bulletin-bg"></div>
+    <div id="index_show" class="bulletin-show">
+        <div class="bulletin-top" id="index_bulletin">
+            {# 公告板标题 } ${contentBodyObj.textConfig.bulletin}
+        </div>
+        <div class="position-absolute"></div>
+        <div class="bulletin-connect" id="index_con">
+            {# 公告板内容 } $${contentBodyObj.noteObj|getCurNote}
+        </div>
+        <div class="bulletin-box">
+            <div class="bulletin-box-left">
+                <div class="left"></div>
+                <div class="right"></div>
+                <span>$${contentBodyObj.footerTextConfig.footer0}</span>
+                <span>${contentBodyObj.cursorIndex}</span>
+                <span>${contentBodyObj.footerTextConfig.footer1}</span>
+                <span>${contentBodyObj.allItemsLength}</span>
+                <span>$${contentBodyObj.footerTextConfig.footer8}</span>
+            </div>
+            <div class="bulletin-box-center">
+                <div id="button" class="index-button">${contentBodyObj.textConfig.cancle}</div>
+            </div>
+            <div class="bulletin-box-right">
+                <div class="top"></div>
+                <div class="bottom"></div>
+                <span>${contentBodyObj.footerTextConfig.footer6}</span>
+            </div>
+        </div>
+    </div>
+    {@else if showBox == 1 }
+    <div class="bulletin-bg">
+        <div class="pop-box">
+            <div class="pop-title">${alertBox.alertTextConfig.popname}</div>
+            <div class="pop-center">${alertBox.alertTextConfig.popconnect}</div>
+            <div class="pop-botton-box">
+                <div class="botton active">${alertBox.alertTextConfig.popyes}</div>
+                <div class="botton">${alertBox.alertTextConfig.popno}</div>
+            </div>
+        </div>
+    </div>
+    {@/if}
+</script>
+<!-- 广告的模板 -->
+<script id="bannerTemplate" type="text/template">
+    <div class="banner-box">
+        <div class="bannerLayerOne advertising-index banner-fadein"></div>
+        <div class="bannerLayerTwo "></div>
+        <div class="doc">
+            {@each imageUrls as data}
+            <div class="doc-item"></div>
+            {@/each}
+        </div>
+    </div>
+</script>
+<script data-main="./js/robotDelivery.js" src="../lib/js/pulgin/require.js"></script>
+</body>
+
+</html>

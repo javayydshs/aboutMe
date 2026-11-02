@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>希尔顿欢朋 · 开机</title>
+
+<!--
+  希尔顿欢朋开机：两张启动图各显示 1 秒（logo → 品牌画面），之后进主页。
+  欢迎页素材还没给，先直接进 hampton.html；拿到后把 location.href 改成欢迎页即可。
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#0b3a75; overflow:hidden; cursor:pointer; }
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .stage img{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+    opacity:0;
+  }
+  .stage img.on{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img id="b1" class="on" src="assets/screens/hampton/boot-1.jpg" alt="希尔顿欢朋" />
+  <img id="b2" src="assets/screens/hampton/boot-2.jpg" alt="希尔顿欢朋" />
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var b1 = document.getElementById('b1');
+  var b2 = document.getElementById('b2');
+  var done = false;
+
+  function go() {
+    if (done) return;
+    done = true;
+    location.href = 'hampton.html';
+  }
+
+  /* 第 1 张 1 秒 → 第 2 张 1 秒 → 进主页 */
+  setTimeout(function () { b1.classList.remove('on'); b2.classList.add('on'); }, 1000);
+  setTimeout(go, 2000);
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (k === 'Enter' || k === ' ' || k === 'OK' || k === 'Select') { e.preventDefault(); go(); }
+  });
+  stage.addEventListener('click', go);
+
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

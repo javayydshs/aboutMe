@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>诺富特 · 主页</title>
+
+<!--
+  诺富特主页：底图 = 设计稿截图（背景、右上时间天气、右侧视频面板、底部提示都在图里），
+  7 个栏目用「未选中 / 选中」两张图叠着做焦点态，位置按截图逐块对齐：
+    看电视 (113,162)   温馨客房 (113,430)   餐厅&酒吧 (113,698)
+    关于诺富特 (415,379, 258×294)   ← 比其它块高
+    成功会议 (707,162) 身心平衡 (707,430)   客房送餐 (707,698)
+  方向键按位置就近找目标（不规则宫格也能走），OK 进占位页，返回回欢迎页。
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#eef2fa; overflow:hidden; }
+  body{ font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif; user-select:none; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .bg{ position:absolute; inset:0; width:1920px; height:1080px; display:block; pointer-events:none; }
+
+  .tile{
+    position:absolute;
+    padding:0; border:0; background:transparent;
+    cursor:pointer; outline:none;
+    transition:transform .16s ease, filter .16s ease;
+  }
+  .tile img{ position:absolute; left:0; top:0; width:100%; height:100%; display:block; }
+  .tile .on{ opacity:0; transition:opacity .14s ease; }
+  .tile.is-focus{ z-index:5; filter:drop-shadow(0 14px 28px rgba(26,32,120,.22)); }
+  .tile.is-focus .on{ opacity:1; }
+
+  /* OK 后的占位页 */
+  .overlay{
+    position:absolute; inset:0; z-index:20;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#1b2088 0%, #2a30a8 100%);
+    color:#fff;
+    opacity:0; visibility:hidden;
+    transition:opacity .28s ease, visibility .28s;
+  }
+  .overlay.is-open{ opacity:1; visibility:visible; }
+  .overlay .kicker{ font-size:15px; letter-spacing:.42em; color:rgba(255,255,255,.55); }
+  .overlay h2{ margin:22px 0 0; font-size:62px; font-weight:300; letter-spacing:.14em; }
+  .overlay .line{ width:110px; height:2px; margin:32px 0 26px; background:rgba(255,255,255,.55); }
+  .overlay .note{ font-size:20px; letter-spacing:.08em; color:rgba(255,255,255,.7); }
+  .overlay .back{ position:absolute; left:0; right:0; bottom:54px; text-align:center; font-size:18px; letter-spacing:.1em; color:rgba(255,255,255,.5); }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img class="bg" src="assets/screens/novotel/home/bg.jpg" alt="诺富特主页" />
+
+  <button class="tile is-focus" style="left:113px; top:162px; width:268px; height:234px" data-title="看电视" data-href="novotel-list.html?set=live">
+    <img src="assets/screens/novotel/home/tv.png" alt="看电视" />
+    <img class="on" src="assets/screens/novotel/home/tv-on.png" alt="" />
+  </button>
+
+  <button class="tile" style="left:113px; top:430px; width:268px; height:234px" data-title="温馨客房" data-href="novotel-list.html?set=room">
+    <img src="assets/screens/novotel/home/room.png" alt="温馨客房" />
+    <img class="on" src="assets/screens/novotel/home/room-on.png" alt="" />
+  </button>
+
+  <button class="tile" style="left:113px; top:698px; width:268px; height:234px" data-title="餐厅&amp;酒吧" data-href="novotel-list.html?set=dining">
+    <img src="assets/screens/novotel/home/bar.png" alt="餐厅&amp;酒吧" />
+    <img class="on" src="assets/screens/novotel/home/bar-on.png" alt="" />
+  </button>
+
+  <button class="tile" style="left:415px; top:400px; width:258px; height:294px" data-title="关于诺富特" data-href="novotel-list.html?set=about">
+    <img src="assets/screens/novotel/home/about.png" alt="关于诺富特" />
+    <img class="on" src="assets/screens/novotel/home/about-on.png" alt="" />
+  </button>
+
+  <button class="tile" style="left:707px; top:162px; width:268px; height:234px" data-title="成功会议" data-href="novotel-list.html?set=meeting">
+    <img src="assets/screens/novotel/home/meeting.png" alt="成功会议" />
+    <img class="on" src="assets/screens/novotel/home/meeting-on.png" alt="" />
+  </button>
+
+  <button class="tile" style="left:707px; top:430px; width:268px; height:234px" data-title="身心平衡" data-href="novotel-list.html?set=balance">
+    <img src="assets/screens/novotel/home/balance.png" alt="身心平衡" />
+    <img class="on" src="assets/screens/novotel/home/balance-on.png" alt="" />
+  </button>
+
+  <button class="tile" style="left:707px; top:698px; width:268px; height:234px" data-title="客房送餐" data-href="novotel-list.html?set=translate">
+    <img src="assets/screens/novotel/home/translate.png" alt="客房送餐" />
+    <img class="on" src="assets/screens/novotel/home/translate-on.png" alt="" />
+  </button>
+
+  <div class="overlay" id="overlay">
+    <div class="kicker">NOVOTEL SHANGHAI HONGQIAO</div>
+    <h2 id="ovTitle">看电视</h2>
+    <div class="line"></div>
+    <div class="note">页面占位：接入该栏目的内容后再替换</div>
+    <div class="back">按「返回」键回到主页</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.tile'));
+  var overlay = document.getElementById('overlay');
+  var ovTitle = document.getElementById('ovTitle');
+  var focus = 0;
+  var zone = 'nav';
+
+  /* 每块的几何中心，用来算方向键的目标 */
+  var boxes = tiles.map(function (t) {
+    var x = parseFloat(t.style.left), y = parseFloat(t.style.top);
+    var w = parseFloat(t.style.width), h = parseFloat(t.style.height);
+    return { x: x + w / 2, y: y + h / 2 };
+  });
+
+  function paint() {
+    tiles.forEach(function (t, i) { t.classList.toggle('is-focus', i === focus); });
+  }
+
+  function neighbor(i, dir) {
+    var a = boxes[i], best = -1, bestScore = 1e9;
+    boxes.forEach(function (b, k) {
+      if (k === i) return;
+      var dx = b.x - a.x, dy = b.y - a.y;
+      var ok = dir === 'right' ? dx > 30
+             : dir === 'left'  ? dx < -30
+             : dir === 'down'  ? dy > 30
+             :                   dy < -30;
+      if (!ok) return;
+      var primary = (dir === 'left' || dir === 'right') ? Math.abs(dx) : Math.abs(dy);
+      var perp = (dir === 'left' || dir === 'right') ? Math.abs(dy) : Math.abs(dx);
+      var score = primary + perp * 2.2;
+      if (score < bestScore) { bestScore = score; best = k; }
+    });
+    return best;
+  }
+
+  function openOverlay() {
+    var tile = tiles[focus];
+    if (tile.dataset.href) { location.href = tile.dataset.href; return; }   // 已有详情页的栏目
+    ovTitle.textContent = tile.dataset.title;
+    overlay.classList.add('is-open');
+    zone = 'overlay';
+  }
+  function closeOverlay() {
+    overlay.classList.remove('is-open');
+    zone = 'nav';
+    paint();
+  }
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+
+    if (zone === 'overlay') {
+      if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') { e.preventDefault(); closeOverlay(); }
+      return;
+    }
+    if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') {
+      e.preventDefault();
+      location.href = 'novotel-boot.html#welcome';
+      return;
+    }
+
+    var dir = k === 'ArrowRight' ? 'right' : k === 'ArrowLeft' ? 'left'
+            : k === 'ArrowDown' ? 'down' : k === 'ArrowUp' ? 'up' : null;
+    if (dir) {
+      e.preventDefault();
+      var n = neighbor(focus, dir);
+      if (n >= 0) { focus = n; paint(); }
+      return;
+    }
+    if (/^[1-7]$/.test(k)) { e.preventDefault(); focus = parseInt(k, 10) - 1; paint(); return; }
+    if (k === 'Enter' || k === ' ' || k === 'OK' || k === 'Select') { e.preventDefault(); openOverlay(); }
+  });
+
+  tiles.forEach(function (t, i) {
+    t.addEventListener('mouseenter', function () { zone = 'nav'; focus = i; paint(); });
+    t.addEventListener('click', function () { zone = 'nav'; focus = i; paint(); openOverlay(); });
+  });
+  overlay.addEventListener('click', closeOverlay);
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+
+  paint();
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

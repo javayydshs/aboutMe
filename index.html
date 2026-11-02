@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Somerset Pudong Riverside · 欢迎页</title>
+
+<!--
+  ============================================================
+  Somerset Pudong Riverside Shanghai —— 酒店电视首页（1:1 复刻）
+  ------------------------------------------------------------
+  设计基准：1920 × 1080（页面按 1920×1080 绘制，再整体等比缩放适配屏幕）
+  交互：遥控器 ← ↑ → ↓ 切换位置 / OK 进入 / 返回 退出
+        鼠标悬停 = 焦点，点击 = 进入
+
+  素材替换：
+    1. 主图：assets/photos/hero-1.jpg … hero-5.jpg（现有 2 张），有几张轮播几张，
+       圆点数量自动跟随；一张都没有时回落到 assets/photos/hero-placeholder.svg。
+    2. 品牌字标：assets/brand/logo-lockup.png（官方透明 PNG，496×143，落在 (377,197)）。
+    3. 功能图标：CSS 变量 --ico-tv / --ico-hotel … 内联的 data URI 蒙版
+       （源文件在 assets/brand/icons/home-*.png，可换色、可换上官方 SVG data URI）。
+       之所以内联而不直接 url("assets/…")，是因为 Chrome 在 file:// 下会拒绝本地 mask 图。
+  ============================================================
+-->
+
+<style>
+  :root{
+    --ink:        #3e5b47;   /* 品牌墨绿：字标 / 图标 / 正文 */
+    --ink-soft:   #46564b;   /* 次级文字 */
+    --active:     #62826b;   /* 选中项填充绿 */
+    --tile-bg:    #fbfcfe;   /* 未选中卡片底色 */
+    --tile-line:  #d9e0e7;   /* 未选中卡片描边 */
+    --bg-top:     #eff4fa;
+    --bg-bottom:  #e1e9f2;
+
+    /* 图标蒙版（内联为 data URI：Chrome 在 file:// 下不允许从本地文件取 mask 图） */
+    --ico-tv: url("data:image/png;base64,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");
+    --ico-hotel: url("data:image/png;base64,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");
+    --ico-aurora: url("data:image/png;base64,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");
+    --ico-cast: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIIAAACCCAYAAACKAxD9AAAG9UlEQVR4nO2deahUVRzHPxMlZYu9eoURhSklUmYbtBIFkUGlbUKGYCvRBpVYlO20QkmELbT8EUZFFFkZZUFIGklBYLTYakGR2h4iaeiJ8+sMTMPMuXd8c++cO/P9wPDem/Nmzpw7n/u7Z7mcX805hxDb6BAIj0QQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQhkQQyYswBphIfzCRxElRhJOAt4E/gFXAeqrNhtAOf5fwEuBkEiQ1EWYGCbwMdXYE7qKa3A3s0PD3yUEG386kqCV0O/vEcOa04wDgK6rDJOCzSPn+wNckQkoR4cyM8juoFreNsL0DGxGGgO+AXVqU+Q9ZA04JoTV1TgUWR8p9/2cC8BuJkFJE+D1yFnkJPLdTDW7NUZ6MBKlFhDofAYdGosJlwGOky1XAQxntO5zESFGEM4CXI+U/A3uSJrsC34TLXD2KNTMNeI3ESOnSUGcR8FKkfA9gPmlyK7Bb03ONZ9pLKUqQWkSYDZwD7AMMA3tTHVwkAjSzFvgz9BE+AJ4H3mfARTgKuBaY0eHB7uTA9wrXwWf8HngmRLrfBkmESaHRfjg46LgGYf4C7gszkn0vwsPA5Rn/U4UzPu9n35q2/BKi5FL6sLM4FBrWTQmS6eA00PzZa1vRhuGw5uKHyn0VEfy8+pvA+DIq6zMeBy7tBxGGwiTKuK2MBFW+THSL+4G5VFyE94BjIuWNX/TfwOthOLUG+AnYTDVxoV2N7Rsdhsf7AqcBUzp4v/OBp6sqwrM5195XhZ7yQgaL8aHP5KelR+X4/+OBZVUTYXqYJYyF+U3ARWEMPcjsDjwRlqZjl0K/Ortf1UYNjWPhum21pkb5xaVBl8DzK3AWcF1Gf2hcUSOJoiLCzHBZaMf6sAL3ZRGVV5w7gXmRct932qsqESFrruA8SdCWm8JQux1jgXOpiAjHRspeTnUFLiEuAf7J6H8lL8Ks8LPVNccPBa8poM5+44cwd9COU6ogwvTQ4WnV6VkcVtpENg9m3ABzAomLcHDT342RIXbtE/9nXcbt8IenLoIfEzfSGBk+KaC+fmZlxtR90iLEbtXyd+eI/MSO184kLkJsGdavs4v8+Bt1adP5Tj4iiO6xOXKCbdvFeiSC+A9FBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIBGFIhLRxZVUkEdKmVlZFEiFttkQiRHPZiJAIaTMcKfM5H7qGREibsZFLhd+VtrIiDPqeyp1yWJvnXdVF2Knk+maEXUc2hqRbfg/DqrA3cFCb0UMt7LeYtAixVDSHUB7XAy+EPZ1GhX2P52Uk5kyJiyOR1IvxYeoiNO7y0SsR/BZ/90aytFZh8++rM3a895ttJS3Cx5GJkDJEmJpjO/tZvcib1AG3hC30WuEy0iEmsxfzhcBTbco2BRk+pxiOBN7NueW95wrgEdLi6JDyqF0bfAKwMd2utIiIEEviParA7XcPCPs45pXAsyBkZk0FL/JbbdpQP2PvKaLiIkT4MWNjzQkFdNh8iuB3IuG0Hb4T9iJwHL3HR6cVkZFVfaTQru+T5PCx1TbzrqnDtjr87AbvRDLHZl37tgPeAA6kN+wfMrotyPFZfTofqpbBZVFkF/HmPE7+mrgc+DYIsrqDzTmXZZzReZODrQ2huay9oqeFZB0+FXIebi5yHqRIEcaGEcTwCGYUG79Enzj0yqby10KSrNjrOskS9w1wBPBHi7JTg9xd3d8wJ/5SenqRFRQ5s7gmWD+SaeX6a+e3kODJNhI0vq759ywmRPo3Pvvc2ZTPyqIlKGOKeUXOBOAxfC95TtNzN4akYEVwZOgztOLVDvo1Iwm19de+WNoknL80lPA42jn3s2vNlshzt7d4r1muHBZG2nOSc25jRhtGgn+/m0r6buxRWkXOuX2cc590cDDmtHiPqQUcdNfiPet/3xlpz/FNMmSR93Mvcc4dXKYEZYtQf1zgnPsi42DMbfG6ya58tjjnZkfacoJzbkOX6loa3q8X30lpScJbMRk4MTzGh4Qfe4Tr/wNbMUzsFq6pg7k+IzfCcaGDOTpnx9Qvyv0eVmk/DZ1Qn/Csp/RShE4YyljeLlqKM4BX6GOqcquan/3rBbXwc3v6nKqIsK7H2eFW0OdURQTPDT2q99FBSFFYJRGeA6aEjpXvwBXN8rBWkpXeuC+oSmdRFEyVIoIoEIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkgDIkg8PwLpLKDmzNf/68AAAAASUVORK5CYII=");
+    --ico-asr: url("data:image/png;base64,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");
+    --ico-info: url("data:image/png;base64,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");
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background:#dfe7f0;
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  body{
+    font-family:"Microsoft YaHei Light","Microsoft YaHei UI Light","Microsoft YaHei UI","Microsoft YaHei",
+                "PingFang SC","Hiragino Sans GB","Noto Sans SC","Source Han Sans SC",sans-serif;
+    font-weight:300;
+    color:var(--ink-soft);
+    user-select:none;
+    cursor:default;
+  }
+
+  /* ---------- 1920×1080 舞台，整体等比缩放 ---------- */
+  .stage{
+    position:absolute;
+    left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--scale,1));
+    background:#eef5fb;
+    overflow:hidden;
+  }
+
+  /* ---------- 左栏：品牌 + 主图 ---------- */
+  .brand-col{
+    position:absolute;
+    left:101px; top:176px;
+    width:1047px;
+    text-align:center;
+  }
+
+  /* 品牌锁形（字标 + 英文案）—— 位图，按参考图 1:1 尺寸摆放 */
+  .lockup{
+    position:absolute;
+    left:276px; top:21px;
+    width:496px; height:143px;
+    display:block;
+    pointer-events:none;
+  }
+
+  /* 主图白框 */
+  .hero-frame{
+    position:absolute;
+    left:0; top:201px;
+    width:1047px; height:611px;
+    padding:19px;
+    background:#fff;
+    box-shadow:0 14px 36px rgba(48,72,96,.13), 0 2px 6px rgba(48,72,96,.06);
+  }
+
+  .hero-media{
+    position:relative;
+    width:100%; height:100%;
+    overflow:hidden;
+    background:#c9d5e0;
+  }
+  .hero-media::after{  /* 图片内缘极细描边，贴合参考图里的层次 */
+    content:"";
+    position:absolute; inset:0;
+    box-shadow:inset 0 0 0 1px rgba(30,50,70,.10);
+    pointer-events:none;
+    z-index:3;
+  }
+
+  .slide{
+    position:absolute; inset:0;
+    background-image:url("assets/photos/hero-placeholder.svg");
+    background-size:cover;
+    background-position:center;
+    opacity:0;
+    transition:opacity .9s ease;
+    transform:scale(1.001);
+    z-index:1;
+  }
+  .slide.is-on{ opacity:1; }
+
+  /* 首帧不要淡入，避免打开瞬间看到空白 */
+  .hero-media.is-booting .slide{ transition:none; }
+
+  /* 轮播圆点 */
+  .dots{
+    position:absolute;
+    left:50%; bottom:47px;
+    transform:translateX(-50%);
+    display:flex; align-items:center; gap:4px;
+    z-index:5;
+  }
+  .dot{
+    width:13px; height:13px; padding:0; border:0; border-radius:50%;
+    background:rgba(255,255,255,.55);
+    box-shadow:0 0 0 1px rgba(30,45,60,.14), 0 1px 4px rgba(24,40,56,.35);
+    cursor:pointer;
+    transition:background .3s ease;
+  }
+  .dot.is-on{
+    background:#fff;
+  }
+
+  /* ---------- 右上：日期 / 时间 / 天气 ---------- */
+  .statusbar{
+    position:absolute;
+    left:1232px; top:44px;
+    width:572px;
+    padding-right:7px;
+    display:flex; align-items:center; justify-content:flex-end;
+    font-family:"Segoe UI Light","Segoe UI","Microsoft YaHei UI Light",sans-serif;
+    font-size:28px;
+    line-height:40px;
+    letter-spacing:.04em;
+    color:#3f4f45;
+  }
+  .clock-date{ font-variant-numeric:tabular-nums; }
+  .clock-time{ margin-left:57px; font-variant-numeric:tabular-nums; }
+  .weather{
+    margin-left:70px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .weather svg{ width:58px; height:58px; display:block; }
+  .temp{ font-size:30px; font-variant-numeric:tabular-nums; }
+
+  /* ---------- 右侧 2×3 功能宫格 ---------- */
+  .grid{
+    position:absolute;
+    left:1233px; top:132px;
+    width:568px;
+    display:grid;
+    grid-template-columns:repeat(2,280px);
+    grid-auto-rows:280px;
+    gap:8px;
+  }
+
+  .tile{
+    position:relative;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    padding:0 10px 51px;
+    background:#fff;
+    border:1px solid #e2e9ef;
+    color:var(--ink);
+    font-family:inherit;
+    text-align:center;
+    cursor:pointer;
+    outline:none;
+    transition:background .22s ease, color .22s ease, border-color .22s ease;
+  }
+  /* 图标：从参考图提取的 alpha 蒙版，用 currentColor 着色，选中态自动变白 */
+  .tile .ico{
+    width:130px; height:130px;
+    display:block;
+    margin-bottom:24px;
+    flex:none;
+    background-color:currentColor;
+    -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+    -webkit-mask-position:center; mask-position:center;
+    -webkit-mask-size:100% 100%; mask-size:100% 100%;
+    transition:background-color .22s ease;
+  }
+  .ico--tv{     -webkit-mask-image:var(--ico-tv);     mask-image:var(--ico-tv); }
+  .ico--hotel{  -webkit-mask-image:var(--ico-hotel);  mask-image:var(--ico-hotel); }
+  .ico--aurora{ -webkit-mask-image:var(--ico-aurora); mask-image:var(--ico-aurora); }
+  .ico--cast{   -webkit-mask-image:var(--ico-cast);   mask-image:var(--ico-cast); }
+  .ico--asr{    -webkit-mask-image:var(--ico-asr);    mask-image:var(--ico-asr);
+                width:150px; height:150px; margin-bottom:14px; }
+  .ico--info{   -webkit-mask-image:var(--ico-info);   mask-image:var(--ico-info); }
+  .tile .label{
+    font-size:34px;
+    line-height:34px;
+    letter-spacing:.02em;
+    text-indent:.02em;
+    font-weight:300;
+    color:#40503f;
+    transition:color .22s ease;
+  }
+
+  /* 选中态：4px 深绿外框 + 8px 白色内环 + 墨绿填充 */
+  .tile.is-active{
+    background:var(--active);
+    border-color:#3a533e;
+    box-shadow:inset 0 0 0 3px #3a533e;
+  }
+  .tile.is-active .ico,
+  .tile.is-active .label{ color:#fff; }
+  .tile.is-active .ico{ background-color:#fff; }
+  .tile.is-active::after{
+    content:"";
+    position:absolute; inset:3px;
+    border:8px solid #fff;
+    pointer-events:none;
+  }
+
+  /* 未读角标 */
+  .badge{
+    position:absolute;
+    top:57px; right:62px;
+    min-width:34px; height:34px;
+    padding:0 9px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:17px;
+    background:#c5352d;
+    color:#fff;
+    font-family:"Segoe UI",Arial,sans-serif;
+    font-size:20px; font-weight:600;
+    line-height:1;
+    box-shadow:0 0 0 3px rgba(255,255,255,.9);
+  }
+  .tile.is-active .badge{ box-shadow:0 0 0 3px rgba(76,106,85,.9); }
+
+  /* ---------- 右下操作提示 ---------- */
+  .hint{
+    position:absolute;
+    right:119px; bottom:23px;
+    display:flex; align-items:center; gap:9px;
+    font-size:24.5px;
+    letter-spacing:.05em;
+    color:#4c5c51;
+  }
+  .hint svg{ width:24px; height:24px; display:block; opacity:.9; }
+
+  /* ---------- 栏目详情：整页截图（左右键可翻页） ---------- */
+  .detail{
+    position:absolute; left:0; top:0;
+    width:1920px; height:1080px;
+    display:block;
+    opacity:0; visibility:hidden;
+    transition:opacity .25s ease, visibility .25s;
+    z-index:25;
+  }
+  .detail.is-open{ opacity:1; visibility:visible; }
+  .detail.no-anim{ transition:none; }
+
+  /* ---------- 进入后的占位页面 ---------- */
+  .overlay{
+    position:absolute; inset:0;
+    z-index:20;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:
+      radial-gradient(1100px 700px at 50% 0%, #f6fafd 0%, rgba(246,250,253,0) 65%),
+      linear-gradient(180deg,#eaf1f8 0%,#dfe8f2 100%);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(24px);
+    transition:opacity .32s ease, transform .32s ease, visibility .32s;
+  }
+  .overlay.is-open{
+    opacity:1; visibility:visible; transform:none;
+  }
+  .overlay.no-anim{ transition:none; }
+  .overlay .eyebrow{
+    font-family:Georgia,serif;
+    font-size:20px;
+    letter-spacing:.42em;
+    text-indent:.42em;
+    color:rgba(62,91,71,.72);
+    text-transform:uppercase;
+  }
+  .overlay .page-title{
+    margin:22px 0 0;
+    font-size:76px;
+    font-weight:300;
+    letter-spacing:.14em;
+    text-indent:.14em;
+    color:var(--ink);
+  }
+  .overlay .page-rule{
+    width:120px; height:2px; margin:34px 0 30px;
+    background:rgba(62,91,71,.35);
+  }
+  .overlay .page-note{
+    font-size:22px;
+    letter-spacing:.06em;
+    color:#6a7a70;
+  }
+  .overlay .page-back{
+    position:absolute;
+    right:116px; bottom:26px;
+    display:flex; align-items:center; gap:9px;
+    font-size:20px;
+    letter-spacing:.05em;
+    color:#4c5c51;
+  }
+</style>
+</head>
+
+<body>
+<div class="stage" id="stage">
+
+  <!-- ============ 左栏 ============ -->
+  <section class="brand-col">
+    <!-- 字标为临时素材：从参考图提取的透明 PNG（somerset + 中英文案锁形）。
+         拿到官方矢量字标后，直接替换 assets/brand/logo-lockup.png 即可（保持 496×143）。 -->
+    <img class="lockup" src="assets/brand/logo-lockup.png" width="496" height="143"
+         alt="Somerset Pudong Riverside Shanghai" />
+
+    <div class="hero-frame">
+      <div class="hero-media is-booting" id="heroMedia">
+        <div class="slide is-on"></div>
+
+        <div class="dots" id="dots" role="tablist" aria-label="酒店图片轮播"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 右上状态栏 ============ -->
+  <div class="statusbar">
+    <span class="clock-date" id="clockDate">2025.11</span>
+    <span class="clock-time" id="clockTime">10:20</span>
+    <span class="weather">
+      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+        <circle cx="31" cy="15.5" r="6.2" stroke="currentColor" stroke-width="2.3"/>
+        <path d="M31 4.6v3.2M31 23.2v3.2M20.3 15.5h3.2M38.5 15.5h3.2M23.6 8.1l2.3 2.3M36.1 20.6l2.3 2.3M23.6 22.9l2.3-2.3M36.1 10.4l2.3-2.3"
+              stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/>
+        <path d="M18 39.5h16.6a6.8 6.8 0 0 0 .5-13.6 9.2 9.2 0 0 0-17.4-1.4A6.1 6.1 0 0 0 18 39.5z"
+              stroke="currentColor" stroke-width="2.6" stroke-linejoin="round" fill="#eef5fb"/>
+      </svg>
+      <span class="temp">25°C</span>
+    </span>
+  </div>
+
+  <!-- ============ 右上功能宫格 ============ -->
+  <nav class="grid" id="grid" role="grid" aria-label="主菜单">
+
+    <button class="tile is-active" type="button" role="gridcell" data-page="看电视" data-key="tv" aria-label="看电视">
+      <span class="ico ico--tv" aria-hidden="true"></span>
+      <span class="label">看电视</span>
+    </button>
+
+    <button class="tile" type="button" role="gridcell" data-page="酒店介绍" data-key="hotel" aria-label="酒店介绍">
+      <span class="ico ico--hotel" aria-hidden="true"></span>
+      <span class="label">酒店介绍</span>
+    </button>
+
+    <button class="tile" type="button" role="gridcell" data-page="极光TV" data-key="aurora" aria-label="极光TV">
+      <span class="ico ico--aurora" aria-hidden="true"></span>
+      <span class="label">极光TV</span>
+    </button>
+
+    <button class="tile" type="button" role="gridcell" data-page="无线投屏" data-key="cast" aria-label="无线投屏">
+      <span class="ico ico--cast" aria-hidden="true"></span>
+      <span class="label">无线投屏</span>
+    </button>
+
+    <button class="tile" type="button" role="gridcell" data-page="雅星会" data-key="asr" aria-label="雅星会">
+      <span class="ico ico--asr" aria-hidden="true"></span>
+      <span class="label">雅星会</span>
+    </button>
+
+    <button class="tile" type="button" role="gridcell" data-page="信息中心" data-key="info" aria-label="信息中心，2 条未读">
+      <span class="ico ico--info" aria-hidden="true"></span>
+      <span class="label">信息中心</span>
+      <span class="badge">2</span>
+    </button>
+
+  </nav>
+
+  <!-- ============ 右下提示 ============ -->
+  <div class="hint">
+    <span>按</span>
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 2.5 9.4 5.1M12 2.5l2.6 2.6M2.5 12l2.6-2.6M2.5 12l2.6 2.6M12 21.5l-2.6-2.6M12 21.5l2.6-2.6M21.5 12l-2.6-2.6M21.5 12l-2.6 2.6"
+            stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="1.7"/>
+    </svg>
+    <span>切换位置，按“OK”进入</span>
+  </div>
+
+  <!-- ============ 栏目详情（整页截图，左右键翻页） ============ -->
+  <img class="detail" id="detail" alt="" />
+
+  <!-- ============ 尚未提供截图的栏目：占位页 ============ -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="eyebrow">Somerset · Pudong Riverside</div>
+    <h2 class="page-title" id="pageTitle">看电视</h2>
+    <div class="page-rule"></div>
+    <div class="page-note" id="pageNote">页面占位：接入该功能的内容源后即可使用</div>
+    <div class="page-back">
+      <span>按</span>
+      <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true">
+        <path d="M11 5 4 12l7 7M4 12h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>或“返回”键退出</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 1. 舞台等比缩放 ---------------- */
+  const stage = document.getElementById('stage');
+  function fitStage() {
+    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+    stage.style.setProperty('--scale', s);
+  }
+  window.addEventListener('resize', fitStage);
+  fitStage();
+
+  /* ---------------- 2. 时钟（实时） ---------------- */
+  const elDate = document.getElementById('clockDate');
+  const elTime = document.getElementById('clockTime');
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function tickClock() {
+    const d = new Date();
+    elDate.textContent = d.getFullYear() + '.' + pad(d.getMonth() + 1);
+    elTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  /* ---------------- 3. 主图轮播 ---------------- */
+  /* 先把 assets/photos/hero-1.jpg … hero-5.jpg 全部探测一遍，
+     有几张就轮播几张（没有的话保留占位图并隐藏圆点）。 */
+  const heroMedia = document.getElementById('heroMedia');
+  const dotsBox = document.getElementById('dots');
+  const HERO_MAX = 5;
+  let slides = [];
+  let dots = [];
+  let current = 0;
+  let timer = null;
+
+  function buildDots(n) {
+    dotsBox.innerHTML = '';
+    dots = [];
+    for (let i = 0; i < n; i++) {
+      const b = document.createElement('button');
+      b.className = 'dot' + (i === 0 ? ' is-on' : '');
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-label', '第 ' + (i + 1) + ' 张图片');
+      b.addEventListener('click', () => { go(i); restart(); });
+      dotsBox.appendChild(b);
+      dots.push(b);
+    }
+    dotsBox.style.display = n > 1 ? '' : 'none';
+  }
+
+  function go(i) {
+    if (!slides.length) return;
+    current = (i + slides.length) % slides.length;
+    slides.forEach((s, k) => s.classList.toggle('is-on', k === current));
+    dots.forEach((d, k) => d.classList.toggle('is-on', k === current));
+  }
+
+  function restart() {
+    clearInterval(timer);
+    if (slides.length > 1) timer = setInterval(() => go(current + 1), 6000);
+  }
+
+  function probe(src) {
+    return new Promise(function (resolve) {
+      const im = new Image();
+      im.onload = function () { resolve(src); };
+      im.onerror = function () { resolve(null); };
+      im.src = src;
+    });
+  }
+
+  const heroList = [];
+  for (let i = 1; i <= HERO_MAX; i++) heroList.push('assets/photos/hero-' + i + '.jpg');
+
+  Promise.all(heroList.map(probe)).then(function (loaded) {
+    const ok = loaded.filter(Boolean);
+    if (ok.length) {
+      heroMedia.querySelectorAll('.slide').forEach(function (el) { el.remove(); });
+      slides = ok.map(function (src, i) {
+        const d = document.createElement('div');
+        d.className = 'slide' + (i === 0 ? ' is-on' : '');
+        d.style.backgroundImage = 'url("' + src + '")';
+        heroMedia.insertBefore(d, dotsBox);
+        return d;
+      });
+      buildDots(slides.length);
+      /* 联调：index.html?slide=2 直接停在第 2 张 */
+      const want = parseInt(new URLSearchParams(location.search).get('slide') || '1', 10);
+      go(isNaN(want) ? 0 : want - 1);
+      restart();
+    }
+    requestAnimationFrame(function () { heroMedia.classList.remove('is-booting'); });
+  });
+
+  /* ---------------- 4. 宫格焦点导航 ---------------- */
+  const tiles = Array.from(document.querySelectorAll('.tile'));
+  const COLS = 2;
+  let focusIndex = 0;
+
+  function setFocus(i) {
+    focusIndex = (i + tiles.length) % tiles.length;
+    tiles.forEach((t, k) => t.classList.toggle('is-active', k === focusIndex));
+  }
+
+  tiles.forEach((t, i) => {
+    t.addEventListener('mouseenter', () => setFocus(i));
+    t.addEventListener('focus', () => setFocus(i));
+    t.addEventListener('click', () => openPage(t));
+  });
+
+  function moveFocus(key) {
+    const row = Math.floor(focusIndex / COLS);
+    const col = focusIndex % COLS;
+    let r = row, c = col;
+
+    if (key === 'ArrowRight') c = (col + 1) % COLS;
+    else if (key === 'ArrowLeft') c = (col - 1 + COLS) % COLS;
+    else if (key === 'ArrowDown') r = (row + 1) % 3;
+    else if (key === 'ArrowUp') r = (row - 1 + 3) % 3;
+
+    setFocus(r * COLS + c);
+  }
+
+  /* ---------------- 5. 进入 / 退出栏目 ----------------
+     有截图的栏目直接铺图（可左右翻页），没有的先用占位页 */
+  const overlay = document.getElementById('overlay');
+  const pageTitle = document.getElementById('pageTitle');
+  const detail = document.getElementById('detail');
+  let overlayOpen = false;
+
+  const SHOTS = {
+    aurora: ['assets/screens/somerset/home/aurora.jpg'],
+    cast:   ['assets/screens/somerset/home/cast.jpg'],
+    asr:    ['assets/screens/somerset/home/asr.jpg'],
+    info:   ['assets/screens/somerset/home/info-1.jpg', 'assets/screens/somerset/home/info-2.jpg']
+  };
+  let shotList = [];
+  let shotIndex = 0;
+
+  function openPage(tile, instant) {
+    /* 「酒店介绍」已经有独立页面（截图铺底 + 宫格交互），直接跳转 */
+    if (tile.dataset.key === 'hotel') { location.href = 'hotel.html'; return; }
+
+    const list = SHOTS[tile.dataset.key];
+    if (list) {
+      if (instant) detail.classList.add('no-anim');
+      shotList = list;
+      shotIndex = 0;
+      detail.src = list[0];
+      detail.classList.add('is-open');
+      overlayOpen = true;
+      return;
+    }
+
+    /* 还没有截图的栏目（看电视）：占位页 */
+    if (instant) overlay.classList.add('no-anim');
+    pageTitle.textContent = tile.dataset.page;
+    overlay.classList.add('is-open');
+    overlay.setAttribute('aria-hidden', 'false');
+    overlayOpen = true;
+  }
+  function closePage() {
+    detail.classList.remove('is-open');
+    overlay.classList.remove('is-open');
+    overlay.setAttribute('aria-hidden', 'true');
+    overlayOpen = false;
+  }
+  function turnPage(dir) {
+    if (shotList.length < 2) return;
+    shotIndex = (shotIndex + dir + shotList.length) % shotList.length;
+    detail.src = shotList[shotIndex];
+  }
+  detail.addEventListener('click', closePage);
+
+  /* 预热截图，切换时无白闪 */
+  Object.keys(SHOTS).forEach(function (k) {
+    SHOTS[k].forEach(function (src) { const im = new Image(); im.src = src; });
+  });
+
+  /* ---------------- 6. 遥控器按键 ---------------- */
+  document.addEventListener('keydown', function (e) {
+    const k = e.key;
+
+    if (overlayOpen) {
+      if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') {
+        e.preventDefault();
+        closePage();
+        return;
+      }
+      /* 详情页左右翻页（信息中心有 2 页） */
+      if (k === 'ArrowRight' || k === 'ArrowLeft') {
+        e.preventDefault();
+        turnPage(k === 'ArrowRight' ? 1 : -1);
+      }
+      return;
+    }
+
+    /* 数字键直达第 N 个栏目（遥控器数字键盘） */
+    if (/^[1-9]$/.test(k)) {
+      const n = parseInt(k, 10);
+      if (n <= tiles.length) { e.preventDefault(); setFocus(n - 1); }
+      return;
+    }
+
+    if (k === 'ArrowLeft' || k === 'ArrowRight' || k === 'ArrowUp' || k === 'ArrowDown') {
+      e.preventDefault();
+      moveFocus(k);
+      return;
+    }
+    if (k === 'Enter' || k === ' ' || k === 'OK' || k === 'Select') {
+      e.preventDefault();
+      const t = tiles[focusIndex];
+      if (t) openPage(t);
+      return;
+    }
+    /* 遥控器数字键 / 左右翻图（可选） */
+    if (k === 'PageDown') { go(current + 1); restart(); }
+    if (k === 'PageUp') { go(current - 1); restart(); }
+  });
+
+  /* 便于联调（截图/演示用）：
+     ?open=1 或 ?open=aurora 直接打开某个栏目；?shot=2 停在详情第 2 页 */
+  (function () {
+    const q = new URLSearchParams(location.search);
+    const v = q.get('open');
+    if (!v) return;
+    const t = /^\d$/.test(v) ? tiles[parseInt(v, 10) - 1]
+                             : tiles.filter(function (x) { return x.dataset.key === v; })[0];
+    if (!t) return;
+    openPage(t, true);
+    const s = parseInt(q.get('shot') || '1', 10);
+    while (shotList.length > 1 && shotIndex < s - 1) turnPage(1);
+  })();
+
+  /* 触屏 / 鼠标：手势左右滑动切图（可选） */
+  const hero = document.getElementById('heroMedia');
+  let startX = null;
+  hero.addEventListener('pointerdown', e => { startX = e.clientX; });
+  hero.addEventListener('pointerup', e => {
+    if (startX === null) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 60) { go(current + (dx < 0 ? 1 : -1)); restart(); }
+    startX = null;
+  });
+
+  /* ---------------- 8. 电视外壳（tv.html）注入的遥控按键 ---------------- */
+  window.addEventListener('message', function (e) {
+    const d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: String(d.key), bubbles: true, cancelable: true
+    }));
+  });
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

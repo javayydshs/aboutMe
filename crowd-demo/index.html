@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>公共区域人流密度 - 演示</title>
+    <link rel="stylesheet" type="text/css" href="css/demo.css" />
+</head>
+
+<body>
+    <div class="nav-box">
+        <nav>
+            <div id="nav">
+                <div class="rectDiv"></div>
+                <div class="logoDiv"></div>
+                <div class="menuContainer">
+                    <div class="menuItem" style="background-image: url('./images/restaurant.png');"></div>
+                    <div class="menuItem" style="background-image: url('./images/front.png');"></div>
+                    <div class="menuItem" style="background-image: url('./images/Lobby.png');"></div>
+                    <div class="menuItem" style="background-image: url('./images/Gym.png');"></div>
+                </div>
+
+                <div class="mainContaint">
+                    <div class="title">公共区域人流密度</div>
+                    <div class="subTitle">实时感知客流密度，享受错峰服务</div>
+                    <div class="PersonnelDistribution">
+                        <canvas id="radarCanvas" width="1115" height="673"></canvas>
+                    </div>
+                    <div class="rightBanner">
+                        <div class="introduceImg"></div>
+                        <div class="deliveryLine"></div>
+                        <div class="densityLevel">
+                            <div class="guideTitle">当前人员密度</div>
+                            <div class="levelImage"></div>
+                            <div class="levelText"></div>
+                            <div class="Peoplecount"></div>
+                        </div>
+                    </div>
+                    <div class="littleTip"></div>
+                    <div class="colorTip"></div>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <script src="js/demo.js"></script>
+</body>
+
+</html>

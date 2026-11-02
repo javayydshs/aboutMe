@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>共享净化智能管理云平台 · 后台原型（测试数据）</title>
+<link rel="icon" href="./public/favicon.svg" type="image/svg+xml" />
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<style>
+  :root{
+    --primary:#409EFF; --success:#67C23A; --warning:#E6A23C; --danger:#F56C6C; --info:#909399;
+    --t1:#303133; --t2:#606266; --t3:#909399; --t4:#C0C4CC;
+    --bd:#DCDFE6; --bd-l:#EBEEF5;
+    --bg:#F0F2F5; --side:#304156; --side-hover:#263445; --side-text:#BFCBD9;
+    --radius:4px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--t1); font-size:14px; line-height:1.5;
+  }
+  a{color:var(--primary);text-decoration:none;}
+  ::-webkit-scrollbar{width:8px;height:8px;}
+  ::-webkit-scrollbar-thumb{background:#c8ccd4;border-radius:4px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  /* ============ 布局 ============ */
+  .layout{display:flex;min-height:100vh;}
+  .sidebar{
+    width:224px;flex:0 0 224px;background:var(--side);color:var(--side-text);
+    position:fixed;top:0;bottom:0;left:0;overflow-y:auto;z-index:30;
+    transition:width .25s;
+  }
+  .sidebar::-webkit-scrollbar-thumb{background:#4a5b70;}
+  .logo{
+    height:58px;display:flex;align-items:center;gap:9px;padding:0 18px;
+    color:#fff;font-weight:700;font-size:15px;letter-spacing:.3px;
+    border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap;overflow:hidden;
+  }
+  .logo .mark{
+    width:26px;height:26px;flex:0 0 26px;border-radius:7px;display:grid;place-items:center;
+    background:linear-gradient(135deg,#409EFF,#22d3ee);font-size:14px;
+  }
+  .menu{padding:10px 0 30px;}
+  .menu-item{
+    display:flex;align-items:center;gap:10px;padding:0 20px;height:46px;
+    cursor:pointer;font-size:14px;color:var(--side-text);white-space:nowrap;overflow:hidden;
+    border-left:3px solid transparent;transition:.2s;
+  }
+  .menu-item:hover{background:var(--side-hover);color:#fff;}
+  .menu-item.active{background:var(--side-hover);color:#fff;border-left-color:var(--primary);}
+  .menu-item .mi{font-size:16px;width:18px;text-align:center;flex:0 0 18px;}
+  .menu-group{padding:14px 20px 6px;font-size:12px;color:#8493a6;letter-spacing:.6px;}
+
+  .main{margin-left:224px;flex:1;min-width:0;display:flex;flex-direction:column;transition:margin-left .25s;}
+  .navbar{
+    height:58px;background:#fff;border-bottom:1px solid var(--bd-l);
+    display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+    position:sticky;top:0;z-index:20;
+  }
+  .nav-left{display:flex;align-items:center;gap:14px;}
+  .crumb{color:var(--t3);font-size:13px;}
+  .crumb b{color:var(--t1);font-weight:600;}
+  .nav-right{display:flex;align-items:center;gap:16px;font-size:13px;color:var(--t2);}
+  .avatar{
+    width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#409EFF,#7c5cff);
+    color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600;
+  }
+  .content{padding:20px;flex:1;}
+
+  /* ============ 通用组件 ============ */
+  .card{background:#fff;border-radius:var(--radius);border:1px solid var(--bd-l);box-shadow:0 1px 2px rgba(0,0,0,.03);}
+  .card + .card{margin-top:16px;}
+  .card-hd{
+    padding:15px 20px;border-bottom:1px solid var(--bd-l);display:flex;
+    align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .card-hd h3{font-size:15px;font-weight:600;}
+  .card-hd .sub{font-size:12px;color:var(--t3);font-weight:400;margin-left:8px;}
+  .card-bd{padding:20px;}
+  .card-bd.tight{padding:0;}
+
+  .stat-group{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:16px;}
+  .stat{
+    background:#fff;border:1px solid var(--bd-l);border-radius:var(--radius);padding:18px 18px;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);position:relative;overflow:hidden;
+  }
+  .stat .k{font-size:13px;color:var(--t3);}
+  .stat .v{font-size:26px;font-weight:700;margin-top:6px;letter-spacing:-.5px;color:var(--t1);}
+  .stat .v small{font-size:12px;font-weight:400;color:var(--t3);margin-left:4px;}
+  .stat::after{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--primary);
+  }
+  .stat.s-success::after{background:var(--success);}
+  .stat.s-warning::after{background:var(--warning);}
+  .stat.s-danger::after{background:var(--danger);}
+  .stat.s-info::after{background:var(--info);}
+  .stat .v.c-success{color:var(--success);}
+  .stat .v.c-warning{color:var(--warning);}
+  .stat .v.c-danger{color:var(--danger);}
+
+  .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--bd-l);}
+  .toolbar .spacer{flex:1;}
+
+  input[type=text],input[type=date],select{
+    height:32px;border:1px solid var(--bd);border-radius:var(--radius);padding:0 10px;
+    font-size:13px;color:var(--t1);background:#fff;outline:none;transition:.2s;
+    font-family:inherit;
+  }
+  input:focus,select:focus{border-color:var(--primary);}
+  select{cursor:pointer;padding-right:26px;}
+  .inp{width:180px;}
+
+  .btn{
+    height:32px;padding:0 15px;border-radius:var(--radius);border:1px solid var(--bd);
+    background:#fff;color:var(--t2);font-size:13px;cursor:pointer;transition:.2s;
+    display:inline-flex;align-items:center;gap:6px;font-family:inherit;white-space:nowrap;
+  }
+  .btn:hover{color:var(--primary);border-color:#c6e2ff;background:#ecf5ff;}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .btn.primary:hover{background:#66b1ff;border-color:#66b1ff;color:#fff;}
+  .btn.danger:hover{color:var(--danger);border-color:#fbc4c4;background:#fef0f0;}
+  .btn.sm{height:26px;padding:0 10px;font-size:12px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:820px;}
+  thead th{
+    background:#fafafa;color:var(--t2);font-weight:600;text-align:left;
+    padding:11px 14px;border-bottom:1px solid var(--bd-l);white-space:nowrap;font-size:13px;
+  }
+  tbody td{padding:11px 14px;border-bottom:1px solid var(--bd-l);color:var(--t2);white-space:nowrap;}
+  tbody tr:hover td{background:#f5f9ff;}
+  tbody tr:last-child td{border-bottom:none;}
+  td.strong{color:var(--t1);font-weight:600;}
+
+  .tag{
+    display:inline-block;padding:1px 8px;border-radius:3px;font-size:12px;line-height:19px;
+    border:1px solid transparent;
+  }
+  .tag.blue{color:#409EFF;background:#ecf5ff;border-color:#d9ecff;}
+  .tag.green{color:#67C23A;background:#f0f9eb;border-color:#e1f3d8;}
+  .tag.gray{color:#909399;background:#f4f4f5;border-color:#e9e9eb;}
+  .tag.orange{color:#E6A23C;background:#fdf6ec;border-color:#faecd8;}
+  .tag.red{color:#F56C6C;background:#fef0f0;border-color:#fde2e2;}
+  .tag.purple{color:#9F29FB;background:#f8f0ff;border-color:#eddcff;}
+
+  .pager{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:14px 20px;color:var(--t2);font-size:13px;}
+  .pager .pg{
+    min-width:28px;height:28px;padding:0 6px;border-radius:var(--radius);border:1px solid var(--bd);
+    background:#fff;display:grid;place-items:center;cursor:pointer;font-size:13px;
+  }
+  .pager .pg.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+  .pager .pg:hover:not(.active){color:var(--primary);border-color:#c6e2ff;}
+
+  /* 楼层面板 */
+  .floor-panel{display:flex;flex-wrap:wrap;gap:8px;}
+  .floor-chip{
+    padding:5px 14px;border:1px solid var(--bd);border-radius:15px;font-size:13px;
+    cursor:pointer;color:var(--t2);background:#fff;transition:.2s;
+  }
+  .floor-chip:hover{color:var(--primary);border-color:#c6e2ff;}
+  .floor-chip.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+  /* 房间卡片 */
+  .room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+  .room-card{
+    border-radius:6px;padding:14px;color:#fff;cursor:pointer;transition:.2s;
+    box-shadow:0 2px 6px rgba(0,0,0,.08);position:relative;
+  }
+  .room-card:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(0,0,0,.16);}
+  .room-card.off{background:#808080 !important;}
+  .room-card .rn{font-size:15px;font-weight:700;}
+  .room-card .rd{font-size:12px;opacity:.9;margin-top:2px;}
+  .room-card .rp{font-size:22px;font-weight:700;margin-top:8px;letter-spacing:-.5px;}
+  .room-card .rp small{font-size:11px;font-weight:400;opacity:.9;margin-left:2px;}
+  .room-card .rl{position:absolute;top:10px;right:10px;font-size:11px;background:rgba(255,255,255,.25);padding:1px 7px;border-radius:9px;}
+
+  .legend-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:13px;color:var(--t2);}
+  .legend-row .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;}
+
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--bd-l);padding:0 20px;}
+  .tab{
+    padding:12px 16px;font-size:14px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;
+    margin-bottom:-1px;transition:.2s;
+  }
+  .tab:hover{color:var(--primary);}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600;}
+
+  .chart{width:100%;height:300px;}
+  .chart.sm{height:230px;}
+
+  .meters{display:flex;flex-direction:column;gap:16px;}
+  .meter .mh{display:flex;justify-content:space-between;font-size:13px;color:var(--t2);margin-bottom:6px;}
+  .meter .bar{height:8px;border-radius:4px;background:#EBEEF5;overflow:hidden;}
+  .meter .bar i{display:block;height:100%;border-radius:4px;transition:width .6s;}
+
+  /* 弹窗 */
+  .mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:100;}
+  .mask.show{display:block;}
+  .dialog{
+    position:fixed;left:50%;top:46%;transform:translate(-50%,-50%);
+    width:440px;max-width:92vw;background:#fff;border-radius:6px;z-index:101;
+    box-shadow:0 12px 32px rgba(0,0,0,.2);display:none;
+  }
+  .dialog.show{display:block;}
+  .dialog-hd{padding:16px 20px;font-size:16px;font-weight:600;border-bottom:1px solid var(--bd-l);display:flex;justify-content:space-between;align-items:center;}
+  .dialog-hd .x{cursor:pointer;color:var(--t3);font-size:18px;line-height:1;}
+  .dialog-bd{padding:20px;}
+  .dialog-ft{padding:12px 20px;border-top:1px solid var(--bd-l);display:flex;justify-content:flex-end;gap:10px;}
+  .form-row{display:flex;align-items:center;margin-bottom:16px;}
+  .form-row label{width:96px;font-size:13px;color:var(--t2);flex:0 0 96px;text-align:right;padding-right:12px;}
+  .form-row label i{color:var(--danger);font-style:normal;margin-right:3px;}
+  .form-row .ctrl{flex:1;}
+  .form-row input,.form-row select{width:100%;}
+
+  .toast{
+    position:fixed;top:22px;left:50%;transform:translateX(-50%) translateY(-20px);
+    background:#f0f9eb;border:1px solid #e1f3d8;color:#67C23A;padding:10px 20px;border-radius:4px;
+    font-size:14px;z-index:200;opacity:0;transition:.3s;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .banner{
+    display:flex;align-items:center;gap:12px;padding:13px 20px;border-radius:var(--radius);
+    background:#f0f9eb;border:1px solid #e1f3d8;color:#529b2e;font-size:13px;margin-bottom:16px;
+  }
+  .banner .pulse{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pl 2s infinite;}
+  @keyframes pl{0%{box-shadow:0 0 0 0 rgba(103,194,58,.6);}70%{box-shadow:0 0 0 10px rgba(103,194,58,0);}100%{box-shadow:0 0 0 0 rgba(103,194,58,0);}}
+  .banner code{background:rgba(0,0,0,.05);padding:1px 6px;border-radius:3px;font-family:ui-monospace,Consolas,monospace;}
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .hint{font-size:12px;color:var(--t3);padding:10px 0 0;}
+  .empty{text-align:center;color:var(--t3);padding:40px 0;font-size:13px;}
+
+  @media (max-width:900px){
+    .sidebar{width:64px;flex:0 0 64px;}
+    .sidebar .logo span.tx,.menu-item span.tx,.menu-group{display:none;}
+    .menu-item{justify-content:center;padding:0;}
+    .main{margin-left:64px;}
+    .inp{width:130px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <!-- 侧边菜单（扁平化） -->
+  <aside class="sidebar">
+    <div class="logo"><span class="mark">❄</span><span class="tx">共享净化平台</span></div>
+    <nav class="menu" id="menu">
+      <div class="menu-group">业务管理</div>
+      <div class="menu-item" data-view="hotel"><span class="mi">🏨</span><span class="tx">酒店管理</span></div>
+      <div class="menu-item" data-view="room"><span class="mi">🛏️</span><span class="tx">房间管理</span></div>
+      <div class="menu-item" data-view="device"><span class="mi">📟</span><span class="tx">设备管理</span></div>
+      <div class="menu-item" data-view="control"><span class="mi">🎛️</span><span class="tx">数字化设备控制</span></div>
+      <div class="menu-item" data-view="access"><span class="mi">🔌</span><span class="tx">设备接入管理</span></div>
+      <div class="menu-group">数据看板</div>
+      <div class="menu-item" data-view="purify"><span class="mi">📈</span><span class="tx">酒店净化看板</span></div>
+      <div class="menu-item" data-view="dashboard"><span class="mi">📊</span><span class="tx">设备运行看板</span></div>
+      <div class="menu-item" data-view="wostat"><span class="mi">📉</span><span class="tx">工单统计</span></div>
+      <div class="menu-group">工单管理</div>
+      <div class="menu-item" data-view="wo-install"><span class="mi">🧾</span><span class="tx">净化设备安装</span></div>
+      <div class="menu-item" data-view="wo-maintain"><span class="mi">🧰</span><span class="tx">净化设备保养</span></div>
+      <div class="menu-item" data-view="wo-repair"><span class="mi">🛠️</span><span class="tx">净化设备维修</span></div>
+      <div class="menu-group">系统设置</div>
+      <div class="menu-item" data-view="user"><span class="mi">👥</span><span class="tx">平台用户管理</span></div>
+      <div class="menu-item" data-view="log"><span class="mi">🔍</span><span class="tx">系统操作日志</span></div>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <!-- 顶栏 -->
+    <header class="navbar">
+      <div class="nav-left">
+        <span class="crumb">首页 / <b id="crumb">酒店管理</b></span>
+      </div>
+      <div class="nav-right">
+        <span>测试数据 · 静态原型</span>
+        <span>管理员</span>
+        <span class="avatar">A</span>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ================= 酒店管理 ================= -->
+      <section class="view active" id="view-hotel">
+        <div class="stat-group" id="hotel-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <input class="inp" type="text" placeholder="酒店名称 / 编号" />
+            <select><option>全部类型</option><option>五星级</option><option>四星级</option><option>三星级</option><option>高档</option><option>舒适</option><option>经济型</option></select>
+            <select><option>全部城市</option><option>北京</option><option>上海</option><option>杭州</option><option>成都</option><option>广州</option><option>深圳</option></select>
+            <button class="btn">查询</button>
+            <button class="btn">重置</button>
+            <span class="spacer"></span>
+            <button class="btn primary">+ 新增酒店</button>
+          </div>
+          <div class="table-wrap"><table id="tbl-hotel"></table></div>
+          <div class="pager"><span>共 128 条</span><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">…</span><span class="pg">13</span><span class="pg">›</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 房间管理 ================= -->
+      <section class="view" id="view-room">
+        <div class="stat-group" id="room-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <select><option>全部酒店</option><option>北京朝阳君悦酒店</option><option>上海外滩华邑酒店</option><option>杭州西湖国宾馆</option></select>
+            <select><option>全部楼层</option><option>3层</option><option>8层</option><option>12层</option><option>15层</option></select>
+            <input class="inp" type="text" placeholder="房间号 / 名称" />
+            <select><option>全部类型</option><option>客房</option><option>会议室</option><option>走廊</option><option>大堂</option></select>
+            <select><option>全部状态</option><option>正常</option><option>停用</option><option>维护中</option></select>
+            <button class="btn">查询</button>
+            <span class="spacer"></span>
+            <button class="btn primary">+ 新增房间</button>
+          </div>
+          <div class="table-wrap"><table id="tbl-room"></table></div>
+          <div class="pager"><span>共 146 条</span><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">›</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 设备管理 ================= -->
+      <section class="view" id="view-device">
+        <div class="stat-group" id="device-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <input class="inp" type="text" placeholder="设备编号 / SN / MAC" />
+            <select><option>全部酒店</option><option>北京朝阳君悦酒店</option><option>上海外滩华邑酒店</option></select>
+            <select><option>全部型号</option><option>HJ-X40-TS</option><option>HJ-X30</option><option>KJ-800F</option></select>
+            <select><option>全部状态</option><option>在线</option><option>离线</option><option>故障</option><option>未激活</option></select>
+            <button class="btn">查询</button>
+            <span class="spacer"></span>
+            <button class="btn primary">+ 新增设备</button>
+          </div>
+          <div class="table-wrap"><table id="tbl-device"></table></div>
+          <div class="pager"><span>共 178 条</span><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">…</span><span class="pg">18</span><span class="pg">›</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 数字化设备控制 ================= -->
+      <section class="view" id="view-control">
+        <div class="card">
+          <div class="toolbar">
+            <select id="ctrl-hotel" style="width:240px"><option>北京朝阳君悦酒店（42 台）</option><option>上海外滩华邑酒店（31 台）</option><option>杭州西湖国宾馆（26 台）</option></select>
+            <button class="btn">刷新</button>
+            <span class="spacer"></span>
+            <span class="hint" style="padding:0">数据每 3 秒自动刷新（原型为静态数据）</span>
+          </div>
+          <div class="card-bd">
+            <div class="stat-group" id="ctrl-stats"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>楼层面板<span class="sub">点击筛选设备</span></h3></div>
+          <div class="card-bd"><div class="floor-panel" id="ctrl-floors"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-hd"><h3>空气质量档位分布</h3></div>
+          <div class="card-bd"><div class="chart sm" id="chart-level"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs">
+            <div class="tab active" data-tab="dev">设备运行状态</div>
+            <div class="tab" data-tab="cmd">指令下发日志</div>
+          </div>
+          <div class="table-wrap" id="ctrl-tab-dev"><table id="tbl-ctrl"></table></div>
+          <div class="table-wrap" id="ctrl-tab-cmd" style="display:none"><table id="tbl-cmd"></table></div>
+        </div>
+      </section>
+
+      <!-- ================= 设备接入管理 ================= -->
+      <section class="view" id="view-access">
+        <div class="banner">
+          <span class="pulse"></span>
+          <span>MQTT 连接状态：<b>已连接</b> · Broker <code>tcp://10.178.72.86:1883</code> · 订阅 <code>d/+/v2_push</code>、<code>d/+/v2_get</code></span>
+          <span class="spacer" style="flex:1"></span>
+          <button class="btn sm">刷新状态</button>
+        </div>
+        <div class="stat-group" id="access-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <input class="inp" type="text" placeholder="设备编号 / MAC / 通信 ID" />
+            <select><option>全部酒店</option><option>北京朝阳君悦酒店</option><option>上海外滩华邑酒店</option></select>
+            <select><option>全部状态</option><option>在线</option><option>离线</option><option>故障</option></select>
+            <button class="btn">查询</button>
+            <span class="spacer"></span>
+            <button class="btn">导出</button>
+          </div>
+          <div class="table-wrap"><table id="tbl-access"></table></div>
+          <div class="pager"><span>共 64 条已登记</span><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">›</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 酒店净化看板 ================= -->
+      <section class="view" id="view-purify">
+        <div class="card">
+          <div class="toolbar">
+            <select style="width:260px"><option>北京朝阳君悦酒店（42 台）</option><option>上海外滩华邑酒店（31 台）</option><option>杭州西湖国宾馆（26 台）</option></select>
+            <span class="spacer"></span>
+            <span class="hint" style="padding:0">房间数据每 3 秒轮询（原型为静态数据）</span>
+          </div>
+          <div class="card-bd"><div class="stat-group" id="purify-stats"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="toolbar">
+            <div class="floor-panel" id="purify-floors"></div>
+            <span class="spacer"></span>
+            <div class="legend-row" id="purify-levels"></div>
+          </div>
+          <div class="card-bd">
+            <div class="room-grid" id="purify-rooms"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="tabs">
+            <div class="tab active" data-tab="7d">近 7 日 PM2.5</div>
+            <div class="tab" data-tab="24h">近 24 小时</div>
+            <div class="tab" data-tab="rt">实时数据</div>
+          </div>
+          <div class="card-bd">
+            <div id="purify-chart-7d"><div class="chart" id="chart-p7d"></div></div>
+            <div id="purify-chart-24h" style="display:none"><div class="chart" id="chart-p24h"></div></div>
+            <div id="purify-chart-rt" style="display:none"><div class="chart sm" id="chart-prt"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 设备运行看板 ================= -->
+      <section class="view" id="view-dashboard">
+        <div class="stat-group" id="dash-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-hd"><h3>今日分时在线率走势</h3></div>
+          <div class="card-bd"><div class="chart" id="chart-online"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>设备状态分布</h3></div>
+          <div class="card-bd"><div class="chart sm" id="chart-status"></div></div>
+        </div>
+        <div class="card">
+          <div class="tabs">
+            <div class="tab active" data-tab="rank">酒店维度排名</div>
+            <div class="tab" data-tab="fault">故障 / 离线设备</div>
+            <div class="tab" data-tab="alarm">待处理告警</div>
+            <div class="tab" data-tab="filter">滤网告警</div>
+          </div>
+          <div class="table-wrap" id="dash-tab-rank"><table id="tbl-rank"></table></div>
+          <div class="table-wrap" id="dash-tab-fault" style="display:none"><table id="tbl-fault"></table></div>
+          <div class="table-wrap" id="dash-tab-alarm" style="display:none"><table id="tbl-alarm"></table></div>
+          <div class="table-wrap" id="dash-tab-filter" style="display:none"><table id="tbl-filter"></table></div>
+        </div>
+      </section>
+
+      <!-- ================= 工单统计 ================= -->
+      <section class="view" id="view-wostat">
+        <div class="stat-group" id="wostat-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="card-hd"><h3>近 7 日工单趋势</h3></div>
+          <div class="card-bd"><div class="chart" id="chart-wotrend"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>工单类型分布</h3></div>
+          <div class="card-bd"><div class="chart sm" id="chart-wotype"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><h3>处理效率</h3></div>
+          <div class="card-bd">
+            <div class="meters" id="wostat-meters"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 工单列表（安装 / 保养 / 维修 共用） ================= -->
+      <section class="view" id="view-workorder">
+        <div class="stat-group" id="wo-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <input class="inp" type="text" placeholder="工单编号 / 酒店 / 设备" />
+            <select><option>全部状态</option><option>待派单</option><option>已派单</option><option>施工中</option><option>待验收</option><option>已完成</option><option>已取消</option></select>
+            <select><option>全部优先级</option><option>紧急</option><option>高</option><option>中</option><option>低</option></select>
+            <button class="btn">查询</button>
+            <span class="spacer"></span>
+            <button class="btn primary">+ 新建工单</button>
+          </div>
+          <div class="table-wrap"><table id="tbl-wo"></table></div>
+          <div class="pager"><span id="wo-total">共 0 条</span><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">›</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 平台用户管理 ================= -->
+      <section class="view" id="view-user">
+        <div class="stat-group" id="user-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <input class="inp" type="text" placeholder="姓名 / 账号 / 手机号" />
+            <select><option>全部角色</option><option>管理员</option><option>酒店运维</option><option>施工人员</option></select>
+            <select><option>全部状态</option><option>正常</option><option>禁用</option><option>待激活</option></select>
+            <button class="btn">查询</button>
+            <span class="spacer"></span>
+            <button class="btn primary">+ 新增用户</button>
+          </div>
+          <div class="table-wrap"><table id="tbl-user"></table></div>
+          <div class="pager"><span>共 33 条</span><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">›</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 系统操作日志 ================= -->
+      <section class="view" id="view-log">
+        <div class="stat-group" id="log-stats"></div>
+        <div class="card" style="margin-top:16px">
+          <div class="toolbar">
+            <input class="inp" type="text" placeholder="操作人 / 账号 / 请求地址" />
+            <select><option>全部模块</option><option>登录鉴权</option><option>酒店管理</option><option>房间管理</option><option>设备管理</option><option>数字化设备控制</option><option>工单管理</option><option>用户管理</option><option>系统操作日志</option></select>
+            <select><option>全部类型</option><option>登录</option><option>登出</option><option>新增</option><option>修改</option><option>删除</option><option>派单</option><option>接单</option><option>提交完工</option><option>验收</option><option>下发指令</option></select>
+            <select><option>全部结果</option><option>成功</option><option>失败</option></select>
+            <button class="btn">查询</button>
+            <span class="spacer"></span>
+            <span class="hint" style="padding:0">仅记录写操作与登录登出，最多 500 条</span>
+          </div>
+          <div class="table-wrap"><table id="tbl-log"></table></div>
+          <div class="pager"><span>共 90 条</span><span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">›</span></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- 指令下发弹窗 -->
+<div class="mask" id="mask"></div>
+<div class="dialog" id="dlg-cmd">
+  <div class="dialog-hd"><span>下发控制指令</span><span class="x" onclick="closeDialog()">×</span></div>
+  <div class="dialog-bd">
+    <div class="form-row"><label>设备编号</label><div class="ctrl"><input type="text" id="cmd-dev" readonly /></div></div>
+    <div class="form-row"><label><i>*</i>指令</label><div class="ctrl">
+      <select id="cmd-type">
+        <option value="power">开关机（power）</option>
+        <option value="wind_speed">风速调节（wind_speed）</option>
+        <option value="run_mode">运行模式（run_mode）</option>
+        <option value="filter_reset">滤网复位（filter_reset）</option>
+        <option value="restart">设备重启（restart）</option>
+      </select></div></div>
+    <div class="form-row" id="cmd-val-row"><label><i>*</i>参数</label><div class="ctrl">
+      <select id="cmd-value"><option>on</option><option>off</option></select></div></div>
+    <div class="form-row"><label>备注</label><div class="ctrl"><input type="text" id="cmd-remark" placeholder="选填" /></div></div>
+  </div>
+  <div class="dialog-ft">
+    <button class="btn" onclick="closeDialog()">取消</button>
+    <button class="btn primary" onclick="submitCommand()">确定下发</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   测试数据（全部为静态假数据，仅用于原型演示）
+   ========================================================= */
+const PM_LEVELS = [
+  { n:1, name:'优',   color:'#40A1EA', max:35  },
+  { n:2, name:'良',   color:'#29C19B', max:75  },
+  { n:3, name:'轻度', color:'#FCA42A', max:115 },
+  { n:4, name:'中度', color:'#FD7828', max:150 },
+  { n:5, name:'重度', color:'#FF5F4E', max:250 },
+  { n:6, name:'严重', color:'#9F29FB', max:1e9 }
+];
+const OFFLINE_COLOR = '#808080';
+
+function pmLevel(v){
+  for (const l of PM_LEVELS) if (v <= l.max) return l;
+  return PM_LEVELS[5];
+}
+
+const HOTELS = [
+  { code:'JH0001', name:'北京朝阳君悦酒店', type:'五星级', city:'北京', contact:'王经理 13800138001', addr:'北京市朝阳区建国路88号', rooms:86, dev:42, online:39 },
+  { code:'JH0002', name:'上海外滩华邑酒店', type:'五星级', city:'上海', contact:'李经理 13900139002', addr:'上海市黄浦区中山东一路12号', rooms:64, dev:31, online:30 },
+  { code:'JH0003', name:'杭州西湖国宾馆',   type:'五星级', city:'杭州', contact:'张经理 13700137003', addr:'杭州市西湖区杨公堤18号', rooms:52, dev:26, online:24 },
+  { code:'JH0004', name:'成都天府丽都酒店', type:'四星级', city:'成都', contact:'陈经理 13600136004', addr:'成都市武侯区人民南路四段36号', rooms:48, dev:22, online:20 },
+  { code:'JH0005', name:'广州珠江新城酒店', type:'高档',   city:'广州', contact:'刘经理 13500135005', addr:'广州市天河区珠江东路6号', rooms:38, dev:18, online:15 },
+  { code:'JH0006', name:'深圳前海商务酒店', type:'舒适',   city:'深圳', contact:'赵经理 13400134006', addr:'深圳市南山区前海路100号', rooms:32, dev:14, online:12 },
+  { code:'JH0007', name:'南京新街口宾馆',   type:'三星级', city:'南京', contact:'孙经理 13300133007', addr:'南京市秦淮区中山东路300号', rooms:28, dev:11, online:9 },
+  { code:'JH0008', name:'西安钟楼快捷酒店', type:'经济型', city:'西安', contact:'周经理 13200132008', addr:'西安市碑林区西大街1号', rooms:24, dev:8,  online:6 }
+];
+
+const ROOMS = [
+  { hotel:'北京朝阳君悦酒店', floor:'12层', no:'1208', name:'1208 客房', type:'客房', status:'正常', dev:2, online:2, area:38.5 },
+  { hotel:'北京朝阳君悦酒店', floor:'12层', no:'1209', name:'1209 客房', type:'客房', status:'正常', dev:1, online:1, area:35.0 },
+  { hotel:'北京朝阳君悦酒店', floor:'8层',  no:'0806', name:'0806 客房', type:'客房', status:'正常', dev:2, online:1, area:42.0 },
+  { hotel:'北京朝阳君悦酒店', floor:'8层',  no:'0810', name:'0810 客房', type:'客房', status:'维护中', dev:1, online:0, area:36.0 },
+  { hotel:'北京朝阳君悦酒店', floor:'3层',  no:'0301', name:'0301 会议室', type:'会议室', status:'正常', dev:3, online:3, area:120.0 },
+  { hotel:'北京朝阳君悦酒店', floor:'1层',  no:'0101', name:'0101 大堂',   type:'大堂',   status:'正常', dev:4, online:3, area:260.0 },
+  { hotel:'上海外滩华邑酒店', floor:'15层', no:'1502', name:'1502 客房',   type:'客房',   status:'正常', dev:2, online:2, area:45.0 },
+  { hotel:'上海外滩华邑酒店', floor:'15层', no:'1503', name:'1503 客房',   type:'客房',   status:'停用', dev:1, online:0, area:40.0 },
+  { hotel:'上海外滩华邑酒店', floor:'9层',  no:'0905', name:'0905 走廊',   type:'走廊',   status:'正常', dev:2, online:2, area:80.0 },
+  { hotel:'杭州西湖国宾馆',   floor:'6层',  no:'0601', name:'0601 客房',   type:'客房',   status:'正常', dev:1, online:1, area:33.0 },
+  { hotel:'杭州西湖国宾馆',   floor:'6层',  no:'0602', name:'0602 客房',   type:'客房',   status:'正常', dev:2, online:1, area:33.0 },
+  { hotel:'成都天府丽都酒店', floor:'10层', no:'1006', name:'1006 客房',   type:'客房',   status:'正常', dev:1, online:1, area:30.0 }
+];
+
+const DEVICES = [
+  { no:'YH-BJ-0001', sn:'D0BAE441B697', model:'HJ-X40-TS', hotel:'北京朝阳君悦酒店', room:'1208', floor:'12层', loc:'床头柜上方', status:'在线', fw:'V2.0.3', sig:5, life:86, power:'on',  wind:'中',   mode:'自动', pm:18,  temp:24.5, humi:52 },
+  { no:'YH-BJ-0002', sn:'D0BAE441B701', model:'HJ-X40-TS', hotel:'北京朝阳君悦酒店', room:'1208', floor:'12层', loc:'写字台旁',   status:'在线', fw:'V2.0.3', sig:4, life:78, power:'on',  wind:'低',   mode:'睡眠', pm:22,  temp:24.1, humi:50 },
+  { no:'YH-BJ-0003', sn:'D0BAE441B702', model:'HJ-X30',    hotel:'北京朝阳君悦酒店', room:'0806', floor:'8层',  loc:'电视机下',   status:'在线', fw:'V1.8.2', sig:3, life:64, power:'on',  wind:'高',   mode:'强劲', pm:41,  temp:25.0, humi:55 },
+  { no:'YH-BJ-0004', sn:'D0BAE441B703', model:'HJ-X40-TS', hotel:'北京朝阳君悦酒店', room:'0810', floor:'8层',  loc:'进门左侧',   status:'离线', fw:'V2.0.1', sig:0, life:52, power:'off', wind:'低',   mode:'自动', pm:0,   temp:0,    humi:0  },
+  { no:'YH-BJ-0005', sn:'D0BAE441B704', model:'KJ-800F',   hotel:'北京朝阳君悦酒店', room:'0301', floor:'3层',  loc:'会议室主位', status:'在线', fw:'V3.1.0', sig:5, life:93, power:'on',  wind:'自动', mode:'自动', pm:12,  temp:23.6, humi:48 },
+  { no:'YH-BJ-0006', sn:'D0BAE441B705', model:'KJ-800F',   hotel:'北京朝阳君悦酒店', room:'0101', floor:'1层',  loc:'大堂北侧',   status:'故障', fw:'V3.0.8', sig:2, life:15, power:'off', wind:'低',   mode:'手动', pm:88,  temp:26.2, humi:61 },
+  { no:'YH-SH-0001', sn:'D0BAE441B801', model:'HJ-X40-TS', hotel:'上海外滩华邑酒店', room:'1502', floor:'15层', loc:'床头柜上方', status:'在线', fw:'V2.0.3', sig:5, life:91, power:'on',  wind:'中',   mode:'自动', pm:26,  temp:24.8, humi:54 },
+  { no:'YH-SH-0002', sn:'D0BAE441B802', model:'HJ-X40-TS', hotel:'上海外滩华邑酒店', room:'1503', floor:'15层', loc:'窗边',       status:'离线', fw:'V2.0.0', sig:0, life:47, power:'off', wind:'低',   mode:'自动', pm:0,   temp:0,    humi:0  },
+  { no:'YH-SH-0003', sn:'D0BAE441B803', model:'HJ-X30',    hotel:'上海外滩华邑酒店', room:'0905', floor:'9层',  loc:'走廊尽头',   status:'在线', fw:'V1.8.5', sig:4, life:73, power:'on',  wind:'高',   mode:'手动', pm:63,  temp:25.4, humi:57 },
+  { no:'YH-HZ-0001', sn:'D0BAE441B901', model:'HJ-X40-TS', hotel:'杭州西湖国宾馆',   room:'0601', floor:'6层',  loc:'床头柜上方', status:'在线', fw:'V2.0.3', sig:4, life:88, power:'on',  wind:'低',   mode:'睡眠', pm:9,   temp:23.2, humi:51 },
+  { no:'YH-HZ-0002', sn:'D0BAE441B902', model:'HJ-X40-TS', hotel:'杭州西湖国宾馆',   room:'0602', floor:'6层',  loc:'书桌旁',     status:'在线', fw:'V2.0.2', sig:3, life:19, power:'on',  wind:'中',   mode:'自动', pm:104, temp:24.0, humi:53 },
+  { no:'YH-CD-0001', sn:'D0BAE441BA01', model:'KJ-800F',   hotel:'成都天府丽都酒店', room:'1006', floor:'10层', loc:'进门右侧',   status:'未激活', fw:'—', sig:0, life:100, power:'off', wind:'低', mode:'自动', pm:0, temp:0, humi:0 }
+];
+
+const WORKORDERS = {
+  'wo-install':  { label:'净化设备安装', prefix:'WO-AZ', orders:[
+    { no:'WO-AZ-0132', hotel:'北京朝阳君悦酒店', device:'YH-BJ-0011', loc:'12层 1210 客房', priority:'高',   status:'待派单', handler:'—',        submitter:'王经理', submitAt:'2026-11-01 09:12', desc:'新客房加装净化设备 1 台' },
+    { no:'WO-AZ-0131', hotel:'上海外滩华邑酒店', device:'YH-SH-0008', loc:'15层 1505 客房', priority:'中',   status:'已派单', handler:'孙师傅',   submitter:'李经理', submitAt:'2026-10-31 16:40', desc:'批量安装，需打孔走线' },
+    { no:'WO-AZ-0130', hotel:'杭州西湖国宾馆',   device:'YH-HZ-0006', loc:'6层 0605 客房',  priority:'中',   status:'施工中', handler:'周师傅',   submitter:'张经理', submitAt:'2026-10-30 10:05', desc:'客房翻新后重新安装' },
+    { no:'WO-AZ-0129', hotel:'成都天府丽都酒店', device:'YH-CD-0003', loc:'10层 1008 客房', priority:'低',   status:'待验收', handler:'吴师傅',   submitter:'陈经理', submitAt:'2026-10-29 14:22', desc:'已完工，等待验收确认' },
+    { no:'WO-AZ-0128', hotel:'广州珠江新城酒店', device:'YH-GZ-0002', loc:'9层 0902 客房',  priority:'高',   status:'已完成', handler:'郑师傅',   submitter:'刘经理', submitAt:'2026-10-28 09:30', desc:'安装完成并通过验收' },
+    { no:'WO-AZ-0127', hotel:'深圳前海商务酒店', device:'YH-SZ-0001', loc:'5层 0503 客房',  priority:'低',   status:'已取消', handler:'—',        submitter:'赵经理', submitAt:'2026-10-27 15:10', desc:'客户取消安装需求' }
+  ]},
+  'wo-maintain': { label:'净化设备保养', prefix:'WO-BY', orders:[
+    { no:'WO-BY-0088', hotel:'北京朝阳君悦酒店', device:'YH-BJ-0006', loc:'1层 0101 大堂',  priority:'紧急', status:'待派单', handler:'—',      submitter:'王经理', submitAt:'2026-11-02 08:20', desc:'滤网寿命低于 20%，需更换' },
+    { no:'WO-BY-0087', hotel:'北京朝阳君悦酒店', device:'YH-BJ-0003', loc:'8层 0806 客房',  priority:'中',   status:'施工中', handler:'孙师傅', submitter:'王经理', submitAt:'2026-11-01 11:35', desc:'常规季度保养' },
+    { no:'WO-BY-0086', hotel:'上海外滩华邑酒店', device:'YH-SH-0003', loc:'9层 0905 走廊',  priority:'中',   status:'待验收', handler:'周师傅', submitter:'李经理', submitAt:'2026-10-30 17:02', desc:'清洁风道与滤网' },
+    { no:'WO-BY-0085', hotel:'杭州西湖国宾馆',   device:'YH-HZ-0002', loc:'6层 0602 客房',  priority:'高',   status:'已派单', handler:'吴师傅', submitter:'张经理', submitAt:'2026-10-30 09:48', desc:'滤网告警，需上门检查' },
+    { no:'WO-BY-0084', hotel:'南京新街口宾馆',   device:'YH-NJ-0001', loc:'7层 0704 客房',  priority:'低',   status:'已完成', handler:'郑师傅', submitter:'孙经理', submitAt:'2026-10-26 13:15', desc:'保养完成' }
+  ]},
+  'wo-repair':   { label:'净化设备维修', prefix:'WO-WX', orders:[
+    { no:'WO-WX-0129', hotel:'北京朝阳君悦酒店', device:'YH-BJ-0006', loc:'1层 0101 大堂',  priority:'紧急', status:'待派单', handler:'—',      submitter:'王经理', submitAt:'2026-11-02 07:55', desc:'设备报 E03 故障码，无法启动' },
+    { no:'WO-WX-0128', hotel:'上海外滩华邑酒店', device:'YH-SH-0002', loc:'15层 1503 客房', priority:'高',   status:'已派单', handler:'孙师傅', submitter:'李经理', submitAt:'2026-11-01 10:18', desc:'设备离线超过 24 小时' },
+    { no:'WO-WX-0127', hotel:'成都天府丽都酒店', device:'YH-CD-0001', loc:'10层 1006 客房', priority:'中',   status:'施工中', handler:'周师傅', submitter:'陈经理', submitAt:'2026-10-31 15:44', desc:'风机异响，待更换轴承' },
+    { no:'WO-WX-0126', hotel:'广州珠江新城酒店', device:'YH-GZ-0001', loc:'9层 0901 客房',  priority:'中',   status:'待验收', handler:'吴师傅',   submitter:'刘经理', submitAt:'2026-10-30 08:36', desc:'已更换电源模块' },
+    { no:'WO-WX-0125', hotel:'深圳前海商务酒店', device:'YH-SZ-0002', loc:'5层 0505 客房',  priority:'低',   status:'已完成', handler:'郑师傅',   submitter:'赵经理', submitAt:'2026-10-28 14:02', desc:'维修完成，运行正常' }
+  ]}
+};
+
+const COMMANDS = [
+  { time:'2026-11-02 09:41:22', device:'YH-BJ-0001', hotel:'北京朝阳君悦酒店', room:'1208', cmd:'power',        label:'开关机',   value:'on',  result:'成功', operator:'admin',  msg:'指令已下发至 d/D0BAE441B697/v2_in' },
+  { time:'2026-11-02 09:38:10', device:'YH-BJ-0003', hotel:'北京朝阳君悦酒店', room:'0806', cmd:'wind_speed',   label:'风速调节', value:'高',  result:'成功', operator:'王经理', msg:'风速档位已调整' },
+  { time:'2026-11-02 09:31:47', device:'YH-SH-0003', hotel:'上海外滩华邑酒店', room:'0905', cmd:'run_mode',     label:'运行模式', value:'手动',result:'成功', operator:'admin',  msg:'运行模式已切换' },
+  { time:'2026-11-02 09:20:05', device:'YH-BJ-0006', hotel:'北京朝阳君悦酒店', room:'0101', cmd:'restart',      label:'设备重启', value:'—',   result:'失败', operator:'admin',  msg:'设备离线，指令未送达' },
+  { time:'2026-11-02 08:55:33', device:'YH-HZ-0002', hotel:'杭州西湖国宾馆',   room:'0602', cmd:'filter_reset', label:'滤网复位', value:'—',   result:'成功', operator:'张经理', msg:'滤网寿命已重置为 100%' },
+  { time:'2026-11-01 18:12:09', device:'YH-BJ-0002', hotel:'北京朝阳君悦酒店', room:'1208', cmd:'power',        label:'开关机',   value:'on',  result:'超时', operator:'王经理', msg:'等待设备回执超时' }
+];
+
+const USERS = [
+  { account:'admin',    name:'超级管理员', role:'管理员',   dept:'技术部', hotel:'—',              phone:'13800138000', status:'正常',   last:'2026-11-02 09:40' },
+  { account:'wangjl',   name:'王经理',     role:'酒店运维', dept:'运营部', hotel:'北京朝阳君悦酒店', phone:'13800138001', status:'正常',   last:'2026-11-02 09:12' },
+  { account:'lijj',     name:'李经理',     role:'酒店运维', dept:'运营部', hotel:'上海外滩华邑酒店', phone:'13900139002', status:'正常',   last:'2026-11-01 18:30' },
+  { account:'zhangjj',  name:'张经理',     role:'酒店运维', dept:'运营部', hotel:'杭州西湖国宾馆',   phone:'13700137003', status:'正常',   last:'2026-11-01 16:05' },
+  { account:'chensr',   name:'陈经理',     role:'酒店运维', dept:'客服部', hotel:'成都天府丽都酒店', phone:'13600136004', status:'禁用',   last:'2026-10-28 11:22' },
+  { account:'sunshifu', name:'孙师傅',     role:'施工人员', dept:'技术部', hotel:'—',              phone:'13100131011', status:'正常',   last:'2026-11-02 08:05' },
+  { account:'zhoushifu',name:'周师傅',     role:'施工人员', dept:'技术部', hotel:'—',              phone:'13100131012', status:'正常',   last:'2026-11-01 17:40' },
+  { account:'wushifu',  name:'吴师傅',     role:'施工人员', dept:'技术部', hotel:'—',              phone:'13100131013', status:'待激活', last:'—' }
+];
+
+const LOGS = [
+  { time:'2026-11-02 09:40:12', op:'超级管理员', account:'admin',   role:'管理员',   module:'登录鉴权',         action:'登录',     method:'POST', uri:'/api/auth/login',                  ip:'101.201.253.88',  dur:126, ok:1, msg:'操作成功' },
+  { time:'2026-11-02 09:41:22', op:'超级管理员', account:'admin',   role:'管理员',   module:'数字化设备控制',   action:'下发指令', method:'POST', uri:'/api/device-access/command',        ip:'101.201.253.88',  dur:48,  ok:1, msg:'操作成功' },
+  { time:'2026-11-02 09:20:05', op:'超级管理员', account:'admin',   role:'管理员',   module:'数字化设备控制',   action:'下发指令', method:'POST', uri:'/api/device-access/command',        ip:'101.201.253.88',  dur:10230,ok:0, msg:'设备离线，指令未送达' },
+  { time:'2026-11-02 09:12:33', op:'王经理',     account:'wangjl',  role:'酒店运维', module:'工单管理',         action:'新建',     method:'POST', uri:'/api/workorder',                    ip:'10.178.72.31',    dur:87,  ok:1, msg:'操作成功' },
+  { time:'2026-11-02 09:05:41', op:'王经理',     account:'wangjl',  role:'酒店运维', module:'房间管理',         action:'绑定设备', method:'POST', uri:'/api/room/18/bind',                 ip:'10.178.72.31',    dur:134, ok:1, msg:'操作成功' },
+  { time:'2026-11-02 08:55:33', op:'张经理',     account:'zhangjj', role:'酒店运维', module:'数字化设备控制',   action:'下发指令', method:'POST', uri:'/api/device-access/command',        ip:'10.178.72.66',    dur:52,  ok:1, msg:'操作成功' },
+  { time:'2026-11-01 18:12:09', op:'王经理',     account:'wangjl',  role:'酒店运维', module:'数字化设备控制',   action:'下发指令', method:'POST', uri:'/api/device-access/command',        ip:'10.178.72.31',    dur:10024,ok:0, msg:'等待设备回执超时' },
+  { time:'2026-11-01 17:40:18', op:'周师傅',     account:'zhoushifu',role:'施工人员',module:'工单管理',         action:'提交完工', method:'POST', uri:'/api/workorder/86/submit-finish',   ip:'10.178.72.91',    dur:76,  ok:1, msg:'操作成功' },
+  { time:'2026-11-01 16:05:50', op:'超级管理员', account:'admin',   role:'管理员',   module:'用户管理',         action:'重置密码', method:'POST', uri:'/api/user/12/reset-password',       ip:'101.201.253.88',  dur:210, ok:1, msg:'操作成功' },
+  { time:'2026-11-01 15:28:07', op:'李经理',     account:'lijj',    role:'酒店运维', module:'工单管理',         action:'派单',     method:'POST', uri:'/api/workorder/131/assign',         ip:'10.178.72.55',    dur:95,  ok:1, msg:'操作成功' },
+  { time:'2026-11-01 11:02:44', op:'陈经理',     account:'chensr',  role:'酒店运维', module:'酒店管理',         action:'新增',     method:'POST', uri:'/api/hotel',                        ip:'10.178.72.77',    dur:143, ok:0, msg:'酒店编号已存在' },
+  { time:'2026-11-01 09:30:11', op:'超级管理员', account:'admin',   role:'管理员',   module:'登录鉴权',         action:'登出',     method:'POST', uri:'/api/auth/logout',                  ip:'101.201.253.88',  dur:31,  ok:1, msg:'操作成功' }
+];
+
+/* =========================================================
+   渲染工具
+   ========================================================= */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstElementChild; }
+
+function statCard(k, v, unit='', cls='', vcls=''){
+  return `<div class="stat ${cls}"><div class="k">${k}</div><div class="v ${vcls}">${v}${unit?`<small>${unit}</small>`:''}</div></div>`;
+}
+
+function statusTag(s){
+  const map = { '在线':'green','离线':'gray','故障':'red','未激活':'orange',
+    '正常':'green','停用':'gray','维护中':'orange',
+    '待派单':'orange','已派单':'blue','施工中':'blue','待验收':'purple','已完成':'green','已取消':'gray',
+    '紧急':'red','高':'orange','中':'blue','低':'gray','禁用':'red' };
+  return `<span class="tag ${map[s]||'gray'}">${s}</span>`;
+}
+
+function table(container, cols, rows, rowFn){
+  const t = typeof container === 'string' ? $(container) : container;
+  t.innerHTML =
+    `<thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead>` +
+    `<tbody>${rows.map(r=>`<tr>${rowFn(r).map(c=>`<td class="${c.cls||''}">${c.v}</td>`).join('')}</tr>`).join('')}</tbody>`;
+}
+
+function fmtRate(o, t){ return t ? ((o/t*100).toFixed(1) + '%') : '—'; }
+function rateColor(r){ return r >= 95 ? 'var(--success)' : (r >= 80 ? 'var(--warning)' : 'var(--danger)'); }
+
+/* =========================================================
+   视图切换
+   ========================================================= */
+const TITLES = {
+  hotel:'酒店管理', room:'房间管理', device:'设备管理', control:'数字化设备控制',
+  access:'设备接入管理', purify:'酒店净化看板', dashboard:'设备运行看板', wostat:'工单统计',
+  'wo-install':'净化设备安装', 'wo-maintain':'净化设备保养', 'wo-repair':'净化设备维修',
+  user:'平台用户管理', log:'系统操作日志'
+};
+
+const inited = {};   // 懒加载标记
+let currentView = 'hotel';
+
+function showView(name){
+  currentView = name;
+  $$('.view').forEach(v => v.classList.remove('active'));
+  const v = $('#view-' + (name.startsWith('wo-') ? 'workorder' : name));
+  if (v) v.classList.add('active');
+  $$('.menu-item').forEach(m => m.classList.toggle('active', m.dataset.view === name));
+  $('#crumb').textContent = TITLES[name] || '';
+
+  if (!inited[name]) { (VIEW_INIT[name] || (()=>{}))(); inited[name] = true; }
+  else { setTimeout(resizeCharts, 30); }
+  window.scrollTo({ top:0 });
+}
+
+$('#menu').addEventListener('click', (e) => {
+  const item = e.target.closest('.menu-item');
+  if (item) showView(item.dataset.view);
+});
+
+/* =========================================================
+   各视图初始化
+   ========================================================= */
+const VIEW_INIT = {
+
+  /* ---------- 酒店管理 ---------- */
+  hotel(){
+    $('#hotel-stats').innerHTML =
+      statCard('酒店总数','128','','' ,'') +
+      statCard('覆盖城市','12','','s-info') +
+      statCard('接入房间','146','','s-success') +
+      statCard('接入设备','178','','s-success') +
+      statCard('在线设备','152','','') +
+      statCard('设备在线率','85.4%','','s-warning','c-warning');
+
+    table('#tbl-hotel',
+      ['酒店编号','酒店名称','类型','城市','联系方式','房间数','设备数','在线数','在线率','操作'],
+      HOTELS,
+      h => [
+        { v:h.code, cls:'strong' },
+        { v:h.name, cls:'strong' },
+        { v:statusTag(h.type) },
+        { v:h.city },
+        { v:h.contact },
+        { v:h.rooms },
+        { v:h.dev },
+        { v:h.online },
+        { v:`<span style="color:${rateColor(h.online/h.dev*100)};font-weight:600">${fmtRate(h.online,h.dev)}</span>` },
+        { v:`<a>详情</a> &nbsp; <a>编辑</a>` }
+      ]);
+  },
+
+  /* ---------- 房间管理 ---------- */
+  room(){
+    $('#room-stats').innerHTML =
+      statCard('房间总数','146','','') +
+      statCard('覆盖酒店','128','','s-info') +
+      statCard('设备总数','178','','s-success') +
+      statCard('在线设备','152','','s-success') +
+      statCard('已绑定房间','132','','') +
+      statCard('设备在线率','85.4%','','s-warning','c-warning');
+
+    table('#tbl-room',
+      ['酒店','楼层','房间号','房间名称','房间类型','状态','设备数','在线数','在线率','面积','操作'],
+      ROOMS,
+      r => [
+        { v:r.hotel, cls:'strong' },
+        { v:r.floor },
+        { v:r.no, cls:'strong' },
+        { v:r.name },
+        { v:statusTag(r.type) },
+        { v:statusTag(r.status) },
+        { v:r.dev },
+        { v:r.online },
+        { v:`<span style="color:${rateColor(r.online/r.dev*100)};font-weight:600">${fmtRate(r.online,r.dev)}</span>` },
+        { v:r.area + ' m²' },
+        { v:`<a>编辑</a> &nbsp; <a>绑定设备</a>` }
+      ]);
+  },
+
+  /* ---------- 设备管理 ---------- */
+  device(){
+    $('#device-stats').innerHTML =
+      statCard('设备总数','178','','') +
+      statCard('在线','152','','s-success','c-success') +
+      statCard('离线','18','','s-info') +
+      statCard('故障','8','','s-danger','c-danger') +
+      statCard('在线率','85.4%','','s-warning','c-warning') +
+      statCard('已登记 MAC','64','','');
+
+    table('#tbl-device',
+      ['设备编号','SN / MAC','型号','所属酒店','房间','楼层','安装位置','状态','固件','信号','滤网寿命','操作'],
+      DEVICES,
+      d => [
+        { v:d.no, cls:'strong' },
+        { v:`<span style="font-family:ui-monospace,Consolas,monospace;font-size:12px">${d.sn}</span>` },
+        { v:d.model },
+        { v:d.hotel },
+        { v:d.room || '—' },
+        { v:d.floor || '—' },
+        { v:d.loc },
+        { v:statusTag(d.status) },
+        { v:d.fw },
+        { v:d.sig ? '▮'.repeat(d.sig) : '—' },
+        { v:`<span style="color:${d.life<20?'var(--danger)':'var(--t1)'};font-weight:600">${d.life}%</span>` },
+        { v:`<a>详情</a> &nbsp; <a>接入配置</a>` }
+      ]);
+  },
+
+  /* ---------- 数字化设备控制 ---------- */
+  control(){
+    const h = HOTELS[0];
+    const running = 36, filterAlert = 4;
+    $('#ctrl-stats').innerHTML =
+      statCard('设备总数','42','台') +
+      statCard('在线','39','台','s-success','c-success') +
+      statCard('离线','2','台','s-info') +
+      statCard('故障','1','台','s-danger','c-danger') +
+      statCard('在线率','92.9%','','s-success') +
+      statCard('运行中',running,'台','') +
+      statCard('室内 PM2.5','34','μg/m³','') +
+      statCard('室外 PM2.5','86','μg/m³','s-warning','c-warning') +
+      statCard('平均滤网寿命','71%','','') +
+      statCard('滤网告警',filterAlert,'台','s-danger','c-danger');
+
+    $('#ctrl-floors').innerHTML =
+      ['全部','1层','3层','8层','12层','15层'].map((f,i)=>
+        `<span class="floor-chip${i===0?' active':''}">${f}${i?' <small>('+ (3+i) +')</small>':''}</span>`).join('');
+
+    $$('#ctrl-floors .floor-chip').forEach(c => c.addEventListener('click', () => {
+      $$('#ctrl-floors .floor-chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    }));
+
+    table('#tbl-ctrl',
+      ['设备编号','楼层','房间号','安装位置','设备状态','电源','风速','运行模式','室内 PM2.5','空气质量','滤网寿命','最近上报','操作'],
+      DEVICES.slice(0,8),
+      d => {
+        const off = d.status === '离线' || d.status === '未激活';
+        const lv = off ? { name:'离线', color:OFFLINE_COLOR } : pmLevel(d.pm);
+        return [
+          { v:d.no, cls:'strong' },
+          { v:d.floor || '—' },
+          { v:d.room || '—' },
+          { v:d.loc },
+          { v:statusTag(d.status) },
+          { v: d.power === 'on' ? '<span class="tag green">开</span>' : '<span class="tag gray">关</span>' },
+          { v:d.wind },
+          { v:statusTag(d.mode) },
+          { v:`<span style="color:${lv.color};font-weight:700">${off?'—':d.pm}</span>` },
+          { v:`<span style="color:#fff;background:${lv.color};padding:1px 8px;border-radius:3px;font-size:12px">${lv.name}</span>` },
+          { v:`<span style="color:${d.life<20?'var(--danger)':'var(--t1)'};font-weight:600">${d.life}%</span>` },
+          { v:d.status==='在线'?'刚刚':'2026-11-01 22:14' },
+          { v:`<button class="btn sm" onclick="openCommand('${d.no}')" ${off?'disabled':''}>下发指令</button>` }
+        ];
+      });
+
+    table('#tbl-cmd',
+      ['下发时间','设备编号','酒店','房间','指令','参数','结果','操作人','描述'],
+      COMMANDS,
+      c => [
+        { v:c.time },
+        { v:c.device, cls:'strong' },
+        { v:c.hotel },
+        { v:c.room },
+        { v:c.label },
+        { v:c.value },
+        { v:statusTag(c.result) },
+        { v:c.operator },
+        { v:c.msg }
+      ]);
+
+    // Tab 切换
+    $$('#view-control .tab').forEach(t => t.addEventListener('click', () => {
+      $$('#view-control .tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      $('#ctrl-tab-dev').style.display = t.dataset.tab === 'dev' ? 'block' : 'none';
+      $('#ctrl-tab-cmd').style.display = t.dataset.tab === 'cmd' ? 'block' : 'none';
+      resizeCharts();
+    }));
+
+    // 档位分布饼图
+    const pie = echarts.init($('#chart-level'));
+    pie.setOption({
+      tooltip:{ trigger:'item', formatter:'{b}：{c} 台（{d}%）' },
+      legend:{ bottom:0, textStyle:{ color:'#606266', fontSize:12 } },
+      series:[{
+        type:'pie', radius:['42%','68%'], center:['50%','46%'],
+        avoidLabelOverlap:true, itemStyle:{ borderColor:'#fff', borderWidth:2 },
+        label:{ formatter:'{b}\n{c} 台', fontSize:12, color:'#606266' },
+        data:[
+          { value:11, name:'优',   itemStyle:{ color:'#40A1EA' } },
+          { value:14, name:'良',   itemStyle:{ color:'#29C19B' } },
+          { value:8,  name:'轻度', itemStyle:{ color:'#FCA42A' } },
+          { value:4,  name:'中度', itemStyle:{ color:'#FD7828' } },
+          { value:2,  name:'重度', itemStyle:{ color:'#FF5F4E' } },
+          { value:1,  name:'严重', itemStyle:{ color:'#9F29FB' } },
+          { value:2,  name:'离线', itemStyle:{ color:'#808080' } }
+        ]
+      }]
+    });
+    CHARTS.push(pie);
+  },
+
+  /* ---------- 设备接入管理 ---------- */
+  access(){
+    $('#access-stats').innerHTML =
+      statCard('设备总数','64','','') +
+      statCard('在线','57','','s-success','c-success') +
+      statCard('离线','4','','s-info') +
+      statCard('故障','3','','s-danger','c-danger') +
+      statCard('已登记 MAC','64','','') +
+      statCard('在线率','89.1%','','s-success');
+
+    table('#tbl-access',
+      ['设备编号','MAC','通信 ID','MQTT 账号','酒店','房间','状态','电源','风速','运行模式','空调','室温','湿度','室内 PM2.5','固件','最近上报','操作'],
+      DEVICES.slice(0,10),
+      d => {
+        const mac = d.sn.match(/.{2}/g).join(':');
+        const offline = d.status === '离线' || d.status === '未激活';
+        const lv = offline ? { color:OFFLINE_COLOR } : pmLevel(d.pm);
+        return [
+          { v:d.no, cls:'strong' },
+          { v:`<span style="font-family:ui-monospace,Consolas,monospace;font-size:12px">${mac}</span>` },
+          { v:`<span style="font-family:ui-monospace,Consolas,monospace;font-size:12px">${d.sn}</span>` },
+          { v:`<span style="font-family:ui-monospace,Consolas,monospace;font-size:12px">dev_${d.sn.toLowerCase()}</span>` },
+          { v:d.hotel },
+          { v:d.room || '—' },
+          { v:statusTag(d.status) },
+          { v: d.power === 'on' ? '<span class="tag green">开</span>' : '<span class="tag gray">关</span>' },
+          { v:d.wind },
+          { v:statusTag(d.mode) },
+          { v: offline ? '—' : '制冷 24℃' },
+          { v: offline ? '—' : d.temp + ' ℃' },
+          { v: offline ? '—' : d.humi + ' %' },
+          { v:`<span style="color:${lv.color};font-weight:700">${offline?'—':d.pm}</span>` },
+          { v:d.fw },
+          { v: offline ? '2026-11-01 22:14' : '刚刚' },
+          { v:`<button class="btn sm" onclick="openCommand('${d.no}')" ${offline?'disabled':''}>控制</button>` }
+        ];
+      });
+  },
+
+  /* ---------- 酒店净化看板 ---------- */
+  purify(){
+    $('#purify-stats').innerHTML =
+      statCard('优享客房总数','86','间','') +
+      statCard('空气品质提升天数','128','天','s-success') +
+      statCard('室内 PM2.5 均值','34','μg/m³','s-success','c-success') +
+      statCard('室外 PM2.5 均值','86','μg/m³','s-warning','c-warning');
+
+    $('#purify-floors').innerHTML =
+      ['全部','1层','3层','8层','12层'].map((f,i)=>
+        `<span class="floor-chip${i===0?' active':''}">${f}</span>`).join('');
+    $$('#purify-floors .floor-chip').forEach(c => c.addEventListener('click', () => {
+      $$('#purify-floors .floor-chip').forEach(x => x.classList.remove('active'));
+      c.classList.add('active');
+    }));
+
+    $('#purify-levels').innerHTML =
+      PM_LEVELS.map(l=>`<span><span class="dot" style="background:${l.color}"></span>${l.name}</span>`).join('') +
+      `<span><span class="dot" style="background:${OFFLINE_COLOR}"></span>离线</span>`;
+
+    // 房间卡片
+    const rooms = [
+      { no:'1208', pm:18,  dev:'YH-BJ-0001' },
+      { no:'1209', pm:24,  dev:'YH-BJ-0002' },
+      { no:'1210', pm:52,  dev:'YH-BJ-0011' },
+      { no:'0806', pm:41,  dev:'YH-BJ-0003' },
+      { no:'0810', pm:null,dev:'YH-BJ-0004' },
+      { no:'0811', pm:96,  dev:'YH-BJ-0012' },
+      { no:'0301', pm:12,  dev:'YH-BJ-0005' },
+      { no:'0302', pm:131, dev:'YH-BJ-0013' },
+      { no:'0101', pm:88,  dev:'YH-BJ-0006' },
+      { no:'0102', pm:null,dev:'YH-BJ-0014' },
+      { no:'1502', pm:26,  dev:'YH-SH-0001' },
+      { no:'0905', pm:63,  dev:'YH-SH-0003' }
+    ];
+    $('#purify-rooms').innerHTML = rooms.map(r => {
+      const off = r.pm === null;
+      const lv  = off ? { name:'离线', color:OFFLINE_COLOR } : pmLevel(r.pm);
+      return `<div class="room-card${off?' off':''}" style="background:linear-gradient(135deg, ${lv.color}, ${lv.color}cc)" data-dev="${r.dev}">
+        <span class="rl">${lv.name}</span>
+        <div class="rn">${r.no}</div>
+        <div class="rd">${r.dev}</div>
+        <div class="rp">${off ? '—' : r.pm}<small>μg/m³</small></div>
+      </div>`;
+    }).join('');
+
+    $$('#purify-rooms .room-card').forEach(c => c.addEventListener('click', () => {
+      const dev = c.dataset.dev;
+      $('#purify-selected') && ($('#purify-selected').textContent = dev);
+      toast('已切换数据源设备：' + dev);
+      resizeCharts();
+    }));
+
+    // Tab
+    $$('#view-purify .tab').forEach(t => t.addEventListener('click', () => {
+      $$('#view-purify .tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      ['7d','24h','rt'].forEach(k => {
+        $('#purify-chart-' + k).style.display = t.dataset.tab === k ? 'block' : 'none';
+      });
+      resizeCharts();
+    }));
+
+    // 近 7 日
+    const c7 = echarts.init($('#chart-p7d'));
+    c7.setOption({
+      tooltip:{ trigger:'axis' },
+      legend:{ data:['室内 PM2.5','室外 PM2.5'], bottom:0, textStyle:{ color:'#606266' } },
+      grid:{ left:44, right:24, top:30, bottom:52 },
+      xAxis:{ type:'category', boundaryGap:false, data:['10-27','10-28','10-29','10-30','10-31','11-01','11-02'], axisLine:{ lineStyle:{ color:'#DCDFE6' } }, axisLabel:{ color:'#909399' } },
+      yAxis:{ type:'value', name:'μg/m³', nameTextStyle:{ color:'#909399' }, splitLine:{ lineStyle:{ color:'#F2F4F7' } }, axisLabel:{ color:'#909399' } },
+      series:[
+        { name:'室内 PM2.5', type:'line', smooth:true, symbolSize:5, data:[38,42,31,29,35,33,34],
+          itemStyle:{ color:'#29C19B' }, lineStyle:{ width:2.5 },
+          areaStyle:{ color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(41,193,155,.28)'},{offset:1,color:'rgba(41,193,155,0)'}]) } },
+        { name:'室外 PM2.5', type:'line', smooth:true, symbolSize:5, data:[92,105,78,71,96,88,86],
+          itemStyle:{ color:'#FCA42A' }, lineStyle:{ width:2.5, type:'dashed' } }
+      ]
+    });
+    CHARTS.push(c7);
+
+    // 近 24 小时
+    const hrs = Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00');
+    const indoor  = [30,32,29,28,27,29,35,44,52,47,39,36,34,33,35,38,41,43,40,37,34,32,31,30];
+    const outdoor = [74,71,68,66,65,70,88,112,126,118,101,95,89,86,90,98,104,110,102,94,88,82,78,75];
+    const c24 = echarts.init($('#chart-p24h'));
+    c24.setOption({
+      tooltip:{ trigger:'axis' },
+      legend:{ data:['室内 PM2.5','室外 PM2.5'], bottom:0, textStyle:{ color:'#606266' } },
+      grid:{ left:44, right:24, top:30, bottom:52 },
+      xAxis:{ type:'category', boundaryGap:false, data:hrs, axisLine:{ lineStyle:{ color:'#DCDFE6' } }, axisLabel:{ color:'#909399', interval:2 } },
+      yAxis:{ type:'value', name:'μg/m³', nameTextStyle:{ color:'#909399' }, splitLine:{ lineStyle:{ color:'#F2F4F7' } }, axisLabel:{ color:'#909399' } },
+      series:[
+        { name:'室内 PM2.5', type:'line', smooth:true, symbol:'none', data:indoor,
+          itemStyle:{ color:'#40A1EA' },
+          areaStyle:{ color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(64,158,255,.3)'},{offset:1,color:'rgba(64,158,255,0)'}]) } },
+        { name:'室外 PM2.5', type:'line', smooth:true, symbol:'none', data:outdoor,
+          itemStyle:{ color:'#FF5F4E' },
+          areaStyle:{ color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(255,95,78,.18)'},{offset:1,color:'rgba(255,95,78,0)'}]) } }
+      ]
+    });
+    CHARTS.push(c24);
+
+    // 实时数据
+    const crt = echarts.init($('#chart-prt'));
+    crt.setOption({
+      series:[{
+        type:'gauge', startAngle:200, endAngle:-20, min:0, max:250, splitNumber:5,
+        center:['50%','58%'], radius:'88%',
+        axisLine:{ lineStyle:{ width:14, color:[[0.14,'#40A1EA'],[0.3,'#29C19B'],[0.46,'#FCA42A'],[0.6,'#FD7828'],[1,'#FF5F4E']] } },
+        pointer:{ width:4, itemStyle:{ color:'#303133' } },
+        axisTick:{ distance:-14, length:5, lineStyle:{ color:'#fff' } },
+        splitLine:{ distance:-14, length:14, lineStyle:{ color:'#fff', width:2 } },
+        axisLabel:{ distance:-6, color:'#909399', fontSize:11 },
+        detail:{ valueAnimation:true, formatter:'{value} μg/m³', color:'#303133', fontSize:16, offsetCenter:[0,'32%'] },
+        title:{ offsetCenter:[0,'62%'], color:'#909399', fontSize:12 },
+        data:[{ value:34, name:'室内 PM2.5' }]
+      }]
+    });
+    CHARTS.push(crt);
+  },
+
+  /* ---------- 设备运行看板 ---------- */
+  dashboard(){
+    $('#dash-stats').innerHTML =
+      statCard('覆盖酒店','128','家') +
+      statCard('接入房间','146','间') +
+      statCard('设备总数','178','台') +
+      statCard('在线','152','台','s-success','c-success') +
+      statCard('离线','18','台','s-info') +
+      statCard('故障','8','台','s-danger','c-danger') +
+      statCard('在线率','85.4%','','s-warning','c-warning') +
+      statCard('运行中','131','台','') +
+      statCard('未处理告警','5','条','s-danger','c-danger') +
+      statCard('进行中工单','9','单','s-warning','c-warning');
+
+    // 分时在线率
+    const hrs = Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+':00');
+    const rates = [78,76,75,74,75,79,85,89,92,93,94,95,94,93,92,93,94,95,96,95,93,90,86,82];
+    const c1 = echarts.init($('#chart-online'));
+    c1.setOption({
+      tooltip:{ trigger:'axis', formatter:p=>`${p[0].axisValue}<br/>在线率：${p[0].data}%` },
+      grid:{ left:48, right:24, top:24, bottom:34 },
+      xAxis:{ type:'category', boundaryGap:false, data:hrs, axisLine:{ lineStyle:{ color:'#DCDFE6' } }, axisLabel:{ color:'#909399', interval:2 } },
+      yAxis:{ type:'value', min:60, max:100, axisLabel:{ formatter:'{value}%', color:'#909399' }, splitLine:{ lineStyle:{ color:'#F2F4F7' } } },
+      series:[{
+        type:'line', smooth:true, symbol:'none', data:rates,
+        lineStyle:{ width:2.5, color:'#409EFF' },
+        areaStyle:{ color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(64,158,255,.32)'},{offset:1,color:'rgba(64,158,255,0)'}]) }
+      }]
+    });
+    CHARTS.push(c1);
+
+    // 状态分布
+    const c2 = echarts.init($('#chart-status'));
+    c2.setOption({
+      tooltip:{ trigger:'item', formatter:'{b}：{c} 台（{d}%）' },
+      legend:{ bottom:0, textStyle:{ color:'#606266' } },
+      series:[{
+        type:'pie', radius:['42%','68%'], center:['50%','46%'],
+        itemStyle:{ borderColor:'#fff', borderWidth:2 },
+        label:{ formatter:'{b} {c}', color:'#606266', fontSize:12 },
+        data:[
+          { value:152, name:'在线',  itemStyle:{ color:'#67C23A' } },
+          { value:18,  name:'离线',  itemStyle:{ color:'#909399' } },
+          { value:8,   name:'故障',  itemStyle:{ color:'#F56C6C' } },
+          { value:0,   name:'未激活',itemStyle:{ color:'#E6A23C' } }
+        ]
+      }]
+    });
+    CHARTS.push(c2);
+
+    // 酒店排名
+    const rank = HOTELS.map(h => ({ ...h, rate:h.online/h.dev*100, fault: Math.max(0, 3 - Math.round(h.online/h.dev*3)), filterAlerts: Math.round(h.dev*0.1), alarms: Math.round(h.dev*0.05) }))
+      .sort((a,b) => b.rate - a.rate);
+    table('#tbl-rank',
+      ['排名','酒店名称','城市','设备数','在线数','在线率','故障数','滤网告警','告警数'],
+      rank,
+      (h,i) => [
+        { v:`<span class="tag ${i<3?'blue':'gray'}">${i+1}</span>` },
+        { v:h.name, cls:'strong' },
+        { v:h.city },
+        { v:h.dev },
+        { v:h.online },
+        { v:`<div style="display:flex;align-items:center;gap:8px;min-width:130px">
+             <div style="flex:1;height:6px;background:#EBEEF5;border-radius:3px;overflow:hidden">
+               <i style="display:block;height:100%;width:${h.rate}%;background:${rateColor(h.rate)}"></i></div>
+             <span style="color:${rateColor(h.rate)};font-weight:600;font-size:12px">${h.rate.toFixed(1)}%</span></div>` },
+        { v:h.fault },
+        { v:h.filterAlerts },
+        { v:h.alarms }
+      ]);
+
+    // 故障 / 离线
+    table('#tbl-fault',
+      ['设备编号','酒店','房间','安装位置','状态','故障码','滤网寿命','最近上报'],
+      DEVICES.filter(d => d.status !== '在线'),
+      d => [
+        { v:d.no, cls:'strong' },
+        { v:d.hotel },
+        { v:d.room || '—' },
+        { v:d.loc },
+        { v:statusTag(d.status) },
+        { v: d.status === '故障' ? '<span class="tag red">E03</span>' : '—' },
+        { v:d.life + '%' },
+        { v:'2026-11-01 22:14' }
+      ]);
+
+    // 告警
+    const alarms = [
+      { time:'2026-11-02 07:55', device:'YH-BJ-0006', hotel:'北京朝阳君悦酒店', level:'严重', type:'设备故障', desc:'设备报 E03 故障码，无法启动', status:'未处理' },
+      { time:'2026-11-01 23:12', device:'YH-SH-0002', hotel:'上海外滩华邑酒店', level:'一般', type:'离线告警', desc:'设备离线超过 24 小时',       status:'未处理' },
+      { time:'2026-11-01 20:41', device:'YH-HZ-0002', hotel:'杭州西湖国宾馆',   level:'提示', type:'滤网告警', desc:'滤网剩余寿命 19%，低于阈值', status:'已处理' },
+      { time:'2026-10-31 16:08', device:'YH-BJ-0004', hotel:'北京朝阳君悦酒店', level:'一般', type:'离线告警', desc:'设备心跳超时',               status:'未处理' },
+      { time:'2026-10-30 09:22', device:'YH-CD-0001', hotel:'成都天府丽都酒店', level:'提示', type:'未激活',   desc:'设备已入库但未完成激活',     status:'已处理' }
+    ];
+    table('#tbl-alarm',
+      ['告警时间','设备编号','酒店','等级','类型','描述','状态'],
+      alarms,
+      a => [
+        { v:a.time },
+        { v:a.device, cls:'strong' },
+        { v:a.hotel },
+        { v:statusTag(a.level) },
+        { v:a.type },
+        { v:a.desc },
+        { v: a.status === '未处理' ? '<span class="tag red">未处理</span>' : '<span class="tag green">已处理</span>' }
+      ]);
+
+    // 滤网告警
+    table('#tbl-filter',
+      ['设备编号','酒店','房间','滤网剩余寿命','阈值','建议'],
+      DEVICES.filter(d => d.life < 60),
+      d => [
+        { v:d.no, cls:'strong' },
+        { v:d.hotel },
+        { v:d.room || '—' },
+        { v:`<span style="color:${d.life<20?'var(--danger)':'var(--warning)'};font-weight:700">${d.life}%</span>` },
+        { v:'20%' },
+        { v: d.life < 20 ? '<span class="tag red">立即更换</span>' : '<span class="tag orange">计划更换</span>' }
+      ]);
+
+    $$('#view-dashboard .tab').forEach(t => t.addEventListener('click', () => {
+      $$('#view-dashboard .tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      ['rank','fault','alarm','filter'].forEach(k => {
+        $('#dash-tab-' + k).style.display = t.dataset.tab === k ? 'block' : 'none';
+      });
+      resizeCharts();
+    }));
+  },
+
+  /* ---------- 工单统计 ---------- */
+  wostat(){
+    $('#wostat-stats').innerHTML =
+      statCard('工单总数','130','单') +
+      statCard('待派单','4','单','s-warning','c-warning') +
+      statCard('进行中','9','单','') +
+      statCard('已完成','108','单','s-success','c-success') +
+      statCard('已取消','9','单','s-info') +
+      statCard('平均处理时长','6.4','小时','');
+
+    const c1 = echarts.init($('#chart-wotrend'));
+    c1.setOption({
+      tooltip:{ trigger:'axis' },
+      legend:{ data:['新建工单','完成工单'], bottom:0, textStyle:{ color:'#606266' } },
+      grid:{ left:44, right:24, top:30, bottom:52 },
+      xAxis:{ type:'category', data:['10-27','10-28','10-29','10-30','10-31','11-01','11-02'], axisLine:{ lineStyle:{ color:'#DCDFE6' } }, axisLabel:{ color:'#909399' } },
+      yAxis:{ type:'value', splitLine:{ lineStyle:{ color:'#F2F4F7' } }, axisLabel:{ color:'#909399' } },
+      series:[
+        { name:'新建工单', type:'bar', barWidth:16, data:[12,15,9,18,14,11,8], itemStyle:{ color:'#409EFF', borderRadius:[3,3,0,0] } },
+        { name:'完成工单', type:'bar', barWidth:16, data:[9,13,11,14,16,12,7], itemStyle:{ color:'#67C23A', borderRadius:[3,3,0,0] } }
+      ]
+    });
+    CHARTS.push(c1);
+
+    const c2 = echarts.init($('#chart-wotype'));
+    c2.setOption({
+      tooltip:{ trigger:'item', formatter:'{b}：{c} 单（{d}%）' },
+      legend:{ bottom:0, textStyle:{ color:'#606266' } },
+      series:[{
+        type:'pie', radius:['42%','68%'], center:['50%','46%'],
+        itemStyle:{ borderColor:'#fff', borderWidth:2 },
+        label:{ formatter:'{b}\n{c} 单', color:'#606266', fontSize:12 },
+        data:[
+          { value:52, name:'净化设备安装', itemStyle:{ color:'#409EFF' } },
+          { value:44, name:'净化设备保养', itemStyle:{ color:'#67C23A' } },
+          { value:34, name:'净化设备维修', itemStyle:{ color:'#E6A23C' } }
+        ]
+      }]
+    });
+    CHARTS.push(c2);
+
+    const meters = [
+      { k:'派单及时率',    v:96.2, color:'#67C23A' },
+      { k:'按时完工率',    v:91.5, color:'#409EFF' },
+      { k:'一次验收通过率', v:87.3, color:'#E6A23C' },
+      { k:'工单关闭率',    v:83.1, color:'#909399' }
+    ];
+    $('#wostat-meters').innerHTML = meters.map(m => `
+      <div class="meter">
+        <div class="mh"><span>${m.k}</span><span style="color:${m.color};font-weight:600">${m.v}%</span></div>
+        <div class="bar"><i style="width:${m.v}%;background:${m.color}"></i></div>
+      </div>`).join('');
+  },
+
+  /* ---------- 工单列表（三类共用） ---------- */
+  workorder(){
+    const key = currentView;
+    const cfg = WORKORDERS[key];
+    const o = cfg.orders;
+
+    $('#wo-stats').innerHTML =
+      statCard('工单类型', cfg.label, '', 's-info') +
+      statCard('工单总数','46','单') +
+      statCard('待派单','2','单','s-warning','c-warning') +
+      statCard('进行中','3','单','') +
+      statCard('已完成','26','单','s-success','c-success') +
+      statCard('已取消','5','单','s-info');
+
+    $('#wo-total').textContent = `共 ${o.length * 8} 条（示例展示 ${o.length} 条）`;
+
+    table('#tbl-wo',
+      ['工单编号','酒店','设备编号','安装位置','优先级','状态','施工人员','提交人','提交时间','问题描述','操作'],
+      o,
+      w => {
+        const btns = [];
+        if (w.status === '待派单') btns.push('<button class="btn sm primary">派单</button>');
+        if (w.status === '待验收') btns.push('<button class="btn sm primary">验收</button>');
+        if (w.status === '已派单') btns.push('<button class="btn sm primary">接单</button>');
+        if (w.status === '施工中') btns.push('<button class="btn sm primary">提交完工</button>');
+        if (w.status !== '已完成' && w.status !== '已取消') btns.push('<button class="btn sm danger">取消</button>');
+        return [
+          { v:w.no, cls:'strong' },
+          { v:w.hotel },
+          { v:w.device },
+          { v:w.loc },
+          { v:statusTag(w.priority) },
+          { v:statusTag(w.status) },
+          { v:w.handler },
+          { v:w.submitter },
+          { v:w.submitAt },
+          { v:w.desc },
+          { v:`<div style="display:flex;gap:6px">${btns.join('')}<button class="btn sm">详情</button></div>` }
+        ];
+      });
+  },
+
+  /* ---------- 平台用户管理 ---------- */
+  user(){
+    $('#user-stats').innerHTML =
+      statCard('用户总数','33','人') +
+      statCard('管理员','1','人','s-info') +
+      statCard('酒店运维','12','人','') +
+      statCard('施工人员','16','人','s-success') +
+      statCard('正常','29','人','s-success','c-success') +
+      statCard('禁用 / 待激活','4','人','s-danger','c-danger');
+
+    table('#tbl-user',
+      ['账号','姓名','角色','所属部门','绑定酒店','手机号','状态','最近登录','操作'],
+      USERS,
+      u => [
+        { v:u.account, cls:'strong' },
+        { v:u.name, cls:'strong' },
+        { v:`<span class="tag ${u.role==='管理员'?'orange':u.role==='酒店运维'?'blue':'green'}">${u.role}</span>` },
+        { v:u.dept },
+        { v:u.hotel },
+        { v:u.phone },
+        { v:statusTag(u.status) },
+        { v:u.last },
+        { v:`<a>编辑</a> &nbsp; <a>重置密码</a> &nbsp; <a>${u.status==='禁用'?'启用':'禁用'}</a>` }
+      ]);
+  },
+
+  /* ---------- 系统操作日志 ---------- */
+  log(){
+    $('#log-stats').innerHTML =
+      statCard('操作日志','90','条') +
+      statCard('成功操作','84','条','s-success','c-success') +
+      statCard('失败操作','6','条','s-danger','c-danger') +
+      statCard('登录次数','12','次','s-info');
+
+    table('#tbl-log',
+      ['操作时间','操作人','登录账号','角色','功能模块','操作类型','请求方式','请求地址','客户端 IP','耗时(ms)','结果','操作'],
+      LOGS,
+      l => [
+        { v:l.time },
+        { v:l.op },
+        { v:l.account },
+        { v:`<span class="tag ${l.role==='管理员'?'orange':l.role==='酒店运维'?'blue':'green'}">${l.role}</span>` },
+        { v:l.module },
+        { v:l.action },
+        { v:`<span class="tag gray">${l.method}</span>` },
+        { v:`<span style="font-family:ui-monospace,Consolas,monospace;font-size:12px">${l.uri}</span>` },
+        { v:l.ip },
+        { v:`<span style="color:${l.dur>3000?'var(--danger)':'var(--t1)'}">${l.dur}</span>` },
+        { v: l.ok ? '<span class="tag green">成功</span>' : '<span class="tag red">失败</span>' },
+        { v:'<a>详情</a>' }
+      ]);
+  }
+};
+
+/* =========================================================
+   图表管理
+   ========================================================= */
+const CHARTS = [];
+function resizeCharts(){ CHARTS.forEach(c => { try { c.resize(); } catch(e){} }); }
+window.addEventListener('resize', resizeCharts);
+
+/* =========================================================
+   指令下发弹窗
+   ========================================================= */
+const CMD_VALUES = {
+  power:         ['on','off'],
+  wind_speed:    ['低','中','高','自动'],
+  run_mode:      ['自动','手动','睡眠','强劲'],
+  filter_reset:  null,
+  restart:       null
+};
+const CMD_LABEL = { power:'开关机', wind_speed:'风速调节', run_mode:'运行模式', filter_reset:'滤网复位', restart:'设备重启' };
+
+function openCommand(deviceNo){
+  $('#cmd-dev').value = deviceNo;
+  $('#cmd-type').value = 'power';
+  syncCmdValue();
+  $('#mask').classList.add('show');
+  $('#dlg-cmd').classList.add('show');
+}
+function closeDialog(){
+  $('#mask').classList.remove('show');
+  $('#dlg-cmd').classList.remove('show');
+}
+function syncCmdValue(){
+  const t = $('#cmd-type').value;
+  const opts = CMD_VALUES[t];
+  const row = $('#cmd-val-row');
+  if (!opts){ row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  $('#cmd-value').innerHTML = opts.map(o => `<option>${o}</option>`).join('');
+}
+function submitCommand(){
+  const dev = $('#cmd-dev').value;
+  const t   = $('#cmd-type').value;
+  const v   = CMD_VALUES[t] ? $('#cmd-value').value : '—';
+  closeDialog();
+  toast(`指令已下发：${dev} · ${CMD_LABEL[t]}${v !== '—' ? ' → ' + v : ''}`);
+}
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 2200);
+}
+$('#mask').addEventListener('click', closeDialog);
+$('#cmd-type').addEventListener('change', syncCmdValue);
+
+/* =========================================================
+   启动
+   ========================================================= */
+showView('hotel');
+</script>
+</body>
+</html>

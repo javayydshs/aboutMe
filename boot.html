@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>开机</title>
+
+<!--
+  开机流程（通用，按 hotel 参数切换酒店）：
+    boot.html?hotel=somerset  →  screens/somerset/boot.jpg → welcome.jpg → index.html
+    boot.html?hotel=parkyard  →  screens/parkyard/boot.jpg → welcome.jpg → parkyard.html
+  停 2 秒后淡入欢迎页；按 OK / 回车 / 点击进入主页；加 #welcome 可跳过等待（截图用）。
+-->
+
+<style>
+  html,body{ margin:0; height:100%; background:#33503f; overflow:hidden; cursor:pointer; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+  }
+  .stage img{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+    transition:opacity .45s ease;
+    -webkit-user-drag:none;
+  }
+  #welcome{ opacity:0; }
+  .stage.is-welcome #boot{ opacity:0; }
+  .stage.is-welcome #welcome{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img id="boot" alt="" />
+  <img id="welcome" alt="" />
+</div>
+
+<script>
+  /* 每家酒店一组：启动图 / 欢迎页 / 主页 */
+  var HOTELS = {
+    somerset: {
+      bg:      '#33503f',
+      boot:    'assets/screens/somerset/boot.jpg',
+      welcome: 'assets/screens/somerset/welcome.jpg',
+      home:    'index.html'
+    },
+    parkyard: {
+      bg:      '#3f5c4a',
+      boot:    'assets/screens/parkyard/boot.jpg',
+      welcome: 'assets/screens/parkyard/welcome.jpg',
+      home:    'parkyard.html'
+    }
+  };
+
+  var id = new URLSearchParams(location.search).get('hotel') || 'somerset';
+  var hotel = HOTELS[id] || HOTELS.somerset;
+
+  document.body.style.background = hotel.bg;
+  document.getElementById('boot').src = hotel.boot;
+  document.getElementById('welcome').src = hotel.welcome;
+
+  var stage = document.getElementById('stage');
+
+  function fit() {
+    stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080));
+  }
+  fit();
+  addEventListener('resize', fit);
+
+  var ready = false;
+  function showWelcome() { stage.classList.add('is-welcome'); ready = true; }
+
+  if (location.hash === '#welcome') showWelcome();
+  else setTimeout(showWelcome, 2000);
+
+  function enter() {
+    if (ready) location.href = hotel.home;
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ' || e.key === 'OK' || e.key === 'Select') enter();
+  });
+  stage.addEventListener('click', enter);
+
+  /* 电视外壳（tv.html）虚拟遥控注入的按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

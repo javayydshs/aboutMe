@@ -1,0 +1,13 @@
+# 系统垃圾
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 编辑器 / 临时文件
+*.tmp
+*.log
+~$*
+
+# 本地调试产物（preview/ 里的截图是文档用的，保留；这里只忽略临时抓图）
+preview/tmp*.png
+preview/srv.*.txt

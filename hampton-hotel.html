@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>希尔顿欢朋 · 酒店</title>
+
+<!--
+  欢朋「酒店」栏目：底图是主页酒店页的截图（左侧 Welcome 大图 + 底部说明条 + 三张卡），
+  三张卡（客房介绍 / 餐厅介绍 / 休闲娱乐）用「未选中 / 选中」两张图叠着做焦点态。
+    ↓ 从大卡到下面两张、← → 在两张小卡之间、↑ 回大卡、1–3 直达
+    OK 进 hampton-detail.html?set=…，返回回主页
+  左下「酒店介绍 →」文字条是截图自带的静态元素，不参与焦点。
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#17359a; overflow:hidden; }
+  body{ font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif; user-select:none; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .bg{ position:absolute; inset:0; width:1920px; height:1080px; display:block; pointer-events:none; }
+
+  .tile{
+    position:absolute;
+    padding:0; border:0; background:transparent;
+    cursor:pointer; outline:none;
+  }
+  .tile img{ position:absolute; left:0; top:0; width:100%; height:100%; display:block; }
+  .tile .on{ opacity:0; transition:opacity .14s ease; }
+  .tile.is-focus{ z-index:5; filter:drop-shadow(0 16px 30px rgba(10,27,90,.35)); }
+  .tile.is-focus .on{ opacity:1; }
+
+  /* 卡片底部的栏目名：设计稿里这三个字是画在底图上的，卡片图盖住后要补回来 */
+  .tile .label{
+    position:absolute; left:0; right:0; bottom:20px;
+    text-align:center;
+    font-size:27px; line-height:1; color:#fff;
+    letter-spacing:.04em;
+    pointer-events:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img class="bg" src="assets/screens/hampton/home/4-hotel.jpg" alt="酒店" />
+
+  <button class="tile is-focus" style="left:1245px; top:148px; width:572px; height:315px"
+          data-title="客房介绍" data-href="hampton-detail.html?set=room">
+    <img src="assets/screens/hampton/hotel/room.png" alt="客房介绍" />
+    <img class="on" src="assets/screens/hampton/hotel/room-on.png" alt="" />
+    <span class="label">客房介绍</span>
+  </button>
+
+  <button class="tile" style="left:1245px; top:504px; width:267px; height:304px"
+          data-title="餐厅介绍" data-href="hampton-detail.html?set=dine">
+    <img src="assets/screens/hampton/hotel/dine.png" alt="餐厅介绍" />
+    <img class="on" src="assets/screens/hampton/hotel/dine-on.png" alt="" />
+    <span class="label">餐厅介绍</span>
+  </button>
+
+  <button class="tile" style="left:1550px; top:504px; width:267px; height:304px"
+          data-title="休闲娱乐" data-href="hampton-detail.html?set=fun">
+    <img src="assets/screens/hampton/hotel/fun.png" alt="休闲娱乐" />
+    <img class="on" src="assets/screens/hampton/hotel/fun-on.png" alt="" />
+    <span class="label">休闲娱乐</span>
+  </button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.tile'));
+  var focus = 0;
+
+  /* 位置关系写死更可控：上面一张大的，下面左右各一张 */
+  var NEXT = {
+    0: { down: 1, up: -1, left: -1, right: -1 },
+    1: { up: 0, down: -1, left: -1, right: 2 },
+    2: { up: 0, down: -1, left: 1, right: -1 }
+  };
+
+  function paint() {
+    tiles.forEach(function (t, i) { t.classList.toggle('is-focus', i === focus); });
+  }
+
+  function open() {
+    var href = tiles[focus].dataset.href;
+    if (href) location.href = href;
+  }
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+
+    if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') {
+      e.preventDefault();
+      location.href = 'hampton.html';
+      return;
+    }
+
+    var dir = k === 'ArrowDown' ? 'down' : k === 'ArrowUp' ? 'up'
+            : k === 'ArrowLeft' ? 'left' : k === 'ArrowRight' ? 'right' : null;
+    if (dir) {
+      e.preventDefault();
+      var n = NEXT[focus][dir];
+      if (n >= 0) { focus = n; paint(); }
+      return;
+    }
+    if (/^[1-3]$/.test(k)) { e.preventDefault(); focus = parseInt(k, 10) - 1; paint(); return; }
+    if (k === 'Enter' || k === ' ' || k === 'OK' || k === 'Select') { e.preventDefault(); open(); }
+  });
+
+  tiles.forEach(function (t, i) {
+    t.addEventListener('mouseenter', function () { focus = i; paint(); });
+    t.addEventListener('click', function () { focus = i; paint(); open(); });
+  });
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+
+  paint();
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

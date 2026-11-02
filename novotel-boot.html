@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>诺富特 · 欢迎</title>
+
+<!--
+  诺富特开机流程：
+    boot.jpg 停 2 秒 → 淡入欢迎页（welcome.jpg 铺底）
+    欢迎页左侧照片区（0, 259，960×600）换成 5 张轮播图，6 秒自动切
+    ◀ ▶ 手动切图，按 OK / 回车 / 点击进主页（novotel.html）
+    加 #welcome 可跳过 2 秒（截图用）
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#232a8f; overflow:hidden; cursor:pointer; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .stage > img{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+  }
+  #splash{ transition:opacity .45s ease; }
+
+  /* 欢迎页 */
+  .welcome{
+    position:absolute; inset:0;
+    opacity:0; transition:opacity .45s ease;
+    pointer-events:none;
+  }
+  .stage.is-welcome .welcome{ opacity:1; }
+  .stage.is-welcome #splash{ opacity:0; }
+
+  /* 左侧轮播（正好 960×600，和照片区一样大） */
+  .carousel{
+    position:absolute; left:0; top:259px;
+    width:960px; height:600px;
+    overflow:hidden;
+  }
+  .carousel img{
+    position:absolute; inset:0;
+    width:960px; height:600px;
+    display:block;
+    opacity:0;
+    transition:opacity .5s ease;
+  }
+  .carousel img.on{ opacity:1; }
+
+  /* 底部三个按钮：240×70，位置按设计稿量的 607 / 871 / 1135，间距 24 */
+  .btns{
+    position:absolute; left:607px; top:906px;
+    display:flex; gap:24px;
+  }
+  .btn{
+    width:240px; height:70px;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    background:#ffffff;
+    border:1px solid #2b2b5e;
+    color:#2b2b5e;
+    font-family:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC",sans-serif;
+    font-size:27px; letter-spacing:.08em;
+    cursor:pointer;
+    transition:background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .btn svg{ width:40px; height:32px; display:block; flex:none; }
+  .btn.is-focus{
+    background:#2124a8;
+    border-color:#2124a8;
+    color:#fff;
+  }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img id="splash" src="assets/screens/novotel/boot.jpg" alt="诺富特" />
+  <div class="welcome">
+    <img src="assets/screens/novotel/welcome.jpg" alt="欢迎" />
+    <div class="carousel" id="carousel">
+      <img class="on" src="assets/screens/novotel/carousel/1.jpg" alt="" />
+      <img src="assets/screens/novotel/carousel/2.jpg" alt="" />
+      <img src="assets/screens/novotel/carousel/3.jpg" alt="" />
+      <img src="assets/screens/novotel/carousel/4.jpg" alt="" />
+      <img src="assets/screens/novotel/carousel/5.jpg" alt="" />
+    </div>
+
+    <!-- 三个按钮：左右键切焦点，OK 触发 -->
+    <div class="btns" id="btns">
+      <div class="btn is-focus" data-action="tv">
+        <svg viewBox="0 0 40 32" fill="none">
+          <rect x="2" y="7" width="36" height="20" rx="6" stroke="currentColor" stroke-width="2.6"/>
+          <path d="M13 7 17.5 1.6M27 7 22.5 1.6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M10 27v3.4M30 27v3.4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+        </svg>
+        看电视
+      </div>
+      <div class="btn" data-action="home">进主页</div>
+      <div class="btn" data-action="en">ENGLISH</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var shots = Array.prototype.slice.call(document.querySelectorAll('#carousel img'));
+  var cur = 0;
+  var timer = null;
+  var ready = false;
+
+  function show(i) {
+    cur = (i + shots.length) % shots.length;
+    shots.forEach(function (s, k) { s.classList.toggle('on', k === cur); });
+  }
+
+  function autoPlay() {
+    clearInterval(timer);
+    timer = setInterval(function () { show(cur + 1); }, 6000);
+  }
+
+  function showWelcome() {
+    stage.classList.add('is-welcome');
+    ready = true;
+    autoPlay();
+  }
+
+  if (location.hash === '#welcome') showWelcome();
+  else setTimeout(showWelcome, 2000);
+
+  function enter() { if (ready) location.href = 'novotel.html'; }
+
+  /* 三个按钮的焦点：左右键切换，OK 触发 */
+  var btns = Array.prototype.slice.call(document.querySelectorAll('.btn'));
+  var focus = 0;
+
+  function setFocus(i) {
+    focus = (i + btns.length) % btns.length;
+    btns.forEach(function (b, k) { b.classList.toggle('is-focus', k === focus); });
+  }
+
+  function activate() {
+    if (!ready) return;
+    var action = btns[focus].dataset.action;
+    if (action === 'tv' || action === 'home') enter();   /* 看电视先复用主页占位 */
+    /* 'en' 暂无英文版素材，保持焦点不动 */
+  }
+
+  btns.forEach(function (b, i) {
+    b.addEventListener('mouseenter', function () { setFocus(i); });
+    b.addEventListener('click', function (e) { e.stopPropagation(); setFocus(i); activate(); });
+  });
+  setFocus(0);
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (!ready) return;
+    if (k === 'ArrowLeft')  { e.preventDefault(); setFocus(focus - 1); return; }
+    if (k === 'ArrowRight') { e.preventDefault(); setFocus(focus + 1); return; }
+    if (k === 'Enter' || k === ' ' || k === 'OK' || k === 'Select') { e.preventDefault(); activate(); }
+  });
+
+  stage.addEventListener('click', activate);
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

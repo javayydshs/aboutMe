@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="716" viewBox="0 0 1200 716">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0.25" y2="1">
+      <stop offset="0" stop-color="#33526e"/>
+      <stop offset="0.38" stop-color="#7d97ae"/>
+      <stop offset="0.62" stop-color="#c3b5c4"/>
+      <stop offset="1" stop-color="#e7d9d3"/>
+    </linearGradient>
+    <linearGradient id="facade" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0" stop-color="#4a6379"/>
+      <stop offset="1" stop-color="#2a3b4b"/>
+    </linearGradient>
+    <linearGradient id="lobby" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe7bd"/>
+      <stop offset="1" stop-color="#eab86b"/>
+    </linearGradient>
+    <radialGradient id="vig" cx="0.5" cy="0.45" r="0.78">
+      <stop offset="0.55" stop-color="#000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0b1620" stop-opacity="0.35"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="716" fill="url(#sky)"/>
+
+  <!-- 远景楼体 -->
+  <g fill="#6b869e" opacity="0.45">
+    <rect x="40" y="180" width="130" height="400"/>
+    <rect x="190" y="235" width="92" height="345"/>
+    <rect x="905" y="200" width="120" height="380"/>
+    <rect x="1045" y="255" width="105" height="325"/>
+  </g>
+
+  <!-- 主楼 -->
+  <g>
+    <rect x="300" y="95" width="360" height="480" fill="url(#facade)"/>
+    <g stroke="#9fbdd4" stroke-opacity="0.22" stroke-width="8">
+      <path d="M300 150h360M300 205h360M300 260h360M300 315h360M300 370h360M300 425h360"/>
+    </g>
+    <rect x="660" y="245" width="180" height="330" fill="#3d566c"/>
+    <g stroke="#9fbdd4" stroke-opacity="0.18" stroke-width="7">
+      <path d="M660 300h180M660 355h180M660 410h180M660 465h180"/>
+    </g>
+  </g>
+
+  <!-- 裙房与大堂灯光 -->
+  <rect x="300" y="480" width="540" height="105" fill="#16242f"/>
+  <g fill="url(#lobby)">
+    <rect x="336" y="512" width="66" height="62" rx="2"/>
+    <rect x="420" y="512" width="66" height="62" rx="2"/>
+    <rect x="504" y="512" width="66" height="62" rx="2"/>
+    <rect x="588" y="512" width="66" height="62" rx="2"/>
+    <rect x="672" y="512" width="66" height="62" rx="2"/>
+  </g>
+  <rect x="300" y="480" width="540" height="14" fill="#c8b49a" opacity="0.7"/>
+
+  <!-- 地面 -->
+  <rect x="0" y="585" width="1200" height="131" fill="#1a2732"/>
+  <rect x="0" y="585" width="1200" height="6" fill="#4a6379" opacity="0.6"/>
+
+  <rect width="1200" height="716" fill="url(#vig)"/>
+
+  <!-- 占位说明 -->
+  <g font-family="Segoe UI, Microsoft YaHei, sans-serif" fill="#ffffff" opacity="0.82">
+    <text x="600" y="345" text-anchor="middle" font-size="26" letter-spacing="8">照片占位</text>
+    <text x="600" y="385" text-anchor="middle" font-size="20" opacity="0.72">把 hero-1.jpg … hero-5.jpg 放进 assets/ 即可替换</text>
+  </g>
+</svg>

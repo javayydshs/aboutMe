@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>机器人送物 · 动态演示</title>
+
+<!--
+  ============================================================
+  机器人送物（从 设备对接/robotDelivery 提取的动态演示）
+  ------------------------------------------------------------
+  原项目：酒店电视里的「机器人送物」下单页——2×3 物品网格、
+          方向键选焦点、确认键增删、已选清单、提交下单。
+  这里把「操作 → 下单 → 送物」整条链路做成可演示的动效：
+    1. 焦点切换：卡片变绿、图标转白、轻微上浮
+    2. 选中物品：图标从卡片飞进「已选物品」，落到清单里弹一下
+    3. 提交：真的调 mock 服务 POST /createOrder/v2.0 生成订单号，
+       再轮询 /getOrderInfo，用返回的 state 和 orderActionList
+       驱动机器人沿路线行进、状态标签、时间线
+    4. 送达：/getOrderInfo 返回 DELIVERED 时弹「已送达」
+  没有服务器时自动退化成离线演示（8s / 18s 走完同样的状态机）。
+  版式数值（坐标、字号、配色）取自 robotDelivery-konka.css。
+  ============================================================
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#eef5fb; overflow:hidden; }
+  body{
+    font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif;
+    color:#111; user-select:none;
+  }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    background:url("assets/robot/bg.jpg") center/100% 100% no-repeat;
+    overflow:hidden;
+  }
+
+  /* ---------------- 头部 ---------------- */
+  .header-bar{
+    position:absolute; left:156px; top:124px;
+    width:1764px; height:44px;
+    display:flex; align-items:baseline;
+  }
+  .pageTitle{ font-size:64px; font-weight:700; line-height:44px; letter-spacing:.02em; }
+  .roomNum{ margin-left:29px; font-size:30px; line-height:42px; }
+
+  /* ---------------- 主体 ---------------- */
+  .main-content{
+    position:absolute; left:160px; top:222px;
+    width:1622px; height:676px;
+    display:flex; justify-content:space-between;
+  }
+
+  .left-panel{
+    position:relative;
+    width:1138px; height:676px;
+    border-radius:18px;
+    background:linear-gradient(297deg, rgba(243,252,255,.86) 20%, rgba(243,254,252,.86) 78%);
+    border:2px solid #fff;
+    box-shadow:0 20px 44px rgba(88,120,110,.10);
+  }
+  .robot-wrap{
+    position:absolute; left:55px; top:63px;
+    width:250px; height:516px;
+    background:url("assets/robot/robot.png") center/cover no-repeat;
+    filter:drop-shadow(0 22px 22px rgba(60,90,80,.18));
+    animation:robotIdle 4.2s ease-in-out infinite;
+  }
+  @keyframes robotIdle{
+    0%,100%{ transform:translateY(0); }
+    50%    { transform:translateY(-7px); }
+  }
+
+  .order-info{ position:absolute; left:358px; top:46px; width:746px; height:576px; }
+  .t1{ font-size:36px; font-weight:600; line-height:42px; margin:0 0 16px; }
+  .t2{ font-size:28px; line-height:41px; opacity:.6; margin:0 0 20px; }
+  .picked-title{ font-size:30px; line-height:42px; opacity:.6; margin-bottom:10px; }
+
+  .picked-list{
+    width:746px; height:266px;
+    display:flex; flex-wrap:wrap; justify-content:space-between;
+    align-content:flex-start;
+  }
+  .picked-list .empty{ font-size:28px; opacity:.45; height:78px; line-height:78px; }
+  .chip{
+    display:flex; align-items:center;
+    width:368px; height:78px; margin-bottom:16px;
+    border-radius:10px; background:#fff;
+    box-shadow:0 6px 16px rgba(88,120,110,.10);
+  }
+  .chip svg{ width:44px; height:44px; margin-left:22px; flex:none; color:#3d4f44; }
+  .chip .nm{ font-size:32px; margin-left:14px; width:200px; }
+  .chip .qt{ font-size:30px; font-weight:700; color:#62826B; }
+  .chip.pop{ animation:chipPop .34s cubic-bezier(.2,1.4,.4,1); }
+  @keyframes chipPop{
+    0%{ transform:scale(.72); opacity:.2; }
+    60%{ transform:scale(1.06); opacity:1; }
+    100%{ transform:scale(1); }
+  }
+  .chip.fly-out{ animation:chipOut .26s ease forwards; }
+  @keyframes chipOut{ to{ transform:translateY(-10px) scale(.9); opacity:0; } }
+
+  .btn-container{
+    position:absolute; left:782px; bottom:23px;
+    width:316px; height:74px;
+    display:flex; justify-content:space-between;
+  }
+  .btn{
+    width:151px; height:74px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:18px; background:#fff;
+    border:2px solid rgba(255,255,255,.7);
+    font-size:32px; opacity:.55;
+    transition:opacity .18s ease, background .18s ease, color .18s ease, transform .12s ease;
+    cursor:pointer;
+  }
+  .btn.on{ opacity:1; background:#43724B; color:#fff; border-color:rgba(239,255,250,.46); }
+  .btn.on:active{ transform:scale(.97); }
+
+  /* 右侧物品网格 */
+  .right-panel{ width:462px; height:676px; }
+  .item-grid{
+    width:462px; height:676px;
+    display:flex; flex-wrap:wrap; justify-content:space-between; align-content:space-between;
+  }
+  .item-card{
+    position:relative;
+    width:220px; height:220px;
+    padding-top:123px;
+    border-radius:18px;
+    background:linear-gradient(310deg, rgba(241,250,253,.64) 19%, rgba(243,254,252,.7) 76%);
+    border:2px solid #62826B;
+    cursor:pointer;
+    transition:background .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .item-card .ico{
+    position:absolute; left:0; right:0; top:38px;
+    width:86px; height:85px; margin:0 auto;
+    color:#33453a;
+    transition:color .18s ease, transform .18s ease;
+  }
+  .item-card .ico svg{ width:100%; height:100%; display:block; }
+  .item-card .nm{
+    text-align:center; font-size:36px; line-height:50px; margin-top:8px;
+    transition:color .18s ease;
+  }
+  .item-card .qty{
+    position:absolute; right:12px; top:12px;
+    min-width:44px; height:44px; padding:0 10px;
+    border-radius:22px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px; font-weight:700;
+    background:#43724B; color:#fff;
+    opacity:0; transform:scale(.4);
+    transition:opacity .2s ease, transform .26s cubic-bezier(.2,1.5,.4,1);
+  }
+  .item-card.has .qty{ opacity:1; transform:scale(1); }
+  .item-card.focus{
+    background:#43724B;
+    border-color:rgba(239,255,250,.46);
+    transform:translateY(-8px);
+    box-shadow:0 22px 34px rgba(52,84,64,.28);
+  }
+  .item-card.focus .ico{ color:#fff; transform:scale(1.06); }
+  .item-card.focus .nm{ color:#fff; }
+  .item-card.punch{ animation:punch .3s ease; }
+  @keyframes punch{
+    0%{ transform:translateY(-8px) scale(1); }
+    45%{ transform:translateY(-8px) scale(.94); }
+    100%{ transform:translateY(-8px) scale(1); }
+  }
+
+  .turnback{
+    position:absolute; left:156px; bottom:79px;
+    display:flex; align-items:center; gap:14px;
+    font-size:28px;
+  }
+  .turnback .tri{
+    width:44px; height:44px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff; box-shadow:0 6px 14px rgba(88,120,110,.14);
+    font-size:24px; color:#43724B;
+  }
+  .tip-message{
+    position:absolute; left:398px; top:966px;
+    width:1240px; font-size:28px; line-height:42px; opacity:.7;
+  }
+
+  /* 飞行图标 */
+  .ghost{ position:fixed; left:0; top:0; z-index:90; pointer-events:none; color:#33453a; }
+  .ghost svg{ width:100%; height:100%; display:block; }
+
+  /* ---------------- 配送面板 ---------------- */
+  .deliver{
+    position:absolute; inset:0; z-index:50;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(238,245,251,.96);
+    backdrop-filter:blur(18px);
+    opacity:0; visibility:hidden;
+    transition:opacity .45s ease, visibility .45s;
+  }
+  .deliver.on{ opacity:1; visibility:visible; }
+
+  .dv-panel{
+    position:relative;
+    width:1500px; height:672px;
+    border-radius:26px;
+    border:1px solid rgba(255,255,255,.9);
+    background:linear-gradient(150deg,#ffffff 0%, #f4fbfa 100%);
+    box-shadow:0 40px 90px rgba(60,90,80,.22);
+    padding:40px 60px;
+  }
+  .dv-head{ display:flex; align-items:center; gap:18px; }
+  .dv-title{ font-size:44px; font-weight:700; }
+  .dv-order{
+    font-size:18px; color:#6b7f74; letter-spacing:.06em;
+    font-variant-numeric:tabular-nums;
+    padding:6px 12px; border-radius:9px; background:#f1f6f3;
+  }
+  .dv-state{
+    margin-left:auto;
+    font-size:17px; letter-spacing:.1em;
+    padding:8px 16px; border-radius:20px;
+    background:#eef3f1; color:#5c7268;
+    transition:background .3s ease, color .3s ease;
+  }
+  .dv-state.pending_delivery{ background:#f6ecd9; color:#a06a24; }
+  .dv-state.delivering{ background:#e3efe7; color:#3d6b4e; }
+  .dv-state.delivered{ background:#43724B; color:#fff; }
+
+  .dv-route{ position:relative; margin-top:26px; width:1380px; height:330px; }
+  .dv-route svg{ width:100%; height:100%; display:block; }
+  #pathBase{ stroke:#d6e6de; stroke-width:6; fill:none; stroke-linecap:round; }
+  #pathDone{ stroke:#43724B; stroke-width:6; fill:none; stroke-linecap:round; }
+  .wp circle{ fill:#fff; stroke:#c4d9ce; stroke-width:5; transition:fill .3s, stroke .3s; }
+  .wp.on circle{ fill:#43724B; stroke:#43724B; }
+  .wp text{ font-size:22px; fill:#8ba295; font-family:inherit; transition:fill .3s; }
+  .wp.on text{ fill:#2f4b3b; }
+
+  .dv-robot{
+    position:absolute; left:0; top:0;
+    width:92px; height:190px;
+    transform-origin:50% 100%;
+    filter:drop-shadow(0 14px 14px rgba(60,90,80,.22));
+    will-change:transform;
+  }
+  .dv-shadow{
+    position:absolute; width:96px; height:22px; left:0; top:0;
+    border-radius:50%;
+    background:radial-gradient(ellipse at center, rgba(60,90,80,.26), rgba(60,90,80,0) 70%);
+    will-change:transform;
+  }
+
+  .dv-foot{ margin-top:14px; display:grid; grid-template-columns:1fr 420px; gap:40px; align-items:start; }
+  .dv-status{ font-size:28px; color:#2f4b3b; height:40px; }
+  .dv-bar{ height:8px; border-radius:4px; background:#e3eee9; overflow:hidden; margin-top:12px; }
+  .dv-bar i{
+    display:block; height:100%; width:0;
+    background:linear-gradient(90deg,#5e9d7d,#43724B);
+    border-radius:4px;
+  }
+
+  .dv-timeline{ display:flex; flex-direction:column; gap:9px; }
+  .tl{
+    display:flex; align-items:center; gap:10px;
+    font-size:16px; color:#7d9488;
+    animation:tlIn .35s ease;
+  }
+  @keyframes tlIn{ from{ opacity:0; transform:translateX(8px); } }
+  .tl i{ width:8px; height:8px; border-radius:50%; background:#cfdcd5; flex:none; }
+  .tl b{ font-weight:400; }
+  .tl em{ margin-left:auto; font-style:normal; font-size:14px; color:#a8bbb1; font-variant-numeric:tabular-nums; }
+  .tl.now{ color:#2f4b3b; }
+  .tl.now i{ background:#43724B; box-shadow:0 0 0 3px rgba(67,114,75,.16); }
+
+  /* 已送达 */
+  .dv-done{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:rgba(238,245,251,.86);
+    backdrop-filter:blur(12px);
+    opacity:0; visibility:hidden;
+    transition:opacity .4s ease, visibility .4s;
+  }
+  .dv-done.on{ opacity:1; visibility:visible; }
+  .dv-check{
+    width:132px; height:132px; border-radius:50%;
+    background:#43724B; color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:70px;
+    animation:ring 1.6s ease-out infinite;
+  }
+  @keyframes ring{
+    0%{ box-shadow:0 0 0 0 rgba(67,114,75,.30); }
+    100%{ box-shadow:0 0 0 46px rgba(67,114,75,0); }
+  }
+  .dv-done-t{ margin-top:34px; font-size:56px; font-weight:700; }
+  .dv-done-s{ margin-top:14px; font-size:28px; color:#5c7268; }
+  .dv-btn{
+    margin-top:40px;
+    width:240px; height:76px; border-radius:38px;
+    border:0; background:#43724B; color:#fff;
+    font-size:28px; font-family:inherit; cursor:pointer;
+  }
+  .dv-btn:active{ transform:scale(.98); }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <div class="header-bar">
+    <div class="pageTitle">机器人送物</div>
+    <div class="roomNum">房间号：8888</div>
+  </div>
+
+  <div class="main-content">
+    <section class="left-panel">
+      <div class="robot-wrap"></div>
+
+      <div class="order-info">
+        <p class="t1">请选择要送的物品</p>
+        <p class="t2">按确认键增删 / 按上下左右键切换</p>
+        <div class="picked-title">已选物品</div>
+        <div class="picked-list" id="pickedList"></div>
+      </div>
+
+      <div class="btn-container">
+        <div class="btn" id="btnSubmit">提交</div>
+        <div class="btn" id="btnReset">重选</div>
+      </div>
+    </section>
+
+    <section class="right-panel">
+      <div class="item-grid" id="grid"></div>
+    </section>
+  </div>
+
+  <div class="turnback"><span class="tri">‹</span><span>返回</span></div>
+  <div class="tip-message">提示：预计送达时间「5-10 分钟」，以上物品均为免费用品，请合理使用</div>
+
+  <!-- 配送动画 -->
+  <div class="deliver" id="deliver">
+    <div class="dv-panel">
+      <div class="dv-head">
+        <span class="dv-title">配送中</span>
+        <span class="dv-order" id="dvOrder">订单 —</span>
+        <span class="dv-state" id="dvState">待配送</span>
+      </div>
+
+      <div class="dv-route">
+        <svg viewBox="0 0 1380 330" preserveAspectRatio="none">
+          <path id="pathBase" d="M 90 252 C 300 252 380 202 560 202 S 830 246 1010 246 S 1230 206 1300 202" />
+          <path id="pathDone" d="M 90 252 C 300 252 380 202 560 202 S 830 246 1010 246 S 1230 206 1300 202" />
+          <g class="wp" data-len="0"><circle cx="90" cy="252" r="13" /><text x="90" y="298" text-anchor="middle">出餐台</text></g>
+          <g class="wp" data-len="0.34"><circle cx="560" cy="202" r="13" /><text x="560" y="248" text-anchor="middle">电梯</text></g>
+          <g class="wp" data-len="0.72"><circle cx="1010" cy="246" r="13" /><text x="1010" y="292" text-anchor="middle">8F 走廊</text></g>
+          <g class="wp" data-len="1"><circle cx="1300" cy="202" r="13" /><text x="1292" y="248" text-anchor="middle">8888</text></g>
+        </svg>
+        <div class="dv-shadow" id="dvShadow"></div>
+        <img class="dv-robot" id="dvRobot" src="assets/robot/robot.png" alt="配送机器人" />
+      </div>
+
+      <div class="dv-foot">
+        <div>
+          <div class="dv-status" id="dvStatus">正在下单…</div>
+          <div class="dv-bar"><i id="dvBar"></i></div>
+        </div>
+        <div class="dv-timeline" id="dvTimeline"></div>
+      </div>
+    </div>
+
+    <div class="dv-done" id="dvDone">
+      <div class="dv-check">✓</div>
+      <div class="dv-done-t">已送达</div>
+      <div class="dv-done-s">机器人已停在 8888 房间门口，请取走物品</div>
+      <button class="dv-btn" id="dvAgain">再来一次</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------------- 数据：6 个物品 ---------------- */
+  var ICON = {
+    paper: '<svg viewBox="0 0 86 85" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+           '<rect x="14" y="18" width="40" height="50" rx="8"/>' +
+           '<ellipse cx="54" cy="43" rx="13" ry="25"/>' +
+           '<ellipse cx="54" cy="43" rx="5" ry="10"/></svg>',
+    water: '<svg viewBox="0 0 86 85" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+           '<path d="M36 12h14v10l6 9v32a6 6 0 0 1-6 6H36a6 6 0 0 1-6-6V31l6-9z"/>' +
+           '<path d="M30 46h26"/><path d="M38 6h10"/></svg>',
+    towel: '<svg viewBox="0 0 86 85" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+           '<path d="M14 34c0-4 3-7 7-7h38c4 0 7 3 7 7v18c0 4-3 7-7 7H21c-4 0-7-3-7-7z"/>' +
+           '<path d="M22 27c-3 7-3 25 0 32"/><path d="M26 52h8"/></svg>',
+    bath:  '<svg viewBox="0 0 86 85" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+           '<path d="M32 24h22a12 12 0 0 1 0 40H32a12 12 0 0 1 0-40z"/>' +
+           '<circle cx="54" cy="44" r="8"/><path d="M54 36a8 8 0 0 0 0 16"/><path d="M32 24v40"/></svg>',
+    brush: '<svg viewBox="0 0 86 85" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+           '<g transform="rotate(-28 43 43)"><rect x="30" y="10" width="26" height="15" rx="7"/>' +
+           '<path d="M35 10V4M43 10V2M51 10V4"/><path d="M43 25v46"/></g></svg>',
+    slipper:'<svg viewBox="0 0 86 85" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">' +
+           '<path d="M12 58c0-4 3-6 7-6h48c4 0 7 2 7 6s-3 6-7 6H19c-4 0-7-2-7-6z"/>' +
+           '<path d="M26 52c4-9 9-13 17-13s13 4 17 13"/><path d="M43 39v13"/></svg>'
+  };
+
+  var ITEMS = [
+    { key: 'paper',   name: '纸巾' },
+    { key: 'water',   name: '矿泉水' },
+    { key: 'towel',   name: '毛巾' },
+    { key: 'bath',    name: '浴巾' },
+    { key: 'brush',   name: '牙刷' },
+    { key: 'slipper', name: '拖鞋' }
+  ];
+
+  var stage = document.getElementById('stage');
+  var grid = document.getElementById('grid');
+  var list = document.getElementById('pickedList');
+  var btnSubmit = document.getElementById('btnSubmit');
+  var btnReset = document.getElementById('btnReset');
+  var deliver = document.getElementById('deliver');
+  var dvDone = document.getElementById('dvDone');
+
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  /* ---------------- 卡片 ---------------- */
+  var cards = ITEMS.map(function (it, i) {
+    var el = document.createElement('div');
+    el.className = 'item-card' + (i === 0 ? ' focus' : '');
+    el.innerHTML =
+      '<div class="ico">' + ICON[it.key] + '</div>' +
+      '<div class="nm">' + it.name + '</div>' +
+      '<span class="qty">0</span>';
+    grid.appendChild(el);
+    el.addEventListener('click', function () { focus = i; paint(); toggle(i); });
+    el.addEventListener('mouseenter', function () { if (mode === 'select') { focus = i; paint(); } });
+    return el;
+  });
+
+  var qty = ITEMS.map(function () { return 0; });
+  var focus = 0;
+  var mode = 'select';
+
+  function paint() {
+    cards.forEach(function (c, i) {
+      c.classList.toggle('focus', i === focus && mode === 'select');
+      c.classList.toggle('has', qty[i] > 0);
+      c.querySelector('.qty').textContent = qty[i];
+    });
+    var total = qty.reduce(function (a, b) { return a + b; }, 0);
+    btnSubmit.classList.toggle('on', total > 0);
+  }
+
+  function renderList(popKey) {
+    var any = false;
+    list.innerHTML = '';
+    ITEMS.forEach(function (it, i) {
+      if (!qty[i]) return;
+      any = true;
+      var chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.dataset.i = i;
+      chip.innerHTML = ICON[it.key] + '<span class="nm">' + it.name + '</span>' +
+                       '<span class="qt">×' + qty[i] + '</span>';
+      if (popKey === it.key) chip.classList.add('pop');
+      list.appendChild(chip);
+    });
+    if (!any) list.innerHTML = '<span class="empty">还没有选择物品</span>';
+  }
+
+  function flyTo(fromEl, targetChip) {
+    var a = fromEl.querySelector('.ico').getBoundingClientRect();
+    var b = targetChip.getBoundingClientRect();
+    var ghost = document.createElement('div');
+    ghost.className = 'ghost';
+    ghost.innerHTML = fromEl.querySelector('.ico').innerHTML;
+    ghost.style.width = a.width + 'px';
+    ghost.style.height = a.height + 'px';
+    document.body.appendChild(ghost);
+
+    var sx = a.left, sy = a.top;
+    var ex = b.left + 18, ey = b.top + (b.height - a.height * 0.6) / 2;
+
+    var anim = ghost.animate([
+      { transform: 'translate(' + sx + 'px,' + sy + 'px) scale(1)', opacity: 1 },
+      { transform: 'translate(' + (sx + (ex - sx) * 0.45) + 'px,' + (Math.min(sy, ey) - 150) + 'px) scale(.86)', opacity: 1, offset: .5 },
+      { transform: 'translate(' + ex + 'px,' + ey + 'px) scale(.6)', opacity: 0 }
+    ], { duration: 560, easing: 'cubic-bezier(.35,.05,.2,1)' });
+
+    anim.onfinish = function () { if (ghost.parentNode) ghost.remove(); };
+    setTimeout(function () { if (ghost.parentNode) ghost.remove(); }, 900);
+  }
+
+  function toggle(i) {
+    if (mode !== 'select') return;
+    var key = ITEMS[i].key;
+    if (qty[i] === 0) {
+      qty[i] = 1;
+      cards[i].classList.add('punch');
+      setTimeout(function () { cards[i].classList.remove('punch'); }, 320);
+      paint();
+      renderList(key);
+      var chip = list.querySelector('.chip[data-i="' + i + '"]');
+      if (chip) flyTo(cards[i], chip);
+    } else {
+      var old = list.querySelector('.chip[data-i="' + i + '"]');
+      if (old) {
+        old.classList.add('fly-out');
+        setTimeout(function () { if (old.parentNode) old.remove(); }, 260);
+      }
+      qty[i] = 0;
+      paint();
+      setTimeout(function () { renderList(); paint(); }, 60);
+    }
+  }
+
+  btnReset.addEventListener('click', function () {
+    if (mode !== 'select') return;
+    qty = ITEMS.map(function () { return 0; });
+    renderList(); paint();
+  });
+
+  /* ---------------- 配送：真下单 + 轮询订单状态 ---------------- */
+  var pathDone = document.getElementById('pathDone');
+  var robotEl = document.getElementById('dvRobot');
+  var shadowEl = document.getElementById('dvShadow');
+  var statusEl = document.getElementById('dvStatus');
+  var barEl = document.getElementById('dvBar');
+  var orderEl = document.getElementById('dvOrder');
+  var stateEl = document.getElementById('dvState');
+  var tlEl = document.getElementById('dvTimeline');
+  var len = pathDone.getTotalLength();
+  pathDone.style.strokeDasharray = len;
+  pathDone.style.strokeDashoffset = len;
+
+  var wps = Array.prototype.slice.call(document.querySelectorAll('.wp'));
+
+  /* mock 服务：D:\delivery-server（已开 CORS） */
+  var API_CREATE = 'http://127.0.0.1:3001/API_URL/createOrder/v2.0';
+  var API_INFO = 'http://127.0.0.1:3001/API_URL/getOrderInfo';
+  var API_HEAD = { 'Content-Type': 'application/json', appId: 'test-app', secret: 'test-secret' };
+
+  var raf = null;
+  var progress = 0, targetP = 0;
+  var order = null, pollTimer = null, offline = false;
+  var t0 = 0;   /* 下单时刻，用于按真实时间推进进度 */
+
+  var STATE_TXT = { PENDING_DELIVERY: '待配送', DELIVERING: '配送中', DELIVERED: '已送达' };
+
+  function nowStr() {
+    var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' +
+           p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+
+  /* 状态 → 路线进度：待配送 0–35%，配送中 40–90%，已送达 100% */
+  function targetFromOrder(o) {
+    if (!o) return 0;
+    if (o.state === 'DELIVERED') return 1;
+    var e = (Date.now() - t0) / 1000;
+    if (o.state === 'DELIVERING') return 0.45 + 0.50 * Math.min(1, (e - 2) / 2);
+    return 0.10 + 0.32 * Math.min(1, e / 2);
+  }
+
+  function paintTimeline(items) {
+    tlEl.innerHTML = '';
+    (items || []).forEach(function (a, i) {
+      var row = document.createElement('div');
+      row.className = 'tl' + (i === items.length - 1 ? ' now' : '');
+      row.innerHTML = '<i></i><b>' + a.action + '</b><em>' + String(a.createTime).slice(11) + '</em>';
+      tlEl.appendChild(row);
+    });
+  }
+
+  function applyOrder(o) {
+    order = o;
+    orderEl.textContent = '订单 ' + o.orderNum;
+    stateEl.textContent = STATE_TXT[o.state] || o.state;
+    stateEl.className = 'dv-state ' + String(o.state || '').toLowerCase();
+    if (o.orderActionList) paintTimeline(o.orderActionList);
+    var acts = o.orderActionList || [];
+    statusEl.textContent = acts.length ? acts[acts.length - 1].action : '订单已创建';
+    targetP = targetFromOrder(o);
+    if (o.state === 'DELIVERED' && mode === 'delivering') finish();
+  }
+
+  function frame() {
+    targetP = Math.max(targetP, targetFromOrder(order));
+    progress += (targetP - progress) * 0.24;
+    if (Math.abs(targetP - progress) < 0.0005) progress = targetP;
+
+    pathDone.style.strokeDashoffset = len * (1 - progress);
+    var pt = pathDone.getPointAtLength(len * progress);
+    var bob = Math.sin(progress * 34) * 3;
+    robotEl.style.transform = 'translate(' + (pt.x - 46) + 'px,' + (pt.y - 190 + bob) + 'px)';
+    shadowEl.style.transform = 'translate(' + (pt.x - 48) + 'px,' + (pt.y - 10) + 'px)';
+    wps.forEach(function (g) { g.classList.toggle('on', progress >= parseFloat(g.dataset.len) - 0.001); });
+    barEl.style.width = (progress * 100).toFixed(1) + '%';
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  function stopPoll() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+
+  function pollOnce() {
+    if (!order || offline) return;
+    fetch(API_INFO, { method: 'POST', headers: API_HEAD, body: JSON.stringify({ orderNum: order.orderNum }) })
+      .then(function (r) { return r.json(); })
+      .then(function (o) { if (o && o.orderNum) applyOrder(o); })
+      .catch(function () {});
+  }
+
+  /* 没有服务器时的兜底：同样的状态机，节奏压到 8s / 18s */
+  function startOffline() {
+    offline = true;
+    t0 = Date.now();
+    order = {
+      orderNum: 'OFFLINE-' + String(Date.now()).slice(-8),
+      state: 'PENDING_DELIVERY',
+      createTime: nowStr(),
+      orderActionList: [{ action: '订单已创建（离线演示）', createTime: nowStr() }]
+    };
+    applyOrder(order);
+    pollTimer = setInterval(function () {
+      var s = (Date.now() - t0) / 1000;
+      if (s >= 18 && order.state !== 'DELIVERED') {
+        order.state = 'DELIVERED';
+        order.orderActionList = order.orderActionList.concat([
+          { action: '到达取件点', createTime: nowStr() },
+          { action: '已取件，配送中', createTime: nowStr() },
+          { action: '已送达', createTime: nowStr() }
+        ]);
+        applyOrder(order);
+        stopPoll();
+      } else if (s >= 8 && order.state === 'PENDING_DELIVERY') {
+        order.state = 'DELIVERING';
+        order.orderActionList = order.orderActionList.concat([
+          { action: '到达取件点', createTime: nowStr() },
+          { action: '已取件，配送中', createTime: nowStr() }
+        ]);
+        applyOrder(order);
+      }
+    }, 700);
+  }
+
+  function startDelivery() {
+    if (mode !== 'select') return;
+    var total = qty.reduce(function (a, b) { return a + b; }, 0);
+    if (!total) return;
+
+    mode = 'delivering';
+    paint();
+    offline = false;
+    order = null;
+    progress = 0; targetP = 0; t0 = Date.now();
+    pathDone.style.strokeDashoffset = len;
+    wps.forEach(function (g) { g.classList.remove('on'); });
+    barEl.style.width = '0%';
+    statusEl.textContent = '正在下单…';
+    orderEl.textContent = '订单 —';
+    stateEl.textContent = '提交中';
+    stateEl.className = 'dv-state';
+    tlEl.innerHTML = '';
+    dvDone.classList.remove('on');
+    deliver.classList.add('on');
+
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(frame);
+
+    var details = [];
+    ITEMS.forEach(function (it, i) {
+      if (qty[i]) details.push({ productName: it.name, productCount: qty[i] });
+    });
+
+    fetch(API_CREATE, {
+      method: 'POST',
+      headers: API_HEAD,
+      body: JSON.stringify({
+        source: 'TV-PORTAL',
+        thridOrderNum: 'TV' + Date.now(),
+        roomNum: '8888',
+        phone: '15800000000',
+        callBackUrl: 'http://localhost/cb',
+        description: details.map(function (d) { return d.productName + '×' + d.productCount; }).join('、'),
+        orderDetails: details
+      })
+    })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (o) {
+        if (!o || !o.orderNum) throw new Error('bad response');
+        applyOrder(o);
+        startPolling();
+      })
+      .catch(function () { startOffline(); });
+  }
+
+  function startPolling() {
+    stopPoll();
+    pollTimer = setInterval(pollOnce, 600);
+  }
+
+  function finish() {
+    mode = 'done';
+    stopPoll();
+    dvDone.classList.add('on');
+  }
+
+  function closeAll() {
+    stopPoll();
+    deliver.classList.remove('on');
+    dvDone.classList.remove('on');
+    mode = 'select';
+    offline = false;
+    order = null;
+    progress = 0; targetP = 0;
+    qty = ITEMS.map(function () { return 0; });
+    renderList();
+    paint();
+    if (raf) { cancelAnimationFrame(raf); raf = null; }
+  }
+
+  document.getElementById('dvAgain').addEventListener('click', function () { closeAll(); });
+
+  btnSubmit.addEventListener('click', function () {
+    var total = qty.reduce(function (a, b) { return a + b; }, 0);
+    if (!total) { btnSubmit.classList.add('punch'); return; }
+    startDelivery();
+  });
+
+  /* ---------------- 键盘 / 遥控 ---------------- */
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+
+    if (mode === 'done') {
+      if (k === 'Escape' || k === 'Enter') { e.preventDefault(); closeAll(); }
+      return;
+    }
+    if (mode === 'delivering') {
+      if (k === 'Escape') { e.preventDefault(); closeAll(); }
+      return;
+    }
+    if (k === 'Escape' || k === 'Backspace') { e.preventDefault(); return; }
+    if (k === 'Enter' || k === ' ') { e.preventDefault(); startDelivery(); return; }
+
+    var row = Math.floor(focus / 2), col = focus % 2, n = ITEMS.length;
+    if (k === 'ArrowRight') { e.preventDefault(); if (col < 1) focus = Math.min(n - 1, focus + 1); paint(); }
+    else if (k === 'ArrowLeft') { e.preventDefault(); if (col > 0) focus -= 1; paint(); }
+    else if (k === 'ArrowDown') { e.preventDefault(); if (row < 2) { focus = Math.min(n - 1, focus + 2); paint(); } }
+    else if (k === 'ArrowUp') { e.preventDefault(); if (row > 0) { focus -= 2; paint(); } }
+    else if (/^[1-6]$/.test(k)) { e.preventDefault(); focus = parseInt(k, 10) - 1; paint(); toggle(focus); }
+  });
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+
+  /* 滚轮转给外层页面 */
+  addEventListener('wheel', function (e) {
+    if (window.parent === window) return;
+    try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+  }, { passive: true });
+
+  /* 联调：?pick=1 预选三件看清单 */
+  if (/[?&]pick=1/.test(location.search)) {
+    qty = [1, 0, 2, 0, 1, 0];
+    renderList(); paint();
+  }
+
+  renderList();
+  paint();
+})();
+</script>
+</body>
+</html>

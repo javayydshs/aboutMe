@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>诺富特 · 栏目详情</title>
+
+<!--
+  诺富特「左列表 + 右图文」类详情页的通用模板（整页截图切换）：
+    novotel-list.html?set=room    温馨客房 5 页
+    novotel-list.html?set=dining  餐厅&酒吧 4 页
+  上下键翻页（循环），返回回主页；左侧菜单高亮、右侧图文都在截图里。
+  新增一个列表式栏目：把截图放进目录，在下面 SETS 里加一行即可。
+-->
+
+<style>
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#f4efe6; overflow:hidden; }
+  body{ font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif; user-select:none; }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+  .shot{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+    opacity:0;
+    transition:opacity .22s ease;
+    pointer-events:none;
+  }
+  .shot.is-on{ opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* 栏目 → 整页截图列表（顺序就是翻页顺序）
+     dir 只是记录设计稿上的翻页提示：'v' 上下、'h' 左右；按键两个方向都能用 */
+  var SETS = {
+    room: { dir: 'v', pages: [
+      'assets/screens/novotel/room/1.jpg',
+      'assets/screens/novotel/room/2.jpg',
+      'assets/screens/novotel/room/3.jpg',
+      'assets/screens/novotel/room/4.jpg',
+      'assets/screens/novotel/room/5.jpg'
+    ] },
+    dining: { dir: 'v', pages: [
+      'assets/screens/novotel/dining/1.jpg',
+      'assets/screens/novotel/dining/2.jpg',
+      'assets/screens/novotel/dining/3.jpg',
+      'assets/screens/novotel/dining/4.jpg'
+    ] },
+    meeting: { dir: 'h', pages: [
+      'assets/screens/novotel/meeting/1.jpg',
+      'assets/screens/novotel/meeting/2.jpg',
+      'assets/screens/novotel/meeting/3.jpg',
+      'assets/screens/novotel/meeting/4.jpg',
+      'assets/screens/novotel/meeting/5.jpg'
+    ] },
+    balance: { dir: 'h', pages: [
+      'assets/screens/novotel/balance/1.jpg',
+      'assets/screens/novotel/balance/2.jpg',
+      'assets/screens/novotel/balance/3.jpg',
+      'assets/screens/novotel/balance/4.jpg'
+    ] },
+    translate: { dir: 'h', pages: [
+      'assets/screens/novotel/translate/1.jpg'
+    ] },
+    about: { dir: 'h', pages: [
+      'assets/screens/novotel/about/1.jpg'
+    ] },
+    /* 看电视直接复用博雅那张频道列表页（同样的电视频道，没有酒店标识） */
+    live: { dir: 'h', pages: [
+      'assets/screens/parkyard/detail/live.jpg'
+    ] }
+  };
+
+  var q = new URLSearchParams(location.search);
+  var key = q.get('set') || 'room';
+  var conf = SETS[key] || SETS.room;
+  var list = conf.pages;
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var shots = list.map(function (src, i) {
+    var img = document.createElement('img');
+    img.className = 'shot' + (i === 0 ? ' is-on' : '');
+    img.src = src;
+    img.alt = '';
+    stage.appendChild(img);
+    return img;
+  });
+
+  var idx = 0;
+  function show(i) {
+    idx = (i + shots.length) % shots.length;
+    shots.forEach(function (s, k) { s.classList.toggle('is-on', k === idx); });
+  }
+
+  /* 联调：?set=dining&i=3 直接停在第三页（截图用） */
+  var start = parseInt(q.get('i') || '1', 10);
+  if (start > 1) show(start - 1);
+
+  function back() { location.href = 'novotel.html'; }
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    /* ← ↑ 上一页，→ ↓ 下一页：设计稿上是「上下」还是「左右」都能用 */
+    if (k === 'ArrowUp' || k === 'ArrowLeft')   { e.preventDefault(); show(idx - 1); return; }
+    if (k === 'ArrowDown' || k === 'ArrowRight') { e.preventDefault(); show(idx + 1); return; }
+    if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') { e.preventDefault(); back(); }
+  });
+
+  stage.addEventListener('click', function () { show(idx + 1); });
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

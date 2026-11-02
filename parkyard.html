@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>博雅酒店 · 首页</title>
+
+<!--
+  博雅酒店首页：
+    底图 = 设计稿截图（照片 / 页头 / 问候语 / 底部 TV 图标都在图里）；
+    需要动效的两块用代码重绘：
+      · 底部 6 个栏目：截图里量出来的位置（112 + 292*i, 748, 280×180），
+        获得焦点时放大 8% + 下方浮出「按 OK 键查看详情」提示条；
+      · 右上「智慧洗衣」卡片：未选中 / 选中两张图切换（选中那张自带提示条）。
+    操作：←→ 在栏目间移动，↑ 切到洗衣卡，↓ 回到栏目，OK 看详情，返回回到欢迎页。
+-->
+
+<style>
+  :root{
+    --green:  #236947;
+    --ink:    #f3f7f4;
+    --orange: #ffc373;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:#12301f; overflow:hidden; }
+  body{
+    font-family:"Microsoft YaHei UI Light","Microsoft YaHei UI","PingFang SC",sans-serif;
+    user-select:none; cursor:default;
+  }
+
+  .stage{
+    position:absolute; left:50%; top:50%;
+    width:1920px; height:1080px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(var(--s,1));
+    overflow:hidden;
+  }
+
+  .bg{ position:absolute; inset:0; width:1920px; height:1080px; display:block; pointer-events:none; }
+
+  /* ---------- 右上：智慧洗衣 ---------- */
+  .card{
+    position:absolute; left:1419px; top:241px;
+    width:410px; height:410px;
+    padding:0; border:0; background:transparent;
+    cursor:pointer; outline:none;
+  }
+  .card img{ width:410px; height:410px; display:block; }
+  .card.is-focus{ filter:drop-shadow(0 10px 24px rgba(0,0,0,.35)); }
+
+  /* ---------- 底部栏目 ---------- */
+  .tile{
+    position:absolute; top:748px;
+    width:280px; height:180px;
+    padding:0; border:0; background:transparent;
+    cursor:pointer; outline:none;
+    transform-origin:50% 100%;
+    transition:transform .18s ease, filter .18s ease;
+    z-index:1;
+  }
+  .tile img{ width:280px; height:180px; display:block; }
+  .tile .tip-in{
+    position:absolute; left:0; bottom:0;
+    width:100%; height:auto;
+    opacity:0; transition:opacity .15s ease;
+    pointer-events:none;
+  }
+  .tile.is-focus{
+    transform:scale(1.08);
+    z-index:6;
+    filter:drop-shadow(0 12px 26px rgba(0,0,0,.45));
+  }
+  .tile.is-focus .tip-in{ opacity:1; }
+
+  /* ---------- 栏目详情：整页截图 ---------- */
+  .detail{
+    position:absolute; inset:0;
+    width:1920px; height:1080px;
+    display:block;
+    opacity:0; visibility:hidden;
+    transition:opacity .22s ease, visibility .22s;
+    z-index:20;
+  }
+  .detail.is-open{ opacity:1; visibility:visible; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+  <img class="bg" src="assets/screens/parkyard/home.jpg" alt="博雅酒店首页" />
+
+  <!-- 智慧洗衣：两张图切换 -->
+  <button class="card" id="card" aria-label="智慧洗衣">
+    <img id="cardImg" src="assets/screens/parkyard/laundry.png" alt="智慧洗衣" />
+  </button>
+
+  <!-- 底部 6 个栏目：每个里面都带一条提示，焦点落在谁身上谁显示 -->
+  <button class="tile" style="left:112px"  data-key="live"       data-title="看电视">
+    <img src="assets/screens/parkyard/nav/1-live.png" alt="看电视" />
+    <img class="tip-in" src="assets/screens/parkyard/tip-ok.png" alt="" />
+  </button>
+  <button class="tile" style="left:404px"  data-key="channel"    data-title="吃喝玩乐">
+    <img src="assets/screens/parkyard/nav/2-channel.png" alt="吃喝玩乐" />
+    <img class="tip-in" src="assets/screens/parkyard/tip-ok.png" alt="" />
+  </button>
+  <button class="tile" style="left:696px"  data-key="member"     data-title="薅羊毛专区">
+    <img src="assets/screens/parkyard/nav/3-member.png" alt="薅羊毛专区" />
+    <img class="tip-in" src="assets/screens/parkyard/tip-ok.png" alt="" />
+  </button>
+  <button class="tile" style="left:988px"  data-key="zhangjiang" data-title="今日张江事">
+    <img src="assets/screens/parkyard/nav/4-zhangjiang.png" alt="今日张江事" />
+    <img class="tip-in" src="assets/screens/parkyard/tip-ok.png" alt="" />
+  </button>
+  <button class="tile" style="left:1280px" data-key="aurora"     data-title="极光TV">
+    <img src="assets/screens/parkyard/nav/5-aurora.png" alt="极光TV" />
+    <img class="tip-in" src="assets/screens/parkyard/tip-ok.png" alt="" />
+  </button>
+  <button class="tile" style="left:1572px" data-key="cast"       data-title="手机投屏">
+    <img src="assets/screens/parkyard/nav/6-cast.png" alt="手机投屏" />
+    <img class="tip-in" src="assets/screens/parkyard/tip-ok.png" alt="" />
+  </button>
+
+  <!-- 栏目详情：整页截图 -->
+  <img class="detail" id="detail" alt="" />
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  function fit() { stage.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); }
+  fit();
+  addEventListener('resize', fit);
+
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('.tile'));
+  var card = document.getElementById('card');
+  var cardImg = document.getElementById('cardImg');
+  var detail = document.getElementById('detail');
+
+  var CARD_NORMAL = 'assets/screens/parkyard/laundry.png';
+  var CARD_FOCUS  = 'assets/screens/parkyard/laundry-focus.png';
+
+  /* 每个栏目的详情页截图；极光TV / 手机投屏 复用盛捷那两页 */
+  var SHOTS = {
+    live:       'assets/screens/parkyard/detail/live.jpg',
+    channel:    'assets/screens/parkyard/detail/channel.jpg',
+    member:     'assets/screens/parkyard/detail/member.jpg',
+    zhangjiang: 'assets/screens/parkyard/detail/zhangjiang.jpg',
+    aurora:     'assets/screens/somerset/home/aurora.jpg',
+    cast:       'assets/screens/somerset/home/cast.jpg'
+  };
+
+  var zone = 'nav';      // 'nav' | 'card' | 'detail'
+  var idx = 0;
+
+  function paint() {
+    var onCard = zone === 'card';
+    tiles.forEach(function (t, i) {
+      t.classList.toggle('is-focus', zone === 'nav' && i === idx);
+    });
+    card.classList.toggle('is-focus', onCard);
+    cardImg.src = onCard ? CARD_FOCUS : CARD_NORMAL;
+  }
+
+  function move(dir) {
+    if (zone !== 'nav') return;
+    idx = (idx + dir + tiles.length) % tiles.length;
+  }
+
+  function openDetail() {
+    if (zone !== 'nav') {                       // 洗衣卡 → 独立页面
+      if (zone === 'card') location.href = 'laundry.html';
+      return;
+    }
+    var src = SHOTS[tiles[idx].dataset.key];
+    if (!src) return;
+    detail.src = src;
+    detail.classList.add('is-open');
+    zone = 'detail';
+  }
+  function closeDetail() {
+    detail.classList.remove('is-open');
+    zone = 'nav';
+    paint();
+  }
+
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+
+    if (zone === 'detail') {
+      if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') { e.preventDefault(); closeDetail(); }
+      return;
+    }
+
+    if (k === 'Escape' || k === 'Backspace' || k === 'BrowserBack') {
+      e.preventDefault();
+      location.href = 'boot.html?hotel=parkyard#welcome';
+      return;
+    }
+    if (k === 'ArrowLeft')  { e.preventDefault(); move(-1); paint(); return; }
+    if (k === 'ArrowRight') { e.preventDefault(); move(1);  paint(); return; }
+    if (k === 'ArrowUp')    { e.preventDefault(); zone = 'card'; paint(); return; }
+    if (k === 'ArrowDown')  { e.preventDefault(); zone = 'nav';  paint(); return; }
+    if (/^[1-6]$/.test(k))  { e.preventDefault(); idx = parseInt(k, 10) - 1; zone = 'nav'; paint(); return; }
+    if (k === 'Enter' || k === ' ' || k === 'OK' || k === 'Select') {
+      e.preventDefault();
+      openDetail();
+    }
+  });
+
+  /* 鼠标 */
+  tiles.forEach(function (t, i) {
+    t.addEventListener('mouseenter', function () { zone = 'nav'; idx = i; paint(); });
+    t.addEventListener('click', function () { zone = 'nav'; idx = i; paint(); openDetail(); });
+  });
+  card.addEventListener('mouseenter', function () { zone = 'card'; paint(); });
+  card.addEventListener('click', function () { zone = 'card'; paint(); openDetail(); });
+  detail.addEventListener('click', function () { if (zone === 'detail') closeDetail(); });
+
+  /* 电视外壳（tv.html）注入的遥控按键 */
+  addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || d.type !== 'remote' || !d.key) return;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: String(d.key) }));
+  });
+
+  paint();
+})();
+</script>
+
+<!-- 「作品集」用：把滚轮转给外层电视壳（单独打开时不影响） -->
+<script>
+addEventListener('wheel', function (e) {
+  if (window.parent === window) return;
+  try { window.parent.postMessage({ type: 'wheel', dy: e.deltaY }, '*'); } catch (err) {}
+}, { passive: true });
+</script>
+</body>
+</html>

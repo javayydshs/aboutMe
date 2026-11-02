@@ -494,48 +494,54 @@
     margin:0 auto;
   }
   .intro-title{
-    margin:0 0 20px;
-    font-size:34px; font-weight:600; letter-spacing:.02em; color:#fff;
+    margin:0;
+    font-size:52px; font-weight:700; letter-spacing:.01em; color:#fff;
   }
-  .intro-block + .intro-block{ margin-top:46px; }
 
-  /* 我能做什么 */
-  .intro-caps{
-    display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;
-    margin-bottom:34px;
+  .intro-head{ margin-bottom:40px; }
+  .intro-sub{
+    margin:14px 0 0;
+    font-size:14.5px; letter-spacing:.08em;
+    color:rgba(232,240,236,.45);
   }
-  .icap{
-    padding:20px 20px 18px;
+
+  /* 六条技能：两列三行 */
+  .sk-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .sk-card{
+    position:relative;
+    padding:24px 26px 22px 70px;
     border-radius:16px;
     background:rgba(255,255,255,.04);
     border:1px solid rgba(255,255,255,.08);
     transition:background .2s ease, border-color .2s ease, transform .2s ease;
   }
-  .icap:hover{
+  .sk-card:hover{
     background:rgba(110,231,168,.07);
     border-color:rgba(110,231,168,.35);
     transform:translateY(-3px);
   }
-  .icap .n{ font-size:11.5px; letter-spacing:.22em; color:#6ee7a8; margin-bottom:11px; }
-  .icap b{ display:block; font-size:15.5px; line-height:1.45; font-weight:600; color:#fff; margin-bottom:8px; }
-  .icap p{ margin:0; font-size:12.5px; line-height:1.8; color:rgba(232,240,236,.55); }
+  .sk-n{
+    position:absolute; left:24px; top:23px;
+    font-size:13px; letter-spacing:.08em; font-weight:600;
+    color:#6ee7a8;
+  }
+  .sk-card b{
+    display:block;
+    font-size:17px; font-weight:600; color:#fff;
+    margin-bottom:9px; letter-spacing:.01em;
+  }
+  .sk-card p{
+    margin:0;
+    font-size:13px; line-height:1.85;
+    color:rgba(232,240,236,.58);
+  }
 
-  /* 技能 */
-  .intro-skills{
-    display:grid; grid-template-columns:repeat(4, 1fr); gap:14px;
-    padding-top:26px;
-    border-top:1px solid rgba(255,255,255,.07);
-  }
-  .iskill .k{
-    font-size:11.5px; letter-spacing:.2em; color:rgba(232,240,236,.38);
-    margin-bottom:10px;
-  }
-  .iskill .tags{ display:flex; flex-wrap:wrap; gap:7px; }
-  .iskill .tags span{
-    font-size:12px; padding:5px 11px; border-radius:999px;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.08);
-    color:rgba(232,240,236,.8);
+  @media (max-width: 900px){
+    .sk-grid{ grid-template-columns:1fr; }
   }
 
   .intro-hint{
@@ -1234,54 +1240,44 @@
 <body>
 
 <!-- ================= 开场：自我介绍 ================= -->
-  <section class="intro" id="intro">
+    <section class="intro" id="intro">
     <div class="intro-inner">
 
-      <div class="intro-block">
-        <h1 class="intro-title">我能做什么</h1>
-        <div class="intro-caps">
-          <div class="icap">
-            <div class="n">01</div>
-            <b>酒店 IPTV 界面设计与实现</b>
-            <p>四家酒店电视门户 · 遥控 / 语音 / 触屏</p>
-          </div>
-          <div class="icap">
-            <div class="n">02</div>
-            <b>酒店外围设备对接</b>
-            <p>机器人 4 家 · 洗烘 4 家 · 空调 · 传感器</p>
-          </div>
-          <div class="icap">
-            <div class="n">03</div>
-            <b>AI 能力落地</b>
-            <p>语音助手 · RAG 客服 · 多模型中转站</p>
-          </div>
-          <div class="icap">
-            <div class="n">04</div>
-            <b>酒店数字化</b>
-            <p>统一设备管理 · 运营看板 · 多店复制</p>
-          </div>
-        </div>
+      <div class="intro-head">
+        <h1 class="intro-title">个人技能</h1>
+        <p class="intro-sub">酒店 IPTV · 后端与网关 · IoT 设备接入 · RAG / Agent 落地</p>
       </div>
 
-      <div class="intro-block">
-        <h1 class="intro-title">我会什么</h1>
-        <div class="intro-skills">
-          <div class="iskill">
-            <div class="k">前端</div>
-            <div class="tags"><span>HTML/CSS/JS</span><span>Vue / React</span><span>TypeScript</span><span>Canvas</span><span>CSS 动效</span></div>
-          </div>
-          <div class="iskill">
-            <div class="k">设备接入</div>
-            <div class="tags"><span>HTTP / REST</span><span>MQTT</span><span>WebSocket</span><span>MCP</span><span>签名鉴权</span></div>
-          </div>
-          <div class="iskill">
-            <div class="k">AI</div>
-            <div class="tags"><span>LLM 应用</span><span>Prompt</span><span>知识库 / RAG</span><span>语音链路</span></div>
-          </div>
-          <div class="iskill">
-            <div class="k">工程</div>
-            <div class="tags"><span>Node.js</span><span>Python</span><span>Git</span><span>设计稿还原</span></div>
-          </div>
+      <div class="sk-grid">
+        <div class="sk-card">
+          <div class="sk-n">01</div>
+          <b>酒店 IPTV 开发</b>
+          <p>熟悉酒店 IPTV 开发，独立完成电视底座、界面改造、机顶盒适配。</p>
+        </div>
+        <div class="sk-card">
+          <div class="sk-n">02</div>
+          <b>Java · Node.js 后端</b>
+          <p>熟练 Java、Node.js，可独立开发后端、语音识别、网关，对接第三方接口与设备 SDK。</p>
+        </div>
+        <div class="sk-card">
+          <div class="sk-n">03</div>
+          <b>酒店 IoT 对接</b>
+          <p>配送机器人、洗烘设备、人流传感器等异构设备接入，状态同步与异常处理。</p>
+        </div>
+        <div class="sk-card">
+          <div class="sk-n">04</div>
+          <b>RAG / Agent 落地</b>
+          <p>有 RAG、Agent 落地经验，实现酒店知识库智能客服，并集成至电视终端供客人使用。</p>
+        </div>
+        <div class="sk-card">
+          <div class="sk-n">05</div>
+          <b>MQTT · IoT 网关</b>
+          <p>掌握 MQTT，了解 IoT 网关架构，实现电视、IoT 设备、客房工单系统联动。</p>
+        </div>
+        <div class="sk-card">
+          <div class="sk-n">06</div>
+          <b>Linux · 现场联调</b>
+          <p>熟悉 Linux、网络排障，能到门店现场联调，适配酒店复杂现场环境。</p>
         </div>
       </div>
 

@@ -539,3 +539,31 @@ ect.top 恒为 0，直接读 rect 会永远停在第一格。
 - 自助洗衣里的设备卡片（空闲/维修/占用）目前是截图里的静态状态，接实时数据的话再按卡片做一版；
 - 酒店介绍 4 个栏目的第 2…5 页截图 → 每个栏目名字后面加 `-2/-3`，把 `data-shot` 换成数组即可翻页；
 - 电视端部署建议：kiosk 全屏启动、开机自启、禁用右键（文本选择已禁用）。
+
+
+## 十六、版本管理（Git）
+
+2026-11-02 第一次接上 Git，仓库就在项目根目录，默认分支 `main`。
+
+```bash
+cd D:\AoboutMe
+
+git status                  # 看改了哪些文件
+git diff tv.html            # 看某个文件改了什么
+git log --oneline           # 看历史（目前只有一条「首次提交」）
+```
+
+**改坏了想回到上次提交的样子：**
+
+```bash
+git checkout -- tv.html     # 只还原一个文件（丢弃未提交的改动）
+git restore .               # 还原所有未提交的改动
+git reset --hard HEAD       # 所有文件都回到最近一次提交（慎用，未提交的改动会没）
+```
+
+**以后养成两个习惯：**
+
+1. 动大改之前先提交一次：`git add -A && git commit -m "改了什么"`；
+2. 每次改完确认页面没问题再提交，这样任何一次「改崩了」都能一条命令回到上一个好的版本。
+
+> `.gitignore` 里忽略了系统垃圾文件和 `preview/tmp*.png`、`preview/srv.*.txt` 这类临时抓图；`preview/` 里的正式截图、`assets/vendor/echarts.simple.min.js` 都是提交进去的，换台机器 `git clone` 下来就能离线跑。

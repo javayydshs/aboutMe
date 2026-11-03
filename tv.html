@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>个人作品集 · 酒店 IPTV / IoT / AI</title>
-<meta name="description" content="酒店 IPTV、IoT 设备接入与 RAG / Agent 落地的个人作品集" />
+<title>贺胜 · 酒店 IPTV / IoT 作品集</title>
+<meta name="description" content="贺胜的酒店 IPTV / IoT 作品集：四家酒店真机界面、设备接入，以及能开口的 AI。" />
 
 
 <!--
@@ -314,8 +314,11 @@ body.pointer-on .fx-spot{ opacity:1; }
   opacity:var(--hc, 1);
 }
 .hotel-tag .ht-name{
-  font-size:12.5px; letter-spacing:.2em; color:rgba(214,232,248,.66);
+  font-size:14px; letter-spacing:.22em; color:rgba(234,242,255,.9);
   transition:opacity .25s ease;
+}
+.hotel-tag .ht-sub{
+  font-size:11px; letter-spacing:.16em; color:rgba(198,214,236,.5);
 }
 .hotel-tag.swapping .ht-name{ opacity:0; }
 .hotel-tag .ht-dots{ display:flex; gap:7px; }
@@ -345,7 +348,11 @@ body.pointer-on .fx-spot{ opacity:1; }
     0 0 0 1px rgba(255,255,255,.03) inset,
     0 1px 0 rgba(255,255,255,.10) inset,
     0 0 80px rgba(84,213,255,.10);
-  animation:tvFloat 9s ease-in-out infinite;
+  animation:tvFloat 9s ease-in-out infinite, tvGlow 7.5s ease-in-out infinite;
+}
+@keyframes tvGlow{
+  0%,100%{ box-shadow:0 40px 90px rgba(0,0,0,.72), 0 0 0 1px rgba(255,255,255,.03) inset, 0 1px 0 rgba(255,255,255,.10) inset, 0 0 70px rgba(84,213,255,.12); }
+  50%    { box-shadow:0 46px 100px rgba(0,0,0,.78), 0 0 0 1px rgba(255,255,255,.03) inset, 0 1px 0 rgba(255,255,255,.10) inset, 0 0 110px rgba(94,242,192,.22); }
 }
 @keyframes tvFloat{
   0%,100%{ transform:translateY(0); }
@@ -379,6 +386,18 @@ body.pointer-on .fx-spot{ opacity:1; }
   width:100%; height:100%;
   border:0; display:block;
   background:#eef5fb;
+}
+.screen::after{
+  content:"";
+  position:absolute; inset:0; z-index:5; pointer-events:none;
+  background:linear-gradient(105deg, transparent 42%, rgba(255,255,255,.16) 50%, transparent 58%);
+  transform:translateX(-130%);
+  animation:screenSweep 11s ease-in-out infinite;
+}
+@keyframes screenSweep{
+  0%,70%{ transform:translateX(-130%); }
+  88%{ transform:translateX(130%); }
+  100%{ transform:translateX(130%); }
 }
 
 .standby{
@@ -581,18 +600,23 @@ body.pointer-on .fx-spot{ opacity:1; }
 .keys .zero{ grid-column:2 / 3; }
 
 .r-tip{
-  font-size:10.5px; line-height:1.7; letter-spacing:.03em;
-  color:rgba(198,214,236,.34); text-align:center; margin-top:-4px;
+  font-size:11px; line-height:1.7; letter-spacing:.04em;
+  color:rgba(198,214,236,.58); text-align:center; margin-top:-4px;
 }
 
 /* 滚动提示 */
 .scroll-hint{
   position:absolute; left:50%; bottom:18px; transform:translateX(-50%);
-  font-size:11px; letter-spacing:.26em; color:rgba(198,214,236,.42);
+  font-size:11px; letter-spacing:.2em; color:rgba(226,240,255,.78);
   display:flex; align-items:center; gap:9px;
-  pointer-events:none;
-  transition:opacity .3s ease;
+  padding:8px 14px; border-radius:999px;
+  background:rgba(6,12,22,.55);
+  border:1px solid rgba(255,255,255,.1);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  pointer-events:auto;
+  transition:opacity .3s ease, border-color .3s ease, color .3s ease;
 }
+.scroll-hint:hover{ color:#fff; border-color:rgba(94,242,192,.4); }
 .scroll-hint b{ font-weight:400; color:rgba(226,240,255,.7); }
 .scroll-hint .dot{
   width:6px; height:6px; border-radius:50%;
@@ -1471,13 +1495,23 @@ html.lock, body.lock{ overflow:hidden; }
 .snav a:hover span{ opacity:1; }
 
 /* 笔记本高度偏矮时压缩首屏 */
-@media (min-width: 901px) and (max-height: 940px){
-  .intro{ padding:56px 0 84px; }
-  .intro-name{ font-size:52px; }
-  .cap-list{ margin-top:30px; }
-  .cap{ padding:15px 0 14px; }
-  .cap p{ line-height:1.75; }
-  .intro-hint{ margin-top:22px; }
+@media (min-width: 901px) and (max-height: 980px){
+  .intro{ padding:36px 0 28px; }
+  .intro-name{ font-size:48px; margin-top:12px; }
+  .intro-hook{ margin-top:10px; font-size:15.5px; }
+  .intro-meta{ margin-top:8px; }
+  .journey a{ padding:9px 12px; }
+  .proof{ margin-top:16px; gap:10px; }
+  .proof li{ padding:10px 12px 9px; }
+  .proof b{ font-size:26px; }
+  .cap-list{ margin-top:12px; gap:10px; }
+  .cap{ padding:11px 12px 10px; }
+  .cap p{ line-height:1.55; }
+  .intro-hint{ margin-top:14px; }
+}
+@media (min-width: 901px) and (max-height: 760px){
+  .journey em{ display:none; }
+  .proof{ display:none; }
 }
 
 /* 电视场景顶部说明 */
@@ -1487,13 +1521,323 @@ html.lock, body.lock{ overflow:hidden; }
   text-align:center; pointer-events:none;
 }
 .hero-cap .cap-k{
-  font-size:11.5px; letter-spacing:.28em; color:rgba(214,232,248,.62);
+  font-size:11.5px; letter-spacing:.22em; color:rgba(234,242,255,.92);
   padding:6px 15px; border-radius:999px;
-  border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.035);
+  border:1px solid rgba(94,242,192,.32);
+  background:rgba(6,12,22,.62);
   -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
 }
-.hero-cap .cap-t{ font-size:11.5px; letter-spacing:.16em; color:rgba(198,214,236,.34); }
+.hero-cap .cap-t{ font-size:12.5px; letter-spacing:.14em; color:rgba(214,232,248,.72); }
+
+/* ================= 叙事、层次、微交互 ================= */
+.fx-grain{
+  position:fixed; inset:0; z-index:2; pointer-events:none;
+  opacity:.045; mix-blend-mode:soft-light;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.fx-vignette{
+  position:fixed; inset:0; z-index:2; pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 46%, rgba(0,0,0,.38) 100%);
+}
+
+:focus-visible{
+  outline:2px solid rgba(94,242,192,.85);
+  outline-offset:3px;
+}
+
+.intro{ overflow:visible; padding:68px 0 56px; }
+.intro-top{
+  display:grid;
+  grid-template-columns:minmax(0, 1.15fr) minmax(260px, .82fr);
+  gap:clamp(22px, 3.5vw, 52px);
+  align-items:center;
+}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .intro-name{
+    background:linear-gradient(100deg, #fff 0%, #fff 36%, #c8ffe9 58%, #9adfff 78%, #fff 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+    animation:nameSheen 9s ease-in-out infinite;
+  }
+}
+@keyframes nameSheen{
+  0%,100%{ background-position:0% 50%; }
+  50%{ background-position:100% 50%; }
+}
+.intro-hook{
+  margin:14px 0 0;
+  max-width:22em;
+  font-size:clamp(15px, 1.25vw, 18px);
+  line-height:1.65;
+  font-weight:400;
+  color:rgba(234,242,255,.86);
+}
+.journey{
+  display:flex; flex-direction:column; gap:8px;
+  margin:0; padding:0;
+}
+.journey a{
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr) auto;
+  gap:12px; align-items:center;
+  padding:11px 14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.09);
+  background:linear-gradient(165deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+  transition:transform .35s var(--ease), border-color .3s ease, background .3s ease, box-shadow .35s ease;
+}
+.journey a:hover{
+  transform:translateX(6px);
+  border-color:rgba(94,242,192,.42);
+  background:rgba(94,242,192,.08);
+  box-shadow:0 14px 34px rgba(0,0,0,.32);
+}
+.journey .jn{
+  font-size:11px; letter-spacing:.14em; color:var(--mint);
+}
+.journey b{
+  display:block; color:#fff; font-size:14px; font-weight:600; letter-spacing:.02em;
+}
+.journey em{
+  display:block; margin-top:2px;
+  font-style:normal; font-size:12px; line-height:1.45;
+  color:rgba(198,214,236,.55);
+}
+.journey .go{
+  color:rgba(198,214,236,.4);
+  transition:transform .3s var(--ease), color .3s ease;
+}
+.journey a:hover .go{ transform:translateX(3px); color:var(--mint); }
+
+.proof{
+  list-style:none;
+  display:grid;
+  grid-template-columns:repeat(4, 1fr);
+  gap:12px;
+  margin:26px 0 0; padding:0;
+}
+.proof li{
+  padding:14px 16px 12px;
+  border-radius:14px;
+  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.018));
+  border:1px solid rgba(255,255,255,.08);
+  transition:transform .35s var(--ease), border-color .3s ease;
+}
+.proof li:hover{ transform:translateY(-3px); border-color:rgba(84,213,255,.28); }
+.proof b{
+  display:block;
+  font-size:clamp(26px, 2.4vw, 34px);
+  line-height:1; font-weight:700; letter-spacing:-.03em;
+  color:var(--mint);
+}
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .proof b{
+    background:var(--grad);
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent;
+  }
+}
+.proof span{
+  display:block; margin-top:6px;
+  font-size:12px; letter-spacing:.08em;
+  color:rgba(198,214,236,.55);
+}
+
+.cap-list{ margin-top:18px; gap:12px clamp(14px, 1.6vw, 18px); }
+.cap{
+  padding:14px 16px 13px;
+  border-top:0; border-radius:16px;
+  background:linear-gradient(165deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.08);
+  transition:transform .35s var(--ease), border-color .3s ease, box-shadow .35s ease;
+}
+.cap:hover{
+  transform:translateY(-4px);
+  border-color:rgba(94,242,192,.34);
+  box-shadow:0 16px 36px rgba(0,0,0,.32), 0 0 24px rgba(94,242,192,.08);
+}
+.cap p{ font-size:12.5px; line-height:1.7; }
+a.intro-hint{ color:var(--ink-4); width:max-content; }
+a.intro-hint:hover{ color:#fff; }
+.intro-hint{ margin-top:22px; }
+
+@keyframes riseIn{
+  from{ opacity:0; translate:0 16px; }
+  to{ opacity:1; translate:0 0; }
+}
+body.js .intro-id{ animation:riseIn .8s var(--ease) both; }
+body.js .journey a{ animation:riseIn .75s var(--ease) both; }
+body.js .journey a:nth-child(1){ animation-delay:.08s; }
+body.js .journey a:nth-child(2){ animation-delay:.14s; }
+body.js .journey a:nth-child(3){ animation-delay:.2s; }
+body.js .journey a:nth-child(4){ animation-delay:.26s; }
+body.js .proof li{ animation:riseIn .7s var(--ease) both; }
+body.js .proof li:nth-child(2){ animation-delay:.06s; }
+body.js .proof li:nth-child(3){ animation-delay:.12s; }
+body.js .proof li:nth-child(4){ animation-delay:.18s; }
+body.js .cap{ animation:riseIn .7s var(--ease) both; }
+body.js .cap:nth-child(1){ animation-delay:.05s; }
+body.js .cap:nth-child(2){ animation-delay:.1s; }
+body.js .cap:nth-child(3){ animation-delay:.15s; }
+body.js .cap:nth-child(4){ animation-delay:.2s; }
+body.js .cap:nth-child(5){ animation-delay:.25s; }
+body.js .cap:nth-child(6){ animation-delay:.3s; }
+body.js .intro-hint{ animation:riseIn .7s var(--ease) .34s both; }
+
+.pf-kicker{
+  position:absolute; z-index:4;
+  top:26px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  pointer-events:none; text-align:center;
+}
+.pf-kicker span{
+  font-size:11px; letter-spacing:.28em; color:rgba(169,255,227,.8);
+}
+.pf-kicker b{
+  font-weight:500; font-size:13px; letter-spacing:.16em;
+  color:rgba(234,242,255,.78);
+}
+
+.bridge{
+  position:relative; z-index:1;
+  display:flex; align-items:center; justify-content:center;
+  padding:13vh 8vw 8vh;
+  text-align:center;
+}
+.bridge-inner{ max-width:780px; }
+.bridge-k{
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:12px; letter-spacing:.26em;
+  color:rgba(169,255,227,.82);
+}
+.bridge-k::before{
+  content:""; width:22px; height:1px;
+  background:linear-gradient(90deg, transparent, var(--mint));
+}
+.bridge h2{
+  margin:14px 0 12px;
+  font-size:clamp(30px, 4vw, 52px);
+  line-height:1.18; font-weight:700; letter-spacing:-.02em;
+  color:#fff;
+}
+.bridge p{
+  margin:0 auto; max-width:36em;
+  font-size:16px; line-height:1.85;
+  color:rgba(198,214,236,.64);
+}
+@keyframes bridgeIn{
+  from{ opacity:0; translate:0 28px; }
+  to{ opacity:1; translate:0 0; }
+}
+@supports (animation-timeline: view()){
+  .bridge-inner{
+    animation:bridgeIn linear both;
+    animation-timeline:view();
+    animation-range:entry 0% cover 40%;
+  }
+}
+
+.slide-head{
+  display:grid;
+  grid-template-columns:auto auto minmax(0, 1fr);
+  grid-template-areas:"num title title" "lead lead lead";
+  column-gap:16px; row-gap:8px;
+  align-items:baseline;
+}
+.slide-head .s-num{ grid-area:num; }
+.slide-head h3{ grid-area:title; }
+.s-lead{
+  grid-area:lead;
+  margin:0;
+  max-width:68em;
+  font-size:14px; line-height:1.7;
+  color:rgba(198,214,236,.66);
+}
+.vendors .v-bar i{
+  width:0;
+  transition:width 1.05s var(--ease) .12s;
+}
+.slide.is-active .vendors .v-bar i{ width:var(--w); }
+
+.nowread{
+  position:fixed; z-index:130;
+  left:18px; top:16px;
+  display:flex; align-items:center; gap:10px;
+  max-width:min(420px, calc(100vw - 36px));
+  padding:7px 12px 7px 10px;
+  border-radius:999px;
+  background:rgba(8,14,26,.72);
+  border:1px solid rgba(255,255,255,.1);
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  font-size:12px; letter-spacing:.06em;
+  color:rgba(226,240,255,.88);
+  opacity:0; translate:0 -8px;
+  pointer-events:none;
+  transition:opacity .35s ease, translate .35s var(--ease);
+}
+.nowread.on{ opacity:1; translate:0 0; }
+.nowread i{
+  width:6px; height:6px; flex:none; border-radius:50%;
+  background:var(--mint); box-shadow:0 0 10px var(--mint);
+}
+.nowread b{ font-weight:500; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.snav a::after{
+  content:""; position:absolute; inset:-7px;
+}
+
+.v-hint{
+  padding:10px 16px; border-radius:999px;
+  border:1px dashed rgba(94,242,192,.4);
+  background:rgba(94,242,192,.07);
+  color:rgba(214,255,238,.82);
+  animation:hintBreath 2.6s ease-in-out infinite;
+}
+@keyframes hintBreath{
+  0%,100%{ box-shadow:0 0 0 0 rgba(94,242,192,.0); }
+  50%{ box-shadow:0 0 0 6px rgba(94,242,192,.06); }
+}
+
+.closeout{
+  position:relative; z-index:1;
+  padding:12vh 8vw 14vh;
+  text-align:center;
+}
+.closeout-k{
+  font-size:12px; letter-spacing:.28em; color:rgba(169,255,227,.75);
+}
+.closeout h2{
+  margin:14px 0 12px;
+  font-size:clamp(28px, 3.4vw, 44px);
+  font-weight:700; letter-spacing:-.02em; color:#fff;
+}
+.closeout p{
+  margin:0 auto; max-width:34em;
+  font-size:15.5px; line-height:1.8;
+  color:rgba(198,214,236,.62);
+}
+.closeout-acts{
+  margin-top:26px;
+  display:flex; justify-content:center; flex-wrap:wrap; gap:12px;
+}
+.closeout-acts a{
+  display:inline-flex; align-items:center; gap:8px;
+  height:44px; padding:0 18px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);
+  color:#fff; font-size:14px;
+  transition:transform .3s var(--ease), border-color .3s ease, background .3s ease;
+}
+.closeout-acts a:hover{
+  transform:translateY(-2px);
+  border-color:rgba(94,242,192,.45);
+  background:rgba(94,242,192,.1);
+}
+.closeout-acts a.primary{
+  border:0; color:#04121a; font-weight:700;
+  background:linear-gradient(120deg, #6ef3c6, #54d5ff 70%, #8f86ff);
+}
 
 /* ================= 响应式 ================= */
 @media (max-width: 1280px){
@@ -1510,11 +1854,19 @@ html.lock, body.lock{ overflow:hidden; }
 @media (max-width: 900px){
   .snav{ display:none; }
 
-  .intro{ padding:88px 0 104px; }
+  .intro{ padding:88px 0 72px; }
+  .intro-top{ grid-template-columns:1fr; gap:18px; }
   .intro-name{ font-size:44px; }
-  .cap-list{ grid-template-columns:1fr; margin-top:34px; }
-  .cap{ padding:18px 0 16px; }
+  .intro-hook{ max-width:none; }
+  .proof{ grid-template-columns:1fr 1fr; margin-top:18px; }
+  .cap-list{ grid-template-columns:1fr; margin-top:16px; }
+  .cap{ padding:14px 14px 12px; }
   .cap p{ font-size:13.5px; }
+  .nowread{ display:none; }
+  .bridge{ padding:10vh 6vw 6vh; }
+  .bridge h2{ font-size:30px; }
+  .pf-kicker{ top:14px; }
+  .closeout{ padding:10vh 6vw 12vh; }
 
   .hero{
     flex-direction:column;
@@ -1543,7 +1895,7 @@ html.lock, body.lock{ overflow:hidden; }
   .keys{ gap:6px; padding:8px; }
   .keys button{ height:30px; font-size:13.5px; }
   .r-tip{ display:none; }
-  .scroll-hint{ bottom:10px; }
+  .scroll-hint{ display:none; }
 
   .ch{ padding:44px 0 48px; border-radius:22px; }
   .ch-inner{ width:92vw; }
@@ -1604,12 +1956,21 @@ html.lock, body.lock{ overflow:hidden; }
   .tv{ animation:none; }
   .led{ animation:none; }
   .pulse-dot{ animation:none; }
+  .screen::after{ animation:none; opacity:0; }
+  .intro-name{ animation:none; }
+  .v-hint{ animation:none; }
+  .bridge-inner{ animation:none !important; }
+  body.js .intro-id,
+  body.js .journey a,
+  body.js .proof li,
+  body.js .cap,
+  body.js .intro-hint{ animation:none; opacity:1; translate:none; }
   body.js .reveal{ opacity:1 !important; transform:none !important; transition:none !important; }
   body.js .ch-head h2{ clip-path:none !important; }
   .ch{ transform:none !important; opacity:1 !important; }
   .ch-inner{ transform:none !important; opacity:1 !important; }
   .hero .tv-wrap, .hero .remote{ transform:none !important; opacity:1 !important; }
-  .fx-spot{ display:none; }
+  .fx-spot, .fx-grain{ display:none; }
 }
 
 </style>
@@ -1621,65 +1982,100 @@ html.lock, body.lock{ overflow:hidden; }
 <div class="fx-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="fx-grid" aria-hidden="true"></div>
 <div class="fx-spot" aria-hidden="true"></div>
+<div class="fx-grain" aria-hidden="true"></div>
+<div class="fx-vignette" aria-hidden="true"></div>
+<div class="nowread" id="nowread" aria-hidden="true"><i></i><b id="nowreadT">开场 · 贺胜</b></div>
 
 <!-- ================= 开场：自我介绍 ================= -->
   <section class="intro" id="intro">
     <div class="intro-inner">
 
-      <!-- 首屏：姓名 + 六项能力 -->
-      <header class="intro-id">
-        <span class="eyebrow"><i class="pulse-dot"></i>求职作品集 · 2026</span>
-        <h1 class="intro-name">贺胜</h1>
-        <p class="intro-role">酒店 IPTV / IoT 应用开发</p>
-        <p class="intro-meta">3 年 · 上海 · <a href="mailto:19355101301@163.com">19355101301@163.com</a></p>
-      </header>
+      <!-- 首屏：姓名 + 往下走的路径 -->
+      <div class="intro-top">
+        <header class="intro-id">
+          <span class="eyebrow"><i class="pulse-dot"></i>求职作品集 · 2026</span>
+          <h1 class="intro-name">贺胜</h1>
+          <p class="intro-role">酒店 IPTV / IoT 应用开发</p>
+          <p class="intro-hook">客房里的那台电视，我做成了能开机、能控设备、也能开口说话的产品。</p>
+          <p class="intro-meta">3 年 · 上海 · <a href="mailto:19355101301@163.com">19355101301@163.com</a></p>
+        </header>
+        <nav class="journey" aria-label="作品路径">
+          <a href="#heroTrack" data-scroll>
+            <span class="jn">01</span>
+            <span><b>开机演示</b><em>四家酒店，遥控真能点</em></span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+          <a href="#works" data-scroll>
+            <span class="jn">02</span>
+            <span><b>上线界面</b><em>18 家，滚一下翻一张</em></span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+          <a href="#pager" data-scroll>
+            <span class="jn">03</span>
+            <span><b>设备接入</b><em>送物、洗衣、人流、空调</em></span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+          <a href="#voice" data-scroll>
+            <span class="jn">04</span>
+            <span><b>开口说话</b><em>语音客服，接到真实接口</em></span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+        </nav>
+      </div>
+
+      <ul class="proof" aria-label="作品规模">
+        <li><b>4</b><span>家可交互酒店</span></li>
+        <li><b>18</b><span>套上线界面</span></li>
+        <li><b>4</b><span>类客房设备</span></li>
+        <li><b>2</b><span>套 AI 演示</span></li>
+      </ul>
 
       <ul class="cap-list">
         <li class="cap">
           <span class="cap-n">01</span>
           <div>
             <b>酒店 IPTV 开发</b>
-            <p>精通酒店 IPTV 开发，独立完成电视底座、界面改造、机顶盒适配，有诺富特门店 POC 落地经验，熟悉国际品牌合规验收要求。</p>
+            <p>独立完成电视底座、界面改造和机顶盒适配。诺富特门店做过 POC，按国际品牌的合规验收走完。</p>
           </div>
         </li>
         <li class="cap">
           <span class="cap-n">02</span>
           <div>
             <b>后端与网关</b>
-            <p>熟练 Java、Node.js，可独立开发后端、网关、对接第三方接口与设备 SDK。</p>
+            <p>Java、Node.js 都能独立写后端和网关，第三方接口和设备 SDK 自己对接。</p>
           </div>
         </li>
         <li class="cap">
           <span class="cap-n">03</span>
           <div>
             <b>酒店 IoT 对接</b>
-            <p>具备酒店 IoT 对接实战：配送机器人、洗烘设备、人流传感器等异构设备接入、状态同步、异常处理。</p>
+            <p>配送机器人、洗烘设备、人流传感器：接入、状态同步、异常处理，都在客房场景里跑过。</p>
           </div>
         </li>
         <li class="cap">
           <span class="cap-n">04</span>
           <div>
             <b>RAG / Agent 落地</b>
-            <p>有 RAG/Agent 落地经验，实现酒店知识库智能客服，并集成至电视终端供客人使用。</p>
+            <p>酒店知识库做成智能客服，接进电视。客人问早餐、Wi-Fi、景点，不用再翻菜单。</p>
           </div>
         </li>
         <li class="cap">
           <span class="cap-n">05</span>
           <div>
             <b>MQTT · IoT 网关</b>
-            <p>掌握 MQTT，了解 IoT 网关架构，实现电视、IoT 设备、客房工单系统联动。</p>
+            <p>电视、客房设备和工单走同一套 MQTT。说一句就能联动，状态也能回得来。</p>
           </div>
         </li>
         <li class="cap">
           <span class="cap-n">06</span>
           <div>
             <b>Linux · 现场联调</b>
-            <p>熟悉 Linux、网络排障，能到门店现场联调，适配酒店复杂现场环境。</p>
+            <p>熟悉 Linux 和网络排障，能到门店把复杂现场环境调通。</p>
           </div>
         </li>
       </ul>
 
-      <div class="intro-hint"><i class="dot"></i>继续往下滚，下面是可点的演示</div>
+      <a class="intro-hint" href="#heroTrack" data-scroll><i class="dot"></i>往下，先看四家酒店开机</a>
 
     </div>
   </section>
@@ -1687,8 +2083,8 @@ html.lock, body.lock{ overflow:hidden; }
     <section class="hero-track" id="heroTrack">
   <div class="hero">
   <div class="hero-cap" aria-hidden="true">
-    <span class="cap-k">02 · 电视终端</span>
-    <span class="cap-t">真机界面 · 用遥控或键盘直接操作</span>
+    <span class="cap-k">01 · 四家酒店真机</span>
+    <span class="cap-t">滚动会换下一家 · 右边遥控和键盘都能操作</span>
   </div>
   <!-- ================= 电视（两侧切换酒店） ================= -->
   <div class="tv-wrap">
@@ -1709,6 +2105,7 @@ html.lock, body.lock{ overflow:hidden; }
       <div class="hotel-tag" id="hotelTag">
         <span class="ht-name" id="hotelName">盛捷服务公寓</span>
         <span class="ht-dots" id="hotelDots"><i class="on"></i><i></i><i></i><i></i></span>
+        <span class="ht-sub">滚动或点两侧 · 换一家酒店</span>
       </div>
     </div>
 
@@ -1752,9 +2149,9 @@ html.lock, body.lock{ overflow:hidden; }
     <div class="r-tip">点按钮控制电视 · 数字键直达对应栏目<br />键盘方向键 / 回车 / Esc 同样有效</div>
   </div>
 
-  <div class="scroll-hint" id="scrollHint" aria-hidden="true">
-    <span class="dot"></span><b>向下滚动</b><span>查看作品集</span>
-  </div>
+  <a class="scroll-hint" id="scrollHint" href="#works" data-scroll>
+    <span class="dot"></span><b>向下滚动</b><span>18 家上线界面</span>
+  </a>
   
   </div>
 </section>
@@ -1762,8 +2159,9 @@ html.lock, body.lock{ overflow:hidden; }
 
 
   <!-- ================= 第二屏：作品集 ================= -->
-  <section class="works" id="works">
+  <section class="works" id="works" data-rail="02 · 作品">
     <div class="works-sticky">
+      <div class="pf-kicker"><span>02 · 上线界面</span><b>18 家酒店电视 · 继续向下翻</b></div>
       <div class="pf-bg"><span id="pfBig">PORTFOLIO</span></div>
       <div class="pf-glow"></div>
       <div class="pf-stage" id="pfStage"></div>
@@ -1781,23 +2179,29 @@ html.lock, body.lock{ overflow:hidden; }
     </div>
   </section>
 
-  
+  <section class="bridge" aria-label="从界面到设备">
+    <div class="bridge-inner">
+      <div class="bridge-k">界面做完，电视开始管房间</div>
+      <h2>下面这些设备，已经接进客房。</h2>
+      <p>配送、洗衣、人流。这一段会横向翻页，画面里可以直接点。</p>
+    </div>
+  </section>
 
   <!-- ================= 设备章节：演示 + 接入情况 ================= -->
   <!-- ================= 设备演示：横向翻页集合 ================= -->
-  <section class="pager" id="pager" data-nav="01–03 · 设备演示">
+  <section class="pager" id="pager" data-nav="03 · 设备演示">
     <div class="pager-sticky">
       <div class="pager-track" id="pagerTrack">
 
         <!-- 01 配送机器人 -->
         <article class="slide">
-          <div class="slide-head"><span class="s-num">01</span><h3>配送机器人</h3></div>
+          <div class="slide-head"><span class="s-num">01</span><h3>配送机器人</h3><p class="s-lead">客人在电视上选物品下单，机器人送到门口。四家厂商走同一套页面。</p></div>
           <div class="slide-body">
             <div class="ch-frame"><iframe id="demoFrame" src="robot-delivery.html" title="机器人送物演示"></iframe></div>
             <aside class="vendors">
               <div class="v-k">已对接厂家</div>
               <ul class="v-list"><li>云迹科技</li><li>猎户星空</li><li>普渡科技</li><li>洛必德</li></ul>
-              <div class="v-bar"><i style="width:38%"></i></div>
+              <div class="v-bar"><i style="--w:38%"></i></div>
               <div class="v-note">酒店场景覆盖率 ≈30–38%</div>
             </aside>
           </div>
@@ -1805,13 +2209,13 @@ html.lock, body.lock{ overflow:hidden; }
 
         <!-- 02 洗烘设备 -->
         <article class="slide">
-          <div class="slide-head"><span class="s-num">02</span><h3>洗烘设备</h3></div>
+          <div class="slide-head"><span class="s-num">02</span><h3>洗烘设备</h3><p class="s-lead">洗衣房的洗衣机和烘干机接到电视上，空闲、预约和状态都看得到。</p></div>
           <div class="slide-body">
             <div class="ch-frame"><iframe id="washerFrame" src="washer-demo.html" title="自助洗衣演示"></iframe></div>
             <aside class="vendors">
               <div class="v-k">已对接厂家</div>
               <ul class="v-list"><li>LG</li><li>海尔商用智洗</li><li>美的 U净</li><li>三星</li></ul>
-              <div class="v-bar"><i style="width:62%"></i></div>
+              <div class="v-bar"><i style="--w:62%"></i></div>
               <div class="v-note">酒店洗衣房覆盖率 ≈55–65%</div>
             </aside>
           </div>
@@ -1819,7 +2223,7 @@ html.lock, body.lock{ overflow:hidden; }
 
         <!-- 03 人体传感器 -->
         <article class="slide">
-          <div class="slide-head"><span class="s-num">03</span><h3>人体传感器</h3></div>
+          <div class="slide-head"><span class="s-num">03</span><h3>人体传感器</h3><p class="s-lead">雷达只报「较少 / 适中 / 较多 / 拥挤」，不拍画面、不认人。客人据此挑一个不挤的时间下楼。</p></div>
           <div class="slide-body">
             <div class="ch-frame"><iframe id="crowdFrame" src="crowd-demo/index.html" title="公共区域人流密度演示" scrolling="no"></iframe></div>
             <aside class="vendors vendors--text">
@@ -1844,8 +2248,9 @@ html.lock, body.lock{ overflow:hidden; }
         <span class="ch-num">04 · 设备控制</span>
         <h2 class="dive-title">空调面板：网页端统一控制</h2>
         <p class="ch-lead">
+          客人在电视上调温度，背后是这一页在发令、回读、标记离线。
           HJ-X40-TS 温控面板走 2.4G Wi-Fi 接入，平台侧补了 Echo 服务（MAC 换 deviceid）、MQTT Broker 分发和固件 OTA；
-          网页后台就能统一控制开关、温度、风速、模式、定时，同时回读温度、湿度、PM2.5 与在线状态。
+          网页后台统一控制开关、温度、风速、模式、定时，同时回读温度、湿度、PM2.5 与在线状态。
         </p>
 
         <div class="dive-specs">
@@ -1909,6 +2314,14 @@ html.lock, body.lock{ overflow:hidden; }
       </div>
     </div>
   </div>
+
+  <section class="bridge" aria-label="从按钮到一句话">
+    <div class="bridge-inner">
+      <div class="bridge-k">按钮收成一句话</div>
+      <h2>客人不用自己找这些功能。</h2>
+      <p>对着电视说，或用手机按住说。同一个 Agent：问服务、控电视、叫设备。点一句就能看到它怎么回。</p>
+    </div>
+  </section>
 
   <div class="chapters">
 
@@ -1993,8 +2406,9 @@ html.lock, body.lock{ overflow:hidden; }
           <span class="ch-num">06 · AI 创作</span>
           <h2>创作中心：对话、生图、生视频、作品库</h2>
           <p class="ch-lead">
-            我负责的是面向普通用户的 AI 创作功能：在同一个工作台里对话、生成图片、生成视频，
-            生成结果自动进入作品库；每次调用按当前密钥的额度计费。
+            客人侧能问、能控之后，运营侧还有一个创作台。
+            我做的是面向普通用户的 AI 创作：同一个工作台里对话、生成图片、生成视频，
+            结果自动进作品库；每次调用按当前密钥的额度计费。
           </p>
         </div>
 
@@ -2030,8 +2444,15 @@ html.lock, body.lock{ overflow:hidden; }
 
   </div>
 
-
-
+  <footer class="closeout" id="closeout">
+    <div class="closeout-k">看到这里</div>
+    <h2>这些演示都可以当场点。</h2>
+    <p>电视、设备、语音、创作台，是同一条从界面走到房间里的链路。</p>
+    <div class="closeout-acts">
+      <a class="primary" href="mailto:19355101301@163.com">19355101301@163.com</a>
+      <a href="#intro" data-scroll>回到开头</a>
+    </div>
+  </footer>
 
   
 
@@ -2431,16 +2852,17 @@ html.lock, body.lock{ overflow:hidden; }
   bar.className = 'page-bar';
   document.body.appendChild(bar);
 
-  /* 3. 右侧章节导航 */
+  /* 3. 右侧章节导航：作品起，避免盖住电视遥控 */
   var nav = document.createElement('div');
   nav.className = 'snav';
 
-  /* 导航项：先放横向翻页集合，再放各个章节 */
-  var navItems = Array.prototype.slice.call(document.querySelectorAll('.pager, .dive, .ch'));
+  var rail = Array.prototype.slice.call(document.querySelectorAll('[data-rail]'));
+  var rest = Array.prototype.slice.call(document.querySelectorAll('.pager, .dive, .ch'));
+  var navItems = rail.filter(function (el) { return rest.indexOf(el) < 0; }).concat(rest);
 
   var links = navItems.map(function (ch, i) {
     var numEl = ch.querySelector('.ch-num');
-    var label = numEl ? numEl.textContent.trim() : (ch.dataset.nav || ch.dataset.label || ('0' + (i + 1)));
+    var label = ch.getAttribute('data-rail') || (numEl ? numEl.textContent.trim() : (ch.dataset.nav || ch.dataset.label || ('0' + (i + 1))));
     var shortLabel = label.split('·')[0].trim();
     var a = document.createElement('a');
     a.href = '#' + (ch.id || ('ch' + i));
@@ -2485,8 +2907,20 @@ html.lock, body.lock{ overflow:hidden; }
   }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
   navItems.forEach(function (c) { activeIo.observe(c); });
 
-  /* 6. 滚动：进度条 + 视差 + 导航显隐 */
+  /* 6. 滚动：进度条 + 视差 + 导航显隐 + 当前位置 */
   var ticking = false;
+  var nowEl = document.getElementById('nowread');
+  var nowT = document.getElementById('nowreadT');
+  var stops = [
+    { el: document.getElementById('intro'), t: '开场 · 贺胜' },
+    { el: document.getElementById('heroTrack'), t: '电视 · 四家酒店' },
+    { el: document.getElementById('works'), t: '作品 · 18 家界面' },
+    { el: document.getElementById('pager'), t: '设备 · 接入演示' },
+    { el: document.getElementById('env'), t: '控制 · 空调后台' },
+    { el: document.getElementById('voice'), t: '语音 · 一句话' },
+    { el: document.getElementById('mindrouter'), t: '创作 · 工作台' },
+    { el: document.getElementById('closeout'), t: '结尾 · 欢迎联系' }
+  ].filter(function (s) { return s.el; });
 
   /* 进度条与导航显隐同步做（便宜且不受 rAF 调度影响），视差放 rAF */
   function onScroll() {
@@ -2494,10 +2928,28 @@ html.lock, body.lock{ overflow:hidden; }
     var pct = docH > 0 ? Math.min(1, Math.max(0, window.scrollY / docH)) : 0;
     bar.style.width = (pct * 100).toFixed(2) + '%';
 
-    var first = navItems[0].getBoundingClientRect();
+    var worksGate = document.getElementById('works');
     var last = navItems[navItems.length - 1].getBoundingClientRect();
-    var inZone = last.bottom > window.innerHeight * 0.35 && first.top < window.innerHeight * 0.75;
+    var gateTop = worksGate ? worksGate.getBoundingClientRect().top : 0;
+    var inZone = gateTop < window.innerHeight * 0.22 && last.bottom > window.innerHeight * 0.28;
     nav.classList.toggle('on', inZone);
+
+    if (nowEl && nowT && stops.length) {
+      var current = stops[0];
+      for (var si = 0; si < stops.length; si++) {
+        if (stops[si].el.getBoundingClientRect().top < window.innerHeight * 0.42) current = stops[si];
+      }
+      var label = current.t;
+      if (current.el.id === 'works') {
+        var count = document.getElementById('pfCount');
+        if (count && count.textContent) label = '作品 · ' + count.textContent.trim();
+      } else if (current.el.id === 'pager') {
+        var activeH = current.el.querySelector('.slide.is-active h3');
+        if (activeH) label = '设备 · ' + activeH.textContent.trim();
+      }
+      if (nowT.textContent !== label) nowT.textContent = label;
+      nowEl.classList.toggle('on', window.scrollY > 40);
+    }
 
     /* 第一屏：随滚动上浮 + 淡出；第二屏：面板抬升 + 内容进场 */
     if (introEl && introInner) {
@@ -2515,7 +2967,11 @@ html.lock, body.lock{ overflow:hidden; }
       /* 进场用真实位置算（sticky 前也能正确淡入），淡出用轨道进度 */
       var hr = heroEl.getBoundingClientRect();
       heroEl.style.setProperty('--hc', Math.min(1, Math.max(0, (window.innerHeight - hr.top) / (window.innerHeight * 0.55))).toFixed(3));
-      if (hintEl) hintEl.style.opacity = tp > 0.08 ? '0' : '1';
+      if (hintEl) {
+        var showHint = tp <= 0.08;
+        hintEl.style.opacity = showHint ? '1' : '0';
+        hintEl.style.pointerEvents = showHint ? 'auto' : 'none';
+      }
       heroEl.style.setProperty('--out', Math.max(0, (tp - 0.8) / 0.2).toFixed(3));
 
       var step = Math.min(3, Math.floor(tp * 4));

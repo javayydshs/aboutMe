@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
+<script>try{if(localStorage.getItem('tv-theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>贺胜 · 酒店 IPTV / IoT 作品集</title>
 <meta name="description" content="贺胜的酒店 IPTV / IoT 作品集：四家酒店真机界面、设备接入，以及能开口的 AI。" />
@@ -1762,7 +1763,7 @@ body.js .intro-hint{ animation:riseIn .7s var(--ease) .34s both; }
 
 .nowread{
   position:fixed; z-index:130;
-  left:18px; top:16px;
+  left:18px; top:58px;
   display:flex; align-items:center; gap:10px;
   max-width:min(420px, calc(100vw - 36px));
   padding:7px 12px 7px 10px;
@@ -1973,6 +1974,315 @@ body.js .intro-hint{ animation:riseIn .7s var(--ease) .34s both; }
   .fx-spot, .fx-grain{ display:none; }
 }
 
+/* ============================================================
+   浅色 · 唯一备选主题
+   默认（无 data-theme）仍是深空极光，这里的规则全部不生效。
+   电视、遥控、演示画面保持深色器物，不跟着翻。
+   ============================================================ */
+html[data-theme="light"]{
+  color-scheme:light;
+  --bg:#f3f6f4;
+  --bg-2:#ffffff;
+  --ink:#14202b;
+  --ink-2:#3c4b5c;
+  --ink-3:rgba(20,32,43,.58);
+  --ink-4:rgba(20,32,43,.42);
+  --line:rgba(20,32,43,.1);
+  --line-2:rgba(20,32,43,.16);
+  --panel:#ffffff;
+  --panel-2:#f7faf8;
+  --mint:#0c7d5b;
+  --mint-d:#086348;
+  --cyan:#0a6f96;
+  --violet:#3d4ed8;
+  --grad:linear-gradient(102deg, #0c7d5b 0%, #0a6f96 52%, #3d4ed8 100%);
+}
+html[data-theme="light"] body{ background:var(--bg); color:var(--ink-2); }
+html[data-theme="light"] ::selection{ background:rgba(12,125,91,.18); color:#14202b; }
+html[data-theme="light"] ::-webkit-scrollbar-track{ background:#e7eeea; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg, rgba(12,125,91,.55), rgba(10,111,150,.45));
+  border-color:#e7eeea;
+}
+html[data-theme="light"] .fx-vignette{ opacity:.35; background:radial-gradient(ellipse at center, transparent 58%, rgba(20,32,43,.06) 100%); }
+html[data-theme="light"] .fx-grain{ opacity:.03; }
+html[data-theme="light"] .fx-grid{
+  background-image:
+    linear-gradient(rgba(20,32,43,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20,32,43,.045) 1px, transparent 1px);
+}
+html[data-theme="light"] .fx-aurora{
+  background:
+    radial-gradient(1100px 700px at 12% -8%, rgba(12,125,91,.16), transparent 62%),
+    radial-gradient(900px 700px at 90% 0%, rgba(10,111,150,.12), transparent 60%);
+}
+html[data-theme="light"] .fx-aurora i:nth-child(1){ background:radial-gradient(circle, rgba(12,125,91,.35), transparent 68%); opacity:.55; }
+html[data-theme="light"] .fx-aurora i:nth-child(2){ background:radial-gradient(circle, rgba(10,111,150,.28), transparent 68%); opacity:.5; }
+html[data-theme="light"] .fx-aurora i:nth-child(3){ background:radial-gradient(circle, rgba(61,78,216,.2), transparent 68%); opacity:.45; }
+html[data-theme="light"] .fx-spot{
+  background:radial-gradient(circle, rgba(12,125,91,.14) 0%, rgba(10,111,150,.06) 40%, transparent 70%);
+}
+html[data-theme="light"] .led{ background:#5ef2c0; box-shadow:0 0 10px rgba(94,242,192,.9); }
+html[data-theme="light"] .remote{
+  background:linear-gradient(165deg, #243044 0%, #161d2b 48%, #10151f 100%);
+  border-color:rgba(255,255,255,.14);
+}
+html[data-theme="light"] .h-arrow{
+  background:#fff;
+  border-color:rgba(20,32,43,.14);
+  color:#14202b;
+  box-shadow:0 8px 20px rgba(20,32,43,.08);
+}
+html[data-theme="light"] .h-arrow:hover{
+  background:#f4fbf8;
+  border-color:rgba(12,125,91,.45);
+  color:#0c7d5b;
+}
+
+html[data-theme="light"] .intro{
+  background:
+    radial-gradient(900px 520px at 10% 0%, rgba(12,125,91,.1), transparent 62%),
+    radial-gradient(800px 560px at 92% 8%, rgba(10,111,150,.08), transparent 62%),
+    var(--bg);
+}
+html[data-theme="light"] .intro::before{
+  background:radial-gradient(closest-side, rgba(12,125,91,.12), transparent 72%);
+}
+html[data-theme="light"] .eyebrow{ color:rgba(20,32,43,.55); }
+html[data-theme="light"] .intro-name{
+  background:none;
+  -webkit-background-clip:border-box; background-clip:border-box;
+  -webkit-text-fill-color:#101820; color:#101820;
+  animation:none;
+}
+html[data-theme="light"] .intro-hook{ color:#243140; }
+html[data-theme="light"] .intro-meta{ color:rgba(20,32,43,.55); }
+html[data-theme="light"] .intro-meta a{ color:#0c7d5b; border-bottom-color:rgba(12,125,91,.4); }
+html[data-theme="light"] .cap,
+html[data-theme="light"] .proof li,
+html[data-theme="light"] .journey a{
+  background:#fff;
+  border-color:rgba(20,32,43,.1);
+  box-shadow:0 10px 28px rgba(20,32,43,.04);
+}
+html[data-theme="light"] .cap b,
+html[data-theme="light"] .journey b{ color:#14202b; }
+html[data-theme="light"] .cap p,
+html[data-theme="light"] .journey em{ color:#516070; }
+html[data-theme="light"] .cap:hover,
+html[data-theme="light"] .journey a:hover,
+html[data-theme="light"] .proof li:hover{
+  border-color:rgba(12,125,91,.45);
+  box-shadow:0 16px 34px rgba(20,32,43,.08);
+}
+html[data-theme="light"] .proof b{
+  background:var(--grad);
+  -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent;
+}
+html[data-theme="light"] a.intro-hint{ color:rgba(20,32,43,.5); }
+html[data-theme="light"] a.intro-hint:hover{ color:#14202b; }
+
+html[data-theme="light"] .hero{
+  background:
+    radial-gradient(900px 560px at 50% 30%, rgba(12,125,91,.08), transparent 62%),
+    radial-gradient(700px 500px at 78% 72%, rgba(10,111,150,.06), transparent 64%),
+    var(--bg);
+}
+html[data-theme="light"] .hero::before{
+  background:radial-gradient(closest-side, rgba(12,125,91,.08), transparent 70%);
+}
+html[data-theme="light"] .hero-cap .cap-k{
+  color:#14202b;
+  border-color:rgba(20,32,43,.12);
+  background:rgba(255,255,255,.82);
+}
+html[data-theme="light"] .hero-cap .cap-t{ color:rgba(20,32,43,.55); }
+html[data-theme="light"] .hotel-tag .ht-name{ color:#14202b; }
+html[data-theme="light"] .hotel-tag .ht-sub{ color:rgba(20,32,43,.5); }
+html[data-theme="light"] .hotel-tag .ht-dots i{ background:rgba(20,32,43,.18); }
+html[data-theme="light"] .scroll-hint{
+  color:#14202b;
+  background:rgba(255,255,255,.86);
+  border-color:rgba(20,32,43,.12);
+}
+html[data-theme="light"] .scroll-hint b{ color:#14202b; }
+html[data-theme="light"] .scroll-hint:hover{ color:#0c7d5b; border-color:rgba(12,125,91,.4); }
+
+html[data-theme="light"] .works{
+  background:
+    radial-gradient(1000px 640px at 50% 18%, rgba(10,111,150,.08), transparent 62%),
+    #eef3f1;
+}
+html[data-theme="light"] .works::before{
+  background:linear-gradient(180deg, rgba(243,246,244,.95), rgba(243,246,244,0));
+}
+html[data-theme="light"] .works-sticky::before{
+  background-image:
+    linear-gradient(rgba(20,32,43,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20,32,43,.04) 1px, transparent 1px);
+}
+html[data-theme="light"] .pf-bg span{ color:rgba(20,32,43,.06); }
+html[data-theme="light"] .pf-kicker span{ color:#0c7d5b; }
+html[data-theme="light"] .pf-kicker b,
+html[data-theme="light"] .pf-name{ color:#14202b; text-shadow:none; }
+html[data-theme="light"] .pf-meta,
+html[data-theme="light"] .pf-meta .pf-hint2{ color:rgba(20,32,43,.48); }
+html[data-theme="light"] .pf-bar{ background:rgba(20,32,43,.1); }
+html[data-theme="light"] .pf-glow{
+  background:radial-gradient(circle, rgba(12,125,91,.12) 0%, rgba(10,111,150,.05) 42%, transparent 70%);
+}
+
+html[data-theme="light"] .pager{
+  background:
+    radial-gradient(900px 560px at 80% 0%, rgba(61,78,216,.06), transparent 62%),
+    var(--bg);
+}
+html[data-theme="light"] .slide-head h3,
+html[data-theme="light"] .dive-title,
+html[data-theme="light"] .ch-head h2,
+html[data-theme="light"] .bridge h2,
+html[data-theme="light"] .closeout h2{ color:#101820; }
+html[data-theme="light"] .s-lead,
+html[data-theme="light"] .ch-lead,
+html[data-theme="light"] .bridge p,
+html[data-theme="light"] .closeout p,
+html[data-theme="light"] .ch-tip{ color:#516070; }
+html[data-theme="light"] .vendors,
+html[data-theme="light"] .spec,
+html[data-theme="light"] .v-in-card,
+html[data-theme="light"] .mc-item{
+  background:#fff;
+  border-color:rgba(20,32,43,.1);
+  box-shadow:0 16px 40px rgba(20,32,43,.05);
+}
+html[data-theme="light"] .vendors .v-k,
+html[data-theme="light"] .spec .k{ color:rgba(20,32,43,.45); }
+html[data-theme="light"] .vendors .v-note,
+html[data-theme="light"] .vendors--text .v-desc,
+html[data-theme="light"] .spec p,
+html[data-theme="light"] .v-in-card p,
+html[data-theme="light"] .mc-item p{ color:#516070; }
+html[data-theme="light"] .vendors .v-list li{
+  background:rgba(12,125,91,.08);
+  border-color:rgba(12,125,91,.28);
+  color:#0c7d5b;
+}
+html[data-theme="light"] .spec b,
+html[data-theme="light"] .v-in-card b,
+html[data-theme="light"] .mc-item b{ color:#14202b; }
+html[data-theme="light"] .dive{
+  background:
+    radial-gradient(900px 560px at 50% 30%, rgba(10,111,150,.07), transparent 62%),
+    var(--bg);
+}
+html[data-theme="light"] .dive-tip{ color:rgba(20,32,43,.45); }
+html[data-theme="light"] .chapters{
+  background:
+    radial-gradient(1000px 560px at 12% 0%, rgba(12,125,91,.08), transparent 62%),
+    radial-gradient(900px 620px at 88% 20%, rgba(10,111,150,.06), transparent 60%),
+    var(--bg);
+}
+html[data-theme="light"] .ch{
+  background:linear-gradient(180deg, #fff, #f6faf8);
+  border-color:rgba(20,32,43,.1);
+  box-shadow:0 28px 60px rgba(20,32,43,.06);
+}
+html[data-theme="light"] .ch::after{
+  background:linear-gradient(90deg, transparent, rgba(12,125,91,.55), rgba(10,111,150,.35), transparent);
+}
+html[data-theme="light"] .ch-num{
+  color:#0c7d5b;
+  border-color:rgba(12,125,91,.3);
+  background:rgba(12,125,91,.08);
+}
+html[data-theme="light"] .ch.vfull{
+  background:
+    radial-gradient(1000px 620px at 20% 0%, rgba(12,125,91,.1), transparent 62%),
+    radial-gradient(900px 620px at 84% 80%, rgba(61,78,216,.08), transparent 62%),
+    #f4f7f5;
+}
+html[data-theme="light"] .bridge-k,
+html[data-theme="light"] .closeout-k{ color:#0c7d5b; }
+html[data-theme="light"] .v-tab{
+  color:#3c4b5c;
+  background:#fff;
+  border-color:rgba(20,32,43,.1);
+}
+html[data-theme="light"] .v-tab:hover{ color:#14202b; border-color:rgba(12,125,91,.4); }
+html[data-theme="light"] .v-chip{
+  color:#243140;
+  background:#fff;
+  border-color:rgba(20,32,43,.1);
+}
+html[data-theme="light"] .v-chip:hover,
+html[data-theme="light"] .v-chip.on{
+  background:rgba(12,125,91,.08);
+  border-color:rgba(12,125,91,.45);
+  color:#0c7d5b;
+}
+html[data-theme="light"] .closeout-acts a{
+  color:#14202b;
+  background:#fff;
+  border-color:rgba(20,32,43,.12);
+}
+html[data-theme="light"] .closeout-acts a.primary{ color:#04121a; border:0; }
+html[data-theme="light"] .nowread{
+  background:rgba(255,255,255,.9);
+  border-color:rgba(20,32,43,.1);
+  color:#14202b;
+}
+html[data-theme="light"] .nowread b{ color:#14202b; }
+html[data-theme="light"] .snav a{ background:rgba(20,32,43,.18); }
+html[data-theme="light"] .snav a span{
+  color:#14202b;
+  background:rgba(255,255,255,.96);
+  border-color:rgba(20,32,43,.1);
+}
+html[data-theme="light"] .pager-dots i{ background:rgba(20,32,43,.16); }
+html[data-theme="light"] .theme-switch{
+  background:rgba(255,255,255,.92);
+  border-color:rgba(20,32,43,.12);
+  box-shadow:0 10px 28px rgba(20,32,43,.08);
+}
+html[data-theme="light"] .theme-switch button{ color:rgba(20,32,43,.62); }
+html[data-theme="light"] .theme-switch button.on{
+  color:#04281c;
+  background:#fff;
+  box-shadow:0 1px 0 rgba(20,32,43,.04);
+}
+
+.theme-switch{
+  position:fixed; z-index:160;
+  top:14px; left:16px;
+  display:flex; gap:2px;
+  padding:3px;
+  border-radius:999px;
+  background:rgba(8,14,26,.72);
+  border:1px solid rgba(255,255,255,.12);
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+}
+.theme-switch button{
+  border:0; cursor:pointer;
+  height:28px; padding:0 10px;
+  border-radius:999px;
+  background:transparent;
+  color:rgba(226,240,255,.72);
+  font-size:12px; letter-spacing:.08em;
+  transition:background .2s ease, color .2s ease;
+}
+.theme-switch button.on{
+  background:rgba(255,255,255,.14);
+  color:#fff;
+}
+.theme-switch button:hover{ color:#fff; }
+html[data-theme="light"] .theme-switch button:hover{ color:#14202b; }
+@media (max-width: 900px){
+  .theme-switch{ top:10px; left:10px; }
+  .theme-switch button{ height:32px; padding:0 12px; }
+}
+
 </style>
 </head>
 
@@ -1984,6 +2294,10 @@ body.js .intro-hint{ animation:riseIn .7s var(--ease) .34s both; }
 <div class="fx-spot" aria-hidden="true"></div>
 <div class="fx-grain" aria-hidden="true"></div>
 <div class="fx-vignette" aria-hidden="true"></div>
+<div class="theme-switch" role="group" aria-label="页面主题">
+  <button type="button" data-theme-set="aurora" aria-pressed="true">深空</button>
+  <button type="button" data-theme-set="light" aria-pressed="false">浅色</button>
+</div>
 <div class="nowread" id="nowread" aria-hidden="true"><i></i><b id="nowreadT">开场 · 贺胜</b></div>
 
 <!-- ================= 开场：自我介绍 ================= -->
@@ -3363,6 +3677,33 @@ body.js .intro-hint{ animation:riseIn .7s var(--ease) .34s both; }
       target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
     });
   });
+})();
+</script>
+<script>
+/* 浅色 / 深空：只换页面配色，选择记在 localStorage */
+(function () {
+  var KEY = 'tv-theme';
+  var root = document.documentElement;
+  var buttons = document.querySelectorAll('[data-theme-set]');
+  function current() { return root.getAttribute('data-theme') === 'light' ? 'light' : 'aurora'; }
+  function paint() {
+    var theme = current();
+    Array.prototype.forEach.call(buttons, function (btn) {
+      var on = btn.getAttribute('data-theme-set') === theme;
+      btn.classList.toggle('on', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function setTheme(theme) {
+    if (theme === 'light') root.setAttribute('data-theme', 'light');
+    else root.removeAttribute('data-theme');
+    try { localStorage.setItem(KEY, theme === 'light' ? 'light' : 'aurora'); } catch (e) {}
+    paint();
+  }
+  Array.prototype.forEach.call(buttons, function (btn) {
+    btn.addEventListener('click', function () { setTheme(btn.getAttribute('data-theme-set')); });
+  });
+  paint();
 })();
 </script>
 </body>

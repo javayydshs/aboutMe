@@ -1403,44 +1403,32 @@ html.lock, body.lock{ overflow:hidden; }
   50%    { opacity:1; transform:translateY(-3px); }
 }
 
-/* ================= MindRouter ================= */
-.mr-parts{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:34px; }
-.mr-part{
+/* ================= AI 创作 ================= */
+.mc-grid{ display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:30px; }
+.mc-item{
   position:relative;
-  padding:24px 22px 22px;
-  border-radius:18px;
+  padding:20px 20px 18px;
+  border-radius:16px;
   overflow:hidden;
   background:linear-gradient(165deg, rgba(255,255,255,.06), rgba(255,255,255,.015));
   border:1px solid rgba(255,255,255,.09);
   transition:transform .4s var(--ease), border-color .35s ease, box-shadow .4s ease;
 }
-.mr-part::before{
+.mc-item::before{
   content:""; position:absolute; right:-30px; top:-30px;
   width:120px; height:120px; border-radius:50%;
   background:radial-gradient(circle, rgba(143,134,255,.18), transparent 70%);
   opacity:0; transition:opacity .4s ease;
 }
-.mr-part:hover{
+.mc-item:hover{
   transform:translateY(-5px);
   border-color:rgba(143,134,255,.34);
   box-shadow:0 24px 54px rgba(0,0,0,.42), 0 0 34px rgba(143,134,255,.08);
 }
-.mr-part:hover::before{ opacity:1; }
-.mr-part .n{ font-size:11.5px; letter-spacing:.24em; color:var(--mint); margin-bottom:12px; }
-.mr-part b{ display:block; font-size:17px; font-weight:600; color:#fff; margin-bottom:9px; }
-.mr-part p{ margin:0; font-size:13px; line-height:1.85; color:rgba(198,214,236,.56); }
-
-.mr-pills{ display:flex; flex-wrap:wrap; gap:10px; margin:26px 0 30px; }
-.mr-pills span{
-  font-size:12.5px; letter-spacing:.02em;
-  padding:9px 15px; border-radius:999px;
-  background:rgba(255,255,255,.045);
-  border:1px solid rgba(255,255,255,.09);
-  color:rgba(214,232,248,.78);
-  transition:border-color .25s ease, background .25s ease;
-}
-.mr-pills span:hover{ background:rgba(94,242,192,.08); border-color:rgba(94,242,192,.35); }
-.mr-pills span b{ color:var(--mint); font-weight:600; }
+.mc-item:hover::before{ opacity:1; }
+.mc-n{ display:block; font-size:11.5px; letter-spacing:.24em; color:var(--mint); margin-bottom:11px; }
+.mc-item b{ display:block; font-size:16px; font-weight:600; color:#fff; margin-bottom:8px; }
+.mc-item p{ margin:0; font-size:12.5px; line-height:1.8; color:rgba(198,214,236,.56); }
 
 /* ================= 进度条 & 右侧导航 ================= */
 .page-bar{
@@ -1510,7 +1498,7 @@ html.lock, body.lock{ overflow:hidden; }
 /* ================= 响应式 ================= */
 @media (max-width: 1280px){
   .ch-specs{ grid-template-columns:repeat(2, 1fr); }
-  .mr-parts{ grid-template-columns:repeat(3, 1fr); }
+  .mc-grid{ grid-template-columns:repeat(2, 1fr); }
 }
 
 @media (max-width: 1100px){
@@ -1562,7 +1550,7 @@ html.lock, body.lock{ overflow:hidden; }
   .ch-specs{ grid-template-columns:1fr 1fr; }
   .v-in{ grid-template-columns:1fr; }
   .v-demo{ grid-template-columns:1fr; }
-  .mr-parts{ grid-template-columns:1fr; }
+  .mc-grid{ grid-template-columns:1fr 1fr; gap:10px; }
   .ch-cards{ grid-template-columns:1fr; }
   .ch.vfull{ padding:60px 0; }
   .ch.vfull .v-demo{ grid-template-columns:1fr; }
@@ -1594,6 +1582,7 @@ html.lock, body.lock{ overflow:hidden; }
   .screen{ width:min(90vw, 460px); }
   .remote{ width:min(88vw, 280px); }
   .ch-specs{ grid-template-columns:1fr; }
+  .mc-grid{ grid-template-columns:1fr; }
   .dive-specs{ grid-template-columns:1fr; }
   .dive-open{ width:100%; }
   .pf-plate{ display:none; }
@@ -1997,73 +1986,43 @@ html.lock, body.lock{ overflow:hidden; }
       </div>
     </section>
 
-<!-- 07 MindRouter 中转站 -->
+<!-- 06 AI 创作 -->
     <section class="ch" id="mindrouter">
       <div class="ch-inner">
         <div class="ch-head">
-          <span class="ch-num">06 · AI 产品</span>
-          <h2>MindRouter：把多家模型收成一个入口</h2>
+          <span class="ch-num">06 · AI 创作</span>
+          <h2>创作中心：对话、生图、生视频、作品库</h2>
           <p class="ch-lead">
-            用大模型本身不难，难的是稳定地用在团队里——每家一个账号、一套密钥、一张账单；密钥散在谁手里、
-            谁花了多少说不清；想让非技术同事也能用，还得另做界面和权限。
-            MindRouter 把这些收拢成<strong>一个地址、一把密钥、一套额度</strong>，重点是给普通用户用的「创作中心」。
+            我负责的是面向普通用户的 AI 创作功能：在同一个工作台里对话、生成图片、生成视频，
+            生成结果自动进入作品库；每次调用按当前密钥的额度计费。
           </p>
         </div>
 
-        <div class="mr-parts">
-          <div class="mr-part">
-            <div class="n">01</div>
-            <b>统一入口</b>
-            <p>兼容主流接口规范的一个地址，背后可以接多家模型。业务代码只认这个地址，换模型、加供应商都不用改代码。</p>
+        <div class="mc-grid">
+          <div class="mc-item">
+            <span class="mc-n">01</span>
+            <b>对话</b>
+            <p>输入一句话开始多轮对话，回答按会话保留。</p>
           </div>
-          <div class="mr-part">
-            <div class="n">02</div>
-            <b>控制台</b>
-            <p>给管理员：模型目录、用户、密钥、可用范围、额度。谁能用哪些模型、每月花多少，都在这里配。</p>
+          <div class="mc-item">
+            <span class="mc-n">02</span>
+            <b>生成图片</b>
+            <p>写提示词、选风格与尺寸，生成后可下载、可再生成。</p>
           </div>
-          <div class="mr-part">
-            <div class="n">03</div>
-            <b>创作中心</b>
-            <p>给普通用户：登录就能对话、出图、生成视频，不用懂接口和参数；每次调用扣自己的额度，作品自动进作品库。</p>
+          <div class="mc-item">
+            <span class="mc-n">03</span>
+            <b>生成视频</b>
+            <p>描述镜头，选时长、分辨率、比例，查看生成进度。</p>
           </div>
-        </div>
-
-        <div class="ch-frame live"><iframe id="mrFrame" src="mindrouter-create.html" title="MindRouter 创作中心演示" scrolling="no"></iframe></div>
-        <p class="ch-tip">这是可以直接点的演示：切换顶部「对话 / 图片 / 视频 / 作品」，在输入框里打字、点「生成」，额度会跟着扣。</p>
-
-        <div class="mr-pills">
-          <span>一个入口 <b>多家模型</b></span>
-          <span>按人发密钥 · <b>单独预算</b></span>
-          <span>密钥层面 <b>限制可用模型</b></span>
-          <span>对话 / 图片 / 视频 <b>同一个工作台</b></span>
-          <span>作品自动归档 · <b>可回看下载</b></span>
-          <span>用量与花费 <b>按人按模型可见</b></span>
-        </div>
-
-        <div class="ch-specs">
-          <div class="spec">
-            <div class="k">接入成本</div>
-            <b>网关侧配置</b>
-            <p>新模型、新供应商在网关加一条，业务侧零改动</p>
-          </div>
-          <div class="spec">
-            <div class="k">成本控制</div>
-            <b>事前设预算</b>
-            <p>预算快超时提前发现，不用等月底看账单</p>
-          </div>
-          <div class="spec">
-            <div class="k">使用门槛</div>
-            <b>登录即用</b>
-            <p>非技术同事不用理解接口和参数，直接出活</p>
-          </div>
-          <div class="spec">
-            <div class="k">可运营</div>
-            <b>用户 · 密钥 · 额度 · 作品</b>
-            <p>都有归属，能对外当成服务提供</p>
+          <div class="mc-item">
+            <span class="mc-n">04</span>
+            <b>作品展示</b>
+            <p>图片与视频自动归档到作品库，可筛选、收藏、下载。</p>
           </div>
         </div>
 
-        <p class="ch-tip">已完成部署并投入使用：支持多家模型供应商的文本、图片、视频能力，带独立管理控制台与面向普通用户的创作中心。</p>
+        <div class="ch-frame live"><iframe id="mrFrame" src="mindrouter-create.html" title="AI 创作中心演示" scrolling="no"></iframe></div>
+        <p class="ch-tip">可以直接点：切换顶部「对话 / 图片 / 视频 / 作品」，输入一句话点「生成」，额度会跟着扣。</p>
       </div>
     </section>
 
@@ -2451,7 +2410,7 @@ html.lock, body.lock{ overflow:hidden; }
 
   var REVEAL_SEL = [
     '.ch-head > *', '.ch-frame', '.ch-browser', '.ch-tip',
-    '.ch-specs > *', '.ch-cards > *', '.mr-parts > *', '.mr-pills',
+    '.ch-specs > *', '.ch-cards > *', '.mc-grid > *',
     '.eco-card', '.v-in-card', '.v-demo', '.v-arch > *'
   ].join(',');
 
